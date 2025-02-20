@@ -9,7 +9,7 @@
 
 ## 📦 Core Architecture  
 
-![UML Diagram](../../assets/UML.png)
+![UML Diagram](./assets/UML.png)
 
 ## 🚀 Quick Start  
 
