@@ -11,6 +11,11 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "isolatedModules": true,
+    "paths": {
+      "ngrx-devtool": [
+        "./dist/ngrx-devtool"
+      ]
+    },
     "esModuleInterop": true,
     "sourceMap": true,
     "declaration": false,
