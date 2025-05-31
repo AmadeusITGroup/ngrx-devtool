@@ -129,6 +129,100 @@
           }
         }
       }
+    },
+    "ngrx-devtool-ui": {
+      "projectType": "application",
+      "schematics": {},
+      "root": "projects/ngrx-devtool-ui",
+      "sourceRoot": "projects/ngrx-devtool-ui/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:application",
+          "options": {
+            "outputPath": "dist/ngrx-devtool-ui",
+            "index": "projects/ngrx-devtool-ui/src/index.html",
+            "browser": "projects/ngrx-devtool-ui/src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "projects/ngrx-devtool-ui/tsconfig.app.json",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "projects/ngrx-devtool-ui/public"
+              }
+            ],
+            "styles": [
+              "projects/ngrx-devtool-ui/src/styles.css"
+            ],
+            "scripts": [],
+            "server": "projects/ngrx-devtool-ui/src/main.server.ts",
+            "outputMode": "server",
+            "ssr": {
+              "entry": "projects/ngrx-devtool-ui/src/server.ts"
+            }
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "ngrx-devtool-ui:build:production"
+            },
+            "development": {
+              "buildTarget": "ngrx-devtool-ui:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "projects/ngrx-devtool-ui/tsconfig.spec.json",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "projects/ngrx-devtool-ui/public"
+              }
+            ],
+            "styles": [
+              "projects/ngrx-devtool-ui/src/styles.css"
+            ],
+            "scripts": []
+          }
+        }
+      }
     }
   },
   "cli": {
