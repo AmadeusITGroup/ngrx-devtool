@@ -1,18 +1,36 @@
-import { ActionReducer, MetaReducer } from '@ngrx/store';
+import { ActionReducer } from '@ngrx/store';
+
+const socket = new WebSocket('ws://localhost:4000');
+const messageBuffer: string[] = [];
+
+function flushBuffer() {
+  while (messageBuffer.length > 0 && socket.readyState === WebSocket.OPEN) {
+    const message = messageBuffer.shift();
+    if (message) {
+      socket.send(message);
+    }
+  }
+}
+
+socket.addEventListener('open', flushBuffer);
 
 export function loggerMetaReducer<State>(
   reducer: ActionReducer<State>
 ): ActionReducer<State> {
   return function (state, action) {
-    console.groupCollapsed('%c Action Dispatched:', 'color: teal', action.type);
-    console.log('%c Prev State:', 'color: gray', state);
-    console.log('%c Action:', 'color: blue', action);
-    
+    const prevState = state;
     const nextState = reducer(state, action);
-    
-    console.log('%c Next State:', 'color: green', nextState);
-    console.groupEnd();
-
+    const payload = JSON.stringify({
+      type: action.type,
+      prevState,
+      nextState,
+      timestamp: new Date().toISOString(),
+    });
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.send(payload);
+    } else {
+      messageBuffer.push(payload)
+    }
     return nextState;
   };
 }
