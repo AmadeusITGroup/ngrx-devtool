@@ -3,12 +3,8 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "serve:ssr:ngrx-devtool-demo": "node dist/ngrx-devtool-demo/server/server.mjs",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build": "npx tsc index.ts --outdir dist && ng build ngrx-devtool && ng build ngrx-devtool-ui"
   },
   "private": true,
   "dependencies": {
@@ -27,6 +23,7 @@
     "ngrx-store": "^0.0.2",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "ws": "^8.18.2",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
