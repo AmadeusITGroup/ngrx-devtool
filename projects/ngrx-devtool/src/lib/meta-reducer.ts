@@ -12,7 +12,7 @@ function flushBuffer() {
   }
 }
 
-socket.addEventListener('open', flushBuffer);
+socket.onopen = flushBuffer;
 
 export function loggerMetaReducer<State>(
   reducer: ActionReducer<State>
@@ -21,7 +21,7 @@ export function loggerMetaReducer<State>(
     const prevState = state;
     const nextState = reducer(state, action);
     const payload = JSON.stringify({
-      type: action.type,
+      action,
       prevState,
       nextState,
       timestamp: new Date().toISOString(),
@@ -29,7 +29,7 @@ export function loggerMetaReducer<State>(
     if (socket.readyState === WebSocket.OPEN) {
       socket.send(payload);
     } else {
-      messageBuffer.push(payload)
+      messageBuffer.push(payload);
     }
     return nextState;
   };

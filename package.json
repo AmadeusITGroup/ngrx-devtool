@@ -6,6 +6,12 @@
     "prepare": "husky",
     "build": "npx tsc index.ts --outdir dist && ng build ngrx-devtool && ng build ngrx-devtool-ui"
   },
+  "exports": {
+    ".": "./dist/ngrx-devtool/fesm2022/ngrx-devtool.mjs"
+  },
+  "bin": {
+    "ngrx-devtool": "./dist/index.js"
+  },
   "private": true,
   "dependencies": {
     "@angular/animations": "^19.2.6",
