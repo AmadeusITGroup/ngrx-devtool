@@ -28,10 +28,7 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "tsConfig": "projects/ngrx-devtool/tsconfig.spec.json",
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ]
+            "polyfills": ["zone.js", "zone.js/testing"]
           }
         }
       }
@@ -49,9 +46,7 @@
             "outputPath": "dist/ngrx-devtool-demo",
             "index": "projects/ngrx-devtool-demo/src/index.html",
             "browser": "projects/ngrx-devtool-demo/src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": ["zone.js"],
             "tsConfig": "projects/ngrx-devtool-demo/tsconfig.app.json",
             "assets": [
               {
@@ -59,9 +54,7 @@
                 "input": "projects/ngrx-devtool-demo/public"
               }
             ],
-            "styles": [
-              "projects/ngrx-devtool-demo/src/styles.css"
-            ],
+            "styles": ["projects/ngrx-devtool-demo/src/styles.css"],
             "scripts": [],
             "server": "projects/ngrx-devtool-demo/src/main.server.ts",
             "outputMode": "server",
@@ -111,10 +104,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
+            "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "projects/ngrx-devtool-demo/tsconfig.spec.json",
             "assets": [
               {
@@ -122,9 +112,7 @@
                 "input": "projects/ngrx-devtool-demo/public"
               }
             ],
-            "styles": [
-              "projects/ngrx-devtool-demo/src/styles.css"
-            ],
+            "styles": ["projects/ngrx-devtool-demo/src/styles.css"],
             "scripts": []
           }
         }
@@ -132,7 +120,11 @@
     },
     "ngrx-devtool-ui": {
       "projectType": "application",
-      "schematics": {},
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
       "root": "projects/ngrx-devtool-ui",
       "sourceRoot": "projects/ngrx-devtool-ui/src",
       "prefix": "app",
@@ -143,9 +135,7 @@
             "outputPath": "dist/ngrx-devtool-ui",
             "index": "projects/ngrx-devtool-ui/src/index.html",
             "browser": "projects/ngrx-devtool-ui/src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": ["zone.js"],
             "tsConfig": "projects/ngrx-devtool-ui/tsconfig.app.json",
             "assets": [
               {
@@ -154,7 +144,8 @@
               }
             ],
             "styles": [
-              "projects/ngrx-devtool-ui/src/styles.css"
+              "@angular/material/prebuilt-themes/azure-blue.css",
+              "projects/ngrx-devtool-ui/src/styles.scss"
             ],
             "scripts": [],
             "server": "projects/ngrx-devtool-ui/src/main.server.ts",
@@ -205,10 +196,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
+            "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "projects/ngrx-devtool-ui/tsconfig.spec.json",
             "assets": [
               {
@@ -217,6 +205,7 @@
               }
             ],
             "styles": [
+              "@angular/material/prebuilt-themes/azure-blue.css",
               "projects/ngrx-devtool-ui/src/styles.css"
             ],
             "scripts": []
