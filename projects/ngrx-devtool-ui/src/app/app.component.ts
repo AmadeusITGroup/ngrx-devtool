@@ -10,6 +10,8 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTabsModule } from '@angular/material/tabs';
 import { JsonTreeComponent } from '../components/json-tree/json-tree.component';
 import { DatePipe } from '@angular/common';
+import { DiffViewerComponent } from '../components/diff-viewer/diff-viewer.component';
+
 @Component({
   selector: 'app-root',
   imports: [
@@ -22,6 +24,7 @@ import { DatePipe } from '@angular/common';
     MatExpansionModule,
     MatTabsModule,
     JsonTreeComponent,
+    DiffViewerComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
@@ -29,6 +32,13 @@ import { DatePipe } from '@angular/common';
 export class AppComponent implements OnInit {
   title = 'ngrx-devtool-ui';
   messages = signal<any[]>([]);
+  messagesWithPrevState = computed(() => {
+    const msgs = this.messages();
+    return msgs.map((msg, index) => {
+      const prevState = index > 0 ? msgs[index - 1].nextState : undefined;
+      return { ...msg, prevState };
+    });
+  });
   private subscription?: Subscription;
   constructor(private _webSocketService: WebsocketService) {}
   ngOnInit(): void {

@@ -1,0 +1,30 @@
+<div class="diff-container">
+    <div *ngIf="diffs.length === 0" class="no-changes">
+      <p>No changes detected between states</p>
+    </div>
+    
+    <div *ngFor="let diff of diffs" class="diff-item" [ngClass]="diff.type">
+      <div class="path">{{ diff.path }}</div>
+      
+      <div *ngIf="diff.type === 'removed'" class="value-line removed">
+        <span class="line-marker">-</span>
+        <span class="value">{{ formatValue(diff.oldValue) }}</span>
+      </div>
+      
+      <div *ngIf="diff.type === 'added'" class="value-line added">
+        <span class="line-marker">+</span>
+        <span class="value">{{ formatValue(diff.newValue) }}</span>
+      </div>
+      
+      <div *ngIf="diff.type === 'changed'" class="value-comparison">
+        <div class="value-line removed">
+          <span class="line-marker">-</span>
+          <span class="value">{{ formatValue(diff.oldValue) }}</span>
+        </div>
+        <div class="value-line added">
+          <span class="line-marker">+</span>
+          <span class="value">{{ formatValue(diff.newValue) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>

@@ -43,7 +43,7 @@
   <div class="actions-container">
     <h2 matSubheader>Dispatched Actions</h2>
     <div class="actions">
-      @for (message of messages(); track message.timestamp) {
+      @for (message of messagesWithPrevState(); track message.timestamp) {
       <mat-expansion-panel>
         <mat-expansion-panel-header>
           <mat-panel-title>{{ message.action?.type }}</mat-panel-title>
@@ -58,7 +58,9 @@
           <mat-tab label="State">
             <json-tree [jsonData]="message.nextState"></json-tree>
           </mat-tab>
-          <mat-tab label="Diff"> diff </mat-tab>
+          <mat-tab label="Diff">
+            <app-diff-viewer [previousState]="message.prevState" [currentState]="message.nextState"></app-diff-viewer>
+          </mat-tab>
         </mat-tab-group>
       </mat-expansion-panel>
       } @empty {
