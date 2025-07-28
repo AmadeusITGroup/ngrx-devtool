@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "prepare": "husky",
-    "build": "npx tsc index.ts --outdir dist && ng build ngrx-devtool && ng build ngrx-devtool-ui && node ./setup-npm-package.js"
+    "build": "npx tsc index.ts --outdir dist && chmod +x dist/index.js && ng build ngrx-devtool && ng build ngrx-devtool-ui && node ./setup-npm-package.js"
   },
   "exports": {
     ".": "./dist/ngrx-devtool/fesm2022/ngrx-devtool.mjs"

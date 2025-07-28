@@ -1,150 +1,109 @@
-<div style="background-color: #ffcc00; color: #000; padding: 1em; border-radius: 5px; margin-bottom: 1em;">
-  <strong>Alert:</strong> This project is currently under development.
-</div>
+# NgRx DevTool - Architecture Visualization Tool
 
-# NgRx State Inspector 🛠️  
-**State Management Observability for Angular Applications**  
+A powerful development tool for visualizing and debugging NgRx state management in Angular applications.
 
----
+## 🚀 Overview
 
-## 📦 Core Architecture  
+This tool provides real-time monitoring and visualization of NgRx actions, state changes, and application architecture. It consists of a library package and a standalone UI application for comprehensive state debugging.
 
-![UML Diagram](./assets/UML.png)
+![NgRx DevTool Demo](assets/devtool-on-pct.gif)
 
-## 🚀 Quick Start  
+## 📦 Project Structure
 
-### 1. Installation  
+- **ngrx-devtool** - Core library package
+- **ngrx-devtool-ui** - Standalone visualization application  
+- **ngrx-devtool-demo** - Example implementation
+
+
+## 🛠️ Installation & Setup
+
+> **Note**: The library is not yet published to npm. Follow these steps to set up the development environment:
+
+### 1. Clone the repository
 ```bash
-Coming Soon
+git clone <repository-url>
+cd ngrx-devtool-proto
 ```
 
----
-
-## 🔍 Core Features  
-
-### Real-Time Action Stream Monitoring  
-```typescript
-interface ActionTelemetry {
-  sequenceId: number;
-  type: string;
-  trigger: 'USER' | 'API' | 'SYSTEM';
-  timestamp: number;
-  stateVersion: number;
-  payloadSize: number;
-  criticalPath: boolean;
-}
+### 2. Install dependencies
+```bash
+npm install
 ```
 
-### State Diff Engine  
-Implements JSON Patch (RFC 6902) for efficient delta calculations:  
-```json
-{
-  "ops": [
-    {
-      "op": "replace",
-      "path": "/user/status",
-      "value": "authenticated",
-      "oldValue": "anonymous"
-    }
-  ],
-  "version": 45,
-  "checksum": "a1b2c3d4"
-}
+### 3. Build and run the library in watch mode
+```bash
+cd projects/ngrx-devtool
+ng build --watch
 ```
 
----
+### 4. Run the WebSocket server and UI
+```bash
+# At the root directory
+npm run build 
+node ./dist/index.js
+```
+Access the UI at **port 3000**.
 
-## 🧩 API Reference  
+### 5. (Optional) Run UI in development mode
+```bash
+cd projects/ngrx-devtool-ui
+ng serve
+```
+Access the UI at **port 4200** for automatic code reloading.
 
-### WebSocket Protocol  
-```typescript
-interface StateUpdate<T> {
-  action: string;
-  correlationId: string;
-  initiator: string;
-  stateSnapshot: T;
-  stateDelta: Operation[];
-  sequenceChain: string[];
-  error?: ErrorPayload;
-}
-
-interface ErrorPayload {
-  code: number;
-  message: string;
-  stackTrace?: string;
-  recoverySuggestion: string;
-}
+### 6. Run the demo application
+```bash
+cd projects/ngrx-devtool-demo
+ng serve
 ```
 
-### Plugin System  
-Create custom visualizers:  
-```typescript
-interface DevToolsPlugin {
-  name: string;
-  render: (ctx: PluginContext) => JSX.Element;
-  onAction?: (action: Action) => void;
-}
+## 🎯 Features
 
-interface PluginContext {
-  currentState: unknown;
-  actionHistory: ActionTelemetry[];
-  stateDiffs: StateDiff[];
-}
-```
+- **Real-time Action Monitoring** - Track all dispatched actions
+- **State Visualization** - View current and previous states
+- **Diff Viewer** - Compare state changes between actions
+- **WebSocket Integration** - Live connection to development UI
+- **JSON Tree Display** - Hierarchical state exploration
 
----
+This project is actively under development.
 
-## 🛠️ Advanced Configuration  
 
-### State Hydration/Rehydration  
-```typescript
-StateInspectorModule.forRoot({
-  stateHydration: {
-    maxAge: 30, // Minutes
-    storage: localStorage,
-    key: '@app/state-history',
-    serialize: (state) => LZString.compress(JSON.stringify(state))
-  },
-  conflictResolution: {
-    strategy: 'LAST_WRITE_WINS',
-    versionPath: '$.meta.version'
-  }
-});
-```
+## 🔧 Configuration
 
-### Performance Profiling  
-```typescript
-inspector.profileReducer(
-  'authReducer', 
-  (state, action) => { /* ... */ },
-  {
-    memorySamplingInterval: 100,
-    captureStackDepth: 5,
-    warnThresholds: {
-      duration: 500,
-      memory: 1024 * 1024 // 1MB
-    }
-  }
-);
-```
+The tool connects to WebSocket on `localhost:4000` by default. Ensure your backend supports WebSocket connections for real-time updates.
 
----
+## 📖 Documentation
 
-## 🚨 Troubleshooting  
+For detailed architecture documentation and advanced usage patterns, visit:
+[Official Documentation](https://amadeus.atlassian.net/wiki/spaces/OACD/pages/2784796572/WG+-+Architecture+Visualization+tool+for+Angular+Redux+web-applications)
 
-| Error Code | Description | Resolution |
-|------------|-------------|------------|
-| WS_1001    | WebSocket connection timeout | Verify CORS configuration |
-| ST_4002    | State version mismatch | Implement conflict resolution strategy |
-| DIFF_3003  | Invalid patch sequence | Enable `strictPatchValidation` |
+## 🏗️ UI Components
 
----
+- **Action List** - Expandable panels for each dispatched action
+- **Tabbed Views** - Action details, state snapshots, and diffs
+- **Material Design** - Clean, professional interface using Angular Material
 
-## 📚 Resources  
+## 🔍 Usage
 
-1. **Coming Soon**   
+1. Follow the installation steps above to set up the development environment
+2. Start the library in watch mode
+3. Launch the WebSocket server and UI
+4. Run the demo application
+5. Monitor real-time updates in the DevTool interface
 
----
+## 🤝 Contributing
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)  
-**v2.8.0** | **Angular 14+** | **NgRx 12+**
+We welcome contributions! To get started:
+
+1. Fork the repository
+2. Follow the installation steps above
+3. Make your changes
+4. Test with the demo application
+5. Submit a pull request
+
+Please ensure your code follows the existing style and includes appropriate tests.
+
+
+
+
+
