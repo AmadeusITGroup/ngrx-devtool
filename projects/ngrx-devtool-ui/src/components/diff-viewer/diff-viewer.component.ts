@@ -1,6 +1,7 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DiffService } from '../../services/diff.service';
+import { MatTabChangeEvent } from '@angular/material/tabs';
 
 @Component({
   selector: 'app-diff-viewer',
@@ -30,4 +31,6 @@ export class DiffViewerComponent implements OnChanges {
     if (typeof value === 'object') return JSON.stringify(value, null, 2);
     return String(value);
   }
+
+
 }

@@ -51,7 +51,7 @@
             {{ message.timestamp | date : "medium" }}
           </mat-panel-description>
         </mat-expansion-panel-header>
-        <mat-tab-group>
+        <mat-tab-group (selectedTabChange)="onTabChange($event, message)">
           <mat-tab label="Action">
             <json-tree [jsonData]="message.action"></json-tree>
           </mat-tab>
@@ -59,7 +59,13 @@
             <json-tree [jsonData]="message.nextState"></json-tree>
           </mat-tab>
           <mat-tab label="Diff">
-            <app-diff-viewer [previousState]="message.prevState" [currentState]="message.nextState"></app-diff-viewer>
+            @if (message.diffLoaded) {
+              <app-diff-viewer [previousState]="message.prevState" [currentState]="message.nextState"></app-diff-viewer>
+            } @else if (message.diffLoading) {
+              <mat-spinner diameter="30"></mat-spinner>
+            } @else {
+              <div>Click to load diff...</div>
+            }
           </mat-tab>
         </mat-tab-group>
       </mat-expansion-panel>

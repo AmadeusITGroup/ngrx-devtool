@@ -7,7 +7,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { MatTabsModule } from '@angular/material/tabs';
+import { MatTabChangeEvent, MatTabsModule } from '@angular/material/tabs';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { JsonTreeComponent } from '../components/json-tree/json-tree.component';
 import { DatePipe } from '@angular/common';
 import { DiffViewerComponent } from '../components/diff-viewer/diff-viewer.component';
@@ -23,6 +24,7 @@ import { DiffViewerComponent } from '../components/diff-viewer/diff-viewer.compo
     MatPaginatorModule,
     MatExpansionModule,
     MatTabsModule,
+    MatProgressSpinnerModule,
     JsonTreeComponent,
     DiffViewerComponent,
   ],
@@ -51,4 +53,16 @@ export class AppComponent implements OnInit {
     this._webSocketService.close();
     this.subscription?.unsubscribe();
   }
+
+  onTabChange(event: MatTabChangeEvent, message: any) {
+    if (event.index === 2 && !message.diffLoaded && !message.diffLoading) {
+      message.diffLoading = true;
+      
+      setTimeout(() => {
+        message.diffLoaded = true;
+        message.diffLoading = false;
+      }, 0);
+    }
+  }
+
 }
