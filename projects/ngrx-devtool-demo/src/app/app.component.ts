@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { BooksActions } from './state/book.actions';
+import { map, mergeMap, tap } from 'rxjs/operators';
 
 import { selectBookCollection, selectBooks } from './state/book.selectors';
-import { BooksActions, BooksApiActions } from './state/book.actions';
+import { BooksApiActions } from './state/book.actions';
 import { GoogleBooksService } from './book-list/book.service';
 import { Book } from './book-list/book.model';
 import { Observable } from 'rxjs';
@@ -39,5 +41,9 @@ export class AppComponent implements OnInit {
 
   onRemove(bookId: string) {
     this.store.dispatch(BooksActions.removeBook({ bookId }));
+  }
+
+  fetchBooks() {
+    this.store.dispatch(BooksActions.loadBooks());
   }
 }

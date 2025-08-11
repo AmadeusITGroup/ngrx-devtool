@@ -1,4 +1,4 @@
-import { createActionGroup, props } from '@ngrx/store';
+import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import { Book } from '../book-list/book.model';
 
 export const BooksActions = createActionGroup({
@@ -6,6 +6,7 @@ export const BooksActions = createActionGroup({
   events: {
     'Add Book': props<{ bookId: string }>(),
     'Remove Book': props<{ bookId: string }>(),
+    'Load Books': emptyProps(), 
   },
 });
 

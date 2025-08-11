@@ -7,7 +7,19 @@ import { booksReducer } from './state/book.reducer';
 import { provideStore } from '@ngrx/store';
 import { collectionReducer } from './state/collection.reducer';
 import { provideHttpClient } from '@angular/common/http';
+import { provideEffects } from '@ngrx/effects';
+import { BooksEffects } from './state/book.effect';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideHttpClient(), provideStore({books: booksReducer, collection: collectionReducer},  {metaReducers: [loggerMetaReducer]}) ,provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes), provideClientHydration(withEventReplay())]
+  providers: [
+    provideHttpClient(),
+    provideStore(
+      {books: booksReducer, collection: collectionReducer},
+      {metaReducers: [loggerMetaReducer]}
+    ),
+    provideEffects([BooksEffects]),
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes),
+    provideClientHydration(withEventReplay())
+  ]
 };
