@@ -1,107 +1,211 @@
 # NgRx DevTool - Architecture Visualization Tool
 
-A powerful development tool for visualizing and debugging NgRx state management in Angular applications.
+A powerful development tool for visualizing and debugging NgRx state management in Angular applications. Features **automatic effect detection** and **action correlation tracking**.
 
-## 🚀 Overview
+## Overview
 
-This tool provides real-time monitoring and visualization of NgRx actions, state changes, and application architecture. It consists of a library package and a standalone UI application for comprehensive state debugging.
+This tool provides real-time monitoring and visualization of NgRx actions, state changes, and effects. It automatically detects which actions are dispatched by effects and correlates them back to their triggering user actions.
 
 ![NgRx DevTool Demo](assets/devtool-on-pct.gif)
 
-## 📦 Project Structure
+## Features
 
-- **ngrx-devtool** - Core library package
-- **ngrx-devtool-ui** - Standalone visualization application  
+- **Real-time Action Monitoring** - Track all dispatched actions as they happen
+- **Automatic Effect Detection** - Distinguishes user actions from effect-dispatched actions
+- **Action Correlation** - Links effect results back to their triggering actions
+- **State Visualization** - View current and previous states
+- **Diff Viewer** - Compare state changes between actions
+- **Visual Indicators** - Blue for user actions, orange for effect results
+- **WebSocket Integration** - Live connection to development UI
+
+## Project Structure
+
+- **ngrx-devtool** - Core library package (what you install in your app)
+- **ngrx-devtool-ui** - Standalone visualization UI  
 - **ngrx-devtool-demo** - Example implementation
 
+---
 
-## 🛠️ Installation & Setup
+## Quick Start: Use DevTool in Your App
 
-> **Note**: The library is not yet published to npm. Follow these steps to set up the development environment:
+### Step 1: Install the library
 
-### 1. Clone the repository
+```bash
+npm install ngrx-devtool
+```
+> *If not published to npm yet, link it locally from this repo*
+
+### Step 2: Add one line to your app
+
+```typescript
+// app.config.ts
+import { loggerMetaReducer } from 'ngrx-devtool';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideStore(
+      { /* your reducers */ },
+      { metaReducers: [loggerMetaReducer] }  // ← Add this line
+    ),
+    provideEffects([/* your effects */]),
+    // ... other providers
+  ]
+};
+```
+
+### Step 3: Run the DevTool server
+
+```bash
+# From the ngrx-devtool-proto directory
+node dist/index.js
+```
+
+### Step 4: Open the DevTool UI
+
+Open your browser to **http://localhost:3000**
+
+### Step 5: Run your app and see actions
+
+Start your Angular app and interact with it. All actions will appear in the DevTool UI:
+- 🔵 **Blue border** = User action
+- 🟠 **Orange border** = Effect result (with "Triggered by" info)
+
+---
+
+## Development Setup (Contributing to DevTool)
+
+If you want to develop or modify the DevTool itself:
+
+### 1. Clone and install
 ```bash
 git clone <repository-url>
 cd ngrx-devtool-proto
-```
-
-### 2. Install dependencies
-```bash
 npm install
 ```
 
-### 3. Build and run the library in watch mode
+### 2. Build everything
 ```bash
-cd projects/ngrx-devtool
-ng build --watch
+npm run build
 ```
 
-### 4. Run the WebSocket server and UI
+### 3. Start the DevTool server + UI
 ```bash
-# At the root directory
-npm run build 
-node ./dist/index.js
+node dist/index.js
 ```
-Access the UI at **port 3000**.
+UI available at **http://localhost:3000**
 
-### 5. (Optional) Run UI in development mode
+### 4. Run the demo app (to test)
 ```bash
-cd projects/ngrx-devtool-ui
-ng serve
+ng serve ngrx-devtool-demo
 ```
-Access the UI at **port 4200** for automatic code reloading.
+Demo app at **http://localhost:4200**
 
-### 6. Run the demo application
-```bash
-cd projects/ngrx-devtool-demo
-ng serve
+---
+
+## How Effect Tracking Works
+
+The DevTool doesn't parse your effect classes. Instead, it detects effect-dispatched actions by **pattern matching on action names**:
+
+| Pattern | Example | Detected As |
+|---------|---------|-------------|
+| `[* API *]` | `[Books API] Retrieved Book List` | Effect |
+| `[* Service *]` | `[Auth Service] Login Success` | Effect |
+| `*Success` | `loadBooksSuccess` | Effect |
+| `*Failure` | `loadBooksFailure` | Effect |
+| `*Error` | `fetchDataError` | Effect |
+| `*Complete` | `uploadComplete` | Effect |
+| Everything else | `[Books] Load Books` | User Action |
+
+### Recommended Action Naming
+
+For best results, follow this naming convention:
+
+```typescript
+// User-initiated actions
+export const BooksActions = createActionGroup({
+  source: 'Books',  // No "API" suffix
+  events: {
+    'Load Books': emptyProps(),
+    'Add Book': props<{ bookId: string }>(),
+  },
+});
+
+// Effect-dispatched actions
+export const BooksApiActions = createActionGroup({
+  source: 'Books API',  // "API" suffix indicates effect result
+  events: {
+    'Retrieved Book List': props<{ books: Book[] }>(),
+    'Load Failed': props<{ error: string }>(),
+  },
+});
 ```
 
-## 🎯 Features
+## UI Components
 
-- **Real-time Action Monitoring** - Track all dispatched actions
-- **State Visualization** - View current and previous states
-- **Diff Viewer** - Compare state changes between actions
-- **WebSocket Integration** - Live connection to development UI
-- **JSON Tree Display** - Hierarchical state exploration
-
-This project is actively under development.
-
-
-## 🔧 Configuration
-
-The tool connects to WebSocket on `localhost:4000` by default. Ensure your backend supports WebSocket connections for real-time updates.
-
-## 📖 Documentation
-
-For detailed architecture documentation and advanced usage patterns, visit:
-[Official Documentation](https://amadeus.atlassian.net/wiki/spaces/OACD/pages/2784796572/WG+-+Architecture+Visualization+tool+for+Angular+Redux+web-applications)
-
-## 🏗️ UI Components
+The DevTool UI displays:
 
 - **Action List** - Expandable panels for each dispatched action
-- **Tabbed Views** - Action details, state snapshots, and diffs
-- **Material Design** - Clean, professional interface using Angular Material
+  - 🔵 Blue border + 👤 icon = User action
+  - 🟠 Orange border + ⚡ icon = Effect result
+- **Correlation Badge** - Shows "Chain #X" for effect sequences
+- **Triggered By** - Shows which user action triggered an effect
+- **Tabbed Views** - Action payload, state snapshot, and diff
 
-## 🔍 Usage
+---
 
-1. Follow the installation steps above to set up the development environment
-2. Start the library in watch mode
-3. Launch the WebSocket server and UI
-4. Run the demo application
-5. Monitor real-time updates in the DevTool interface
+## Advanced Configuration
 
-## 🤝 Contributing
+### Custom WebSocket URL
 
-We welcome contributions! To get started:
+If your DevTool server runs on a different host/port:
+
+```typescript
+import { createDevToolMetaReducer } from 'ngrx-devtool';
+
+provideStore(
+  { /* reducers */ },
+  { metaReducers: [createDevToolMetaReducer('ws://custom-host:4000')] }
+)
+```
+
+---
+
+## Troubleshooting
+
+### UI not loading at http://localhost:3000
+
+Run the servers manually in separate terminals:
+
+```bash
+# Terminal 1: WebSocket server
+node dist/index.js
+
+# Terminal 2: UI server  
+cd dist && npx http-server ngrx-devtool-ui/browser -p 3000
+
+# Terminal 3: Your app
+ng serve your-app
+```
+
+### Actions showing without names
+
+You may have duplicate message sources. Only use `loggerMetaReducer` - don't add `provideNgrxDevTool()`.
+
+### Effects not being detected as effects
+
+Check that your effect action names include `API`, `Service`, `Success`, `Failure`, `Error`, or `Complete`. See the naming patterns table above.
+
+---
+
+## Contributing
+
+We welcome contributions!
 
 1. Fork the repository
 2. Follow the installation steps above
 3. Make your changes
 4. Test with the demo application
 5. Submit a pull request
-
-Please ensure your code follows the existing style and includes appropriate tests.
 
 
 

@@ -44,13 +44,34 @@
     <h2 matSubheader>Dispatched Actions</h2>
     <div class="actions">
       @for (message of messagesWithPrevState(); track message.timestamp) {
-      <mat-expansion-panel>
+      <mat-expansion-panel [class.effect-action]="message.isEffectResult" [class.user-action]="!message.isEffectResult">
         <mat-expansion-panel-header>
-          <mat-panel-title>{{ message.action?.type }}</mat-panel-title>
+          <mat-panel-title>
+            @if (message.isEffectResult) {
+              <mat-icon class="action-icon effect-icon">bolt</mat-icon>
+            } @else {
+              <mat-icon class="action-icon user-icon">person</mat-icon>
+            }
+            {{ message.action?.type }}
+          </mat-panel-title>
           <mat-panel-description>
+            @if (message.correlation?.triggeredBy) {
+              <span class="correlation-badge">
+                <mat-icon>link</mat-icon>
+                Chain #{{ message.correlation.chainIndex }}
+              </span>
+            }
             {{ message.timestamp | date : "medium" }}
           </mat-panel-description>
         </mat-expansion-panel-header>
+
+        @if (message.correlation?.triggeredBy) {
+          <div class="correlation-info">
+            <mat-icon>subdirectory_arrow_right</mat-icon>
+            <span>Triggered by: <strong>{{ message.correlation.triggeredBy }}</strong></span>
+          </div>
+        }
+
         <mat-tab-group (selectedTabChange)="onTabChange($event, message)">
           <mat-tab label="Action">
             <json-tree [jsonData]="message.action"></json-tree>
