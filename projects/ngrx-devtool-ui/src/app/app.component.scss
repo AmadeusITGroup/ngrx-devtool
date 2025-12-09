@@ -30,3 +30,63 @@ mat-toolbar {
 .toolbar-spacer {
   flex: 1 1 auto;
 }
+
+// Effect tracking styles
+.effect-action {
+  border-left: 4px solid #ff9800 !important;
+}
+
+.user-action {
+  border-left: 4px solid #2196f3 !important;
+}
+
+.action-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+
+  &.effect-icon {
+    color: #ff9800;
+  }
+
+  &.user-icon {
+    color: #2196f3;
+  }
+}
+
+.correlation-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: rgba(156, 39, 176, 0.1);
+  color: #9c27b0;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin-right: 12px;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.correlation-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: rgba(156, 39, 176, 0.05);
+  border-radius: 4px;
+  margin-bottom: 16px;
+
+  mat-icon {
+    color: #9c27b0;
+  }
+
+  strong {
+    color: #9c27b0;
+  }
+}
