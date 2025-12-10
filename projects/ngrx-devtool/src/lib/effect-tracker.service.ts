@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Action } from '@ngrx/store';
-
 export interface EffectInvocation {
   triggerAction: string;
   resultAction: string | null;
@@ -23,6 +22,10 @@ export class EffectTrackerService {
   private effectActionPatterns = new Set<string>();
   private pendingCorrelations = new Map<string, { action: Action; timestamp: number }>();
   private correlationCounter = 0;
+
+  constructor() {
+    console.log('[NgRx DevTool] EffectTrackerService initialized - Version: 2025-12-09');
+  }
 
   /**
    * Register action types that are known to be dispatched by effects.
@@ -50,14 +53,21 @@ export class EffectTrackerService {
     }
 
     // Heuristic detection based on NgRx conventions
+    // These patterns identify actions that are RESULTS of effects (not triggers)
     const effectPatterns = [
-      /\[.*API.*\]/i,           // [Books API] patterns
-      /\[.*Service.*\]/i,       // [Books Service] patterns
-      /\[.*Effect.*\]/i,        // [Books Effect] patterns
+      /-> Succeeded/i,          // [Competitors API] Fetch -> Succeeded
+      /-> Failed/i,             // [Competitors API] Fetch -> Failed
+      /-> Success/i,            // [API] Action -> Success
+      /-> Failure/i,            // [API] Action -> Failure
+      /-> Error/i,              // [API] Action -> Error
+      /-> Complete/i,           // [API] Action -> Complete
       /Success$/i,              // loadBooksSuccess
+      /Succeeded$/i,            // fetchCompetitorsSucceeded
       /Failure$/i,              // loadBooksFailure
+      /Failed$/i,               // fetchCompetitorsFailed
       /Error$/i,                // loadBooksError
       /Complete$/i,             // loadBooksComplete
+      /Completed$/i,            // loadBooksCompleted
       /Retrieved/i,             // retrievedBookList
       /Loaded$/i,               // booksLoaded
       /Fetched$/i,              // booksFetched
