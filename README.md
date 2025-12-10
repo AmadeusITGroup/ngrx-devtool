@@ -16,95 +16,100 @@ This tool provides real-time monitoring and visualization of NgRx actions, state
 - **State Visualization** - View current and previous states
 - **Diff Viewer** - Compare state changes between actions
 - **Visual Indicators** - Blue for user actions, orange for effect results
-- **WebSocket Integration** - Live connection to development UI
 
 ## Project Structure
 
-- **ngrx-devtool** - Core library package (what you install in your app)
+- **ngrx-devtool** - Core library package
 - **ngrx-devtool-ui** - Standalone visualization UI  
 - **ngrx-devtool-demo** - Example implementation
 
 ---
 
-## Quick Start: Use DevTool in Your App
+## Quick Start
 
-### Step 1: Install the library
+### Step 1: Clone and build
+
+Since the package is not yet published to npm, use the development setup:
 
 ```bash
-npm install ngrx-devtool
+git clone <repository-url>
+cd ngrx-devtool-proto
+npm install
+npm run build
 ```
-> *If not published to npm yet, link it locally from this repo*
 
-### Step 2: Add one line to your app
+### Step 2: Link the library to your project
+
+```bash
+cd dist/ngrx-devtool
+npm link
+
+# In your Angular project directory
+npm link ngrx-devtool
+```
+
+> ⚠️ **Important:** If you encounter module resolution issues, see the [npm Link Issues](#npm-link-issues) section in Troubleshooting.
+
+### Step 3: Add one line to your app
 
 ```typescript
-// app.config.ts
+// app.config.ts (standalone) or app.module.ts (NgModule)
 import { loggerMetaReducer } from 'ngrx-devtool';
 
+// Standalone API
 export const appConfig: ApplicationConfig = {
   providers: [
     provideStore(
       { /* your reducers */ },
-      { metaReducers: [loggerMetaReducer] }  // ← Add this line
+      { metaReducers: [loggerMetaReducer] }  // ← Add this
     ),
-    provideEffects([/* your effects */]),
-    // ... other providers
   ]
 };
+
+// Or NgModule
+@NgModule({
+  imports: [
+    StoreModule.forRoot({ /* reducers */ }, { metaReducers: [loggerMetaReducer] }),
+  ]
+})
 ```
 
-### Step 3: Run the DevTool server
+### Step 4: Run the DevTool server
 
 ```bash
 # From the ngrx-devtool-proto directory
 node dist/index.js
 ```
 
-### Step 4: Open the DevTool UI
+### Step 5: Open the DevTool UI
 
-Open your browser to **http://localhost:3000**
-
-### Step 5: Run your app and see actions
-
-Start your Angular app and interact with it. All actions will appear in the DevTool UI:
+Open **http://localhost:3000** and start your Angular app. All actions will appear:
 - 🔵 **Blue border** = User action
 - 🟠 **Orange border** = Effect result (with "Triggered by" info)
 
 ---
 
-## Development Setup (Contributing to DevTool)
+## AI-Assisted Setup
 
-If you want to develop or modify the DevTool itself:
+**Prefer a hands-off approach?** Let an AI assistant set up the tool for you!
 
-### 1. Clone and install
-```bash
-git clone <repository-url>
-cd ngrx-devtool-proto
-npm install
-```
+1. Copy this entire README
+2. Open **GitHub Copilot Chat** in VS Code (Claude Sonnet 4 or Claude Opus 4.5 recommended)
+3. Paste the README and prompt:
 
-### 2. Build everything
-```bash
-npm run build
-```
+> "Set up ngrx-devtool in my Angular project following this README"
 
-### 3. Start the DevTool server + UI
-```bash
-node dist/index.js
-```
-UI available at **http://localhost:3000**
-
-### 4. Run the demo app (to test)
-```bash
-ng serve ngrx-devtool-demo
-```
-Demo app at **http://localhost:4200**
+The AI will:
+- Clone and build the library
+- Link it to your project
+- Add the meta-reducer to your store configuration
+- Guide you through running the DevTool server
 
 ---
 
 ## How Effect Tracking Works
 
-The DevTool doesn't parse your effect classes. Instead, it detects effect-dispatched actions by **pattern matching on action names**:
+The DevTool detects effect-dispatched actions by **pattern matching on action names**:
 
 | Pattern | Example | Detected As |
 |---------|---------|-------------|
@@ -113,12 +118,10 @@ The DevTool doesn't parse your effect classes. Instead, it detects effect-dispat
 | `*Success` | `loadBooksSuccess` | Effect |
 | `*Failure` | `loadBooksFailure` | Effect |
 | `*Error` | `fetchDataError` | Effect |
-| `*Complete` | `uploadComplete` | Effect |
+| `-> Succeeded` | `[Users] Fetch -> Succeeded` | Effect |
 | Everything else | `[Books] Load Books` | User Action |
 
 ### Recommended Action Naming
-
-For best results, follow this naming convention:
 
 ```typescript
 // User-initiated actions
@@ -140,24 +143,11 @@ export const BooksApiActions = createActionGroup({
 });
 ```
 
-## UI Components
-
-The DevTool UI displays:
-
-- **Action List** - Expandable panels for each dispatched action
-  - 🔵 Blue border + 👤 icon = User action
-  - 🟠 Orange border + ⚡ icon = Effect result
-- **Correlation Badge** - Shows "Chain #X" for effect sequences
-- **Triggered By** - Shows which user action triggered an effect
-- **Tabbed Views** - Action payload, state snapshot, and diff
-
 ---
 
 ## Advanced Configuration
 
 ### Custom WebSocket URL
-
-If your DevTool server runs on a different host/port:
 
 ```typescript
 import { createDevToolMetaReducer } from 'ngrx-devtool';
@@ -168,44 +158,65 @@ provideStore(
 )
 ```
 
+### Conditional Enable (Production Safety)
+
+```typescript
+const metaReducers = !environment.production ? [loggerMetaReducer] : [];
+
+provideStore({ /* reducers */ }, { metaReducers })
+```
+
 ---
 
 ## Troubleshooting
 
-### UI not loading at http://localhost:3000
+### npm Link Issues
 
-Run the servers manually in separate terminals:
+If you get module resolution errors after `npm link`, you need to enable symlink preservation.
 
-```bash
-# Terminal 1: WebSocket server
-node dist/index.js
+> **Note:** This is required for **Amadeus Product Catalogue UI** and similar Nx/Angular monorepo projects.
 
-# Terminal 2: UI server  
-cd dist && npx http-server ngrx-devtool-ui/browser -p 3000
-
-# Terminal 3: Your app
-ng serve your-app
+**tsconfig.json:**
+```json
+{
+  "compilerOptions": {
+    "preserveSymlinks": true
+  }
+}
 ```
 
-### Actions showing without names
+**angular.json** (in build options):
+```json
+{
+  "architect": {
+    "build": {
+      "options": {
+        "preserveSymlinks": true
+      }
+    }
+  }
+}
+```
 
-You may have duplicate message sources. Only use `loggerMetaReducer` - don't add `provideNgrxDevTool()`.
+> **Note:** After running `npm install`, you may need to re-run `npm link ngrx-devtool`.
 
-### Effects not being detected as effects
+### Effects not being detected
 
-Check that your effect action names include `API`, `Service`, `Success`, `Failure`, `Error`, or `Complete`. See the naming patterns table above.
+Check that your effect action names include `API`, `Service`, `Success`, `Failure`, `Error`, `Complete`, or arrow notation like `-> Succeeded`. See the patterns table above.
+
+### WebSocket connection issues
+
+- Ensure the DevTool server is running (`node dist/index.js`) before starting your Angular app
+- Check that ports 3000 and 4000 are not in use by other processes
 
 ---
 
 ## Contributing
 
-We welcome contributions!
-
 1. Fork the repository
-2. Follow the installation steps above
-3. Make your changes
-4. Test with the demo application
-5. Submit a pull request
+2. Make your changes
+3. Test with the demo app: `ng serve ngrx-devtool-demo`
+4. Submit a pull request
 
 
 

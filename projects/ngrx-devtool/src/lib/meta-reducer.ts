@@ -14,17 +14,37 @@ export interface StateChangeMessage {
 }
 
 // Effect detection patterns based on NgRx conventions
-const EFFECT_ACTION_PATTERNS = [
-  /\[.*API.*\]/i,
-  /\[.*Service.*\]/i,
-  /\[.*Effect.*\]/i,
-  /Success$/i,
-  /Failure$/i,
-  /Error$/i,
-  /Complete$/i,
-  /Retrieved/i,
-  /Loaded$/i,
-  /Fetched$/i,
+// These patterns identify actions that are RESULTS of effects (dispatched by effects)
+const EFFECT_RESULT_PATTERNS = [
+  // API response patterns
+  /\[.*API.*\]/i,           // [Books API], [Users API], etc.
+  /\[.*Service.*\]/i,       // [Auth Service], etc.
+  /\[.*Effect.*\]/i,        // [Router Effect], etc.
+
+  // Arrow notation (common in enterprise apps)
+  /-> Succeeded/i,          // [Competitors API] Fetch -> Succeeded
+  /-> Failed/i,             // [Competitors API] Fetch -> Failed
+  /-> Success/i,            // [API] Action -> Success
+  /-> Failure/i,            // [API] Action -> Failure
+  /-> Error/i,              // [API] Action -> Error
+  /-> Complete/i,           // [API] Action -> Complete
+  /-> Loaded/i,             // [API] Action -> Loaded
+
+  // Suffix patterns (camelCase and separate words)
+  /Success$/i,              // loadBooksSuccess, Load Books Success
+  /Succeeded$/i,            // fetchCompetitorsSucceeded
+  /Failure$/i,              // loadBooksFailure
+  /Failed$/i,               // fetchCompetitorsFailed
+  /Error$/i,                // loadBooksError
+  /Complete$/i,             // loadBooksComplete
+  /Completed$/i,            // loadBooksCompleted
+  /Retrieved/i,             // retrievedBookList, Retrieved Book List
+  /Loaded$/i,               // booksLoaded, Books Loaded
+  /Fetched$/i,              // booksFetched, Books Fetched
+  /Received$/i,             // dataReceived
+  /Updated$/i,              // stateUpdated (when from API)
+  /Created$/i,              // itemCreated (when from API)
+  /Deleted$/i,              // itemDeleted (when from API)
 ];
 
 /**
@@ -48,7 +68,7 @@ export function createDevToolMetaReducer(wsUrl: string = 'ws://localhost:4000') 
   socket.onopen = flushBuffer;
 
   function isEffectAction(actionType: string): boolean {
-    return EFFECT_ACTION_PATTERNS.some(pattern => pattern.test(actionType));
+    return EFFECT_RESULT_PATTERNS.some(pattern => pattern.test(actionType));
   }
 
   return function devToolMetaReducer<State>(
@@ -101,5 +121,6 @@ export function createDevToolMetaReducer(wsUrl: string = 'ws://localhost:4000') 
 export function loggerMetaReducer<State>(
   reducer: ActionReducer<State>
 ): ActionReducer<State> {
+  console.log('[NgRx DevTool] Meta-reducer initialized - Version: 2025-12-09');
   return createDevToolMetaReducer('ws://localhost:4000')(reducer);
 }
