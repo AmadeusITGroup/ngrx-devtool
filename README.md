@@ -74,6 +74,8 @@ export const appConfig: ApplicationConfig = {
 })
 ```
 
+> ⚠️ **Important:** If your app fails to compile or run after this step, see the [npm Link Issues](#npm-link-issues) section in Troubleshooting to configure `preserveSymlinks`.
+
 ### Step 4: Run the DevTool server
 
 ```bash
@@ -208,6 +210,18 @@ Check that your effect action names include `API`, `Service`, `Success`, `Failur
 
 - Ensure the DevTool server is running (`node dist/index.js`) before starting your Angular app
 - Check that ports 3000 and 4000 are not in use by other processes
+
+### Port already in use
+
+If you get `EADDRINUSE: address already in use`, kill the existing process:
+
+```bash
+# Kill process on port 4000
+lsof -ti :4000 | xargs kill -9
+
+# Kill process on port 3000
+lsof -ti :3000 | xargs kill -9
+```
 
 ---
 
