@@ -1,0 +1,360 @@
+import { Injectable } from '@angular/core';
+import {
+  PerformanceTrackerService,
+  AggregatedPerformanceStats,
+  PerformanceWarning,
+  ActionTypeStats
+} from './performance-tracker.service';
+
+export interface PerformanceRecommendation {
+  category: 'reducer' | 'state' | 'actions' | 'memory' | 'general';
+  title: string;
+  description: string;
+  impact: 'low' | 'medium' | 'high';
+  codeExample?: string;
+  learnMoreUrl?: string;
+}
+
+export interface PerformanceReport {
+  timestamp: string;
+  overallScore: number;
+  scoreGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+  stats: AggregatedPerformanceStats;
+  recommendations: PerformanceRecommendation[];
+  hotspots: HotspotInfo[];
+  trends: PerformanceTrends;
+}
+
+export interface HotspotInfo {
+  actionType: string;
+  issue: string;
+  avgTime: number;
+  callCount: number;
+  totalTime: number;
+  percentOfTotal: number;
+}
+
+export interface PerformanceTrends {
+  reducerTimesTrend: 'improving' | 'stable' | 'degrading';
+  stateSizeTrend: 'stable' | 'growing' | 'shrinking';
+  actionFrequencyTrend: 'stable' | 'increasing' | 'decreasing';
+}
+
+@Injectable({ providedIn: 'root' })
+export class PerformanceAnalyzerService {
+  private previousStats: AggregatedPerformanceStats | null = null;
+
+  constructor(private performanceTracker: PerformanceTrackerService) {}
+
+  /**
+   * Generate a comprehensive performance report.
+   */
+  generateReport(): PerformanceReport {
+    const stats = this.performanceTracker.getAggregatedStats();
+    const recommendations = this.generateRecommendations(stats);
+    const hotspots = this.identifyHotspots(stats);
+    const trends = this.analyzeTrends(stats);
+
+    const report: PerformanceReport = {
+      timestamp: new Date().toISOString(),
+      overallScore: stats.performanceScore,
+      scoreGrade: this.getScoreGrade(stats.performanceScore),
+      stats,
+      recommendations,
+      hotspots,
+      trends,
+    };
+
+    // Store for trend analysis
+    this.previousStats = stats;
+
+    return report;
+  }
+
+  /**
+   * Get quick performance summary for display.
+   */
+  getQuickSummary(): {
+    score: number;
+    grade: string;
+    mainIssue: string | null;
+    actionCount: number;
+    avgReducerTime: number;
+  } {
+    const stats = this.performanceTracker.getAggregatedStats();
+    const warnings = this.performanceTracker.getWarningsSummary();
+
+    let mainIssue: string | null = null;
+    const highSeverityWarning = warnings.find(w => w.severity === 'high');
+    if (highSeverityWarning) {
+      mainIssue = this.getWarningDescription(highSeverityWarning.type);
+    }
+
+    return {
+      score: stats.performanceScore,
+      grade: this.getScoreGrade(stats.performanceScore),
+      mainIssue,
+      actionCount: stats.totalActions,
+      avgReducerTime: stats.avgReducerTime,
+    };
+  }
+
+  /**
+   * Analyze specific action type for performance issues.
+   */
+  analyzeActionType(actionType: string): {
+    stats: ActionTypeStats | undefined;
+    isProblematic: boolean;
+    issues: string[];
+    suggestions: string[];
+  } {
+    const stats = this.performanceTracker.getAggregatedStats();
+    const actionStats = stats.actionTypeStats.get(actionType);
+    const thresholds = this.performanceTracker.getThresholds();
+
+    const issues: string[] = [];
+    const suggestions: string[] = [];
+
+    if (!actionStats) {
+      return { stats: undefined, isProblematic: false, issues, suggestions };
+    }
+
+    // Check average time
+    if (actionStats.avgTime > thresholds.maxReducerTime) {
+      issues.push(`Average execution time (${actionStats.avgTime.toFixed(2)}ms) exceeds threshold`);
+      suggestions.push('Consider optimizing the reducer logic for this action');
+    }
+
+    // Check frequency
+    const totalActions = stats.totalActions;
+    const percentOfTotal = (actionStats.count / totalActions) * 100;
+    if (percentOfTotal > 30 && actionStats.count > 10) {
+      issues.push(`This action represents ${percentOfTotal.toFixed(1)}% of all actions`);
+      suggestions.push('Consider debouncing or batching this action if dispatched frequently');
+    }
+
+    // Check max time spike
+    if (actionStats.maxTime > actionStats.avgTime * 3 && actionStats.maxTime > thresholds.maxReducerTime) {
+      issues.push(`Occasional spikes in execution time (max: ${actionStats.maxTime.toFixed(2)}ms)`);
+      suggestions.push('Investigate what causes performance spikes - possibly large payload or complex state updates');
+    }
+
+    return {
+      stats: actionStats,
+      isProblematic: issues.length > 0,
+      issues,
+      suggestions,
+    };
+  }
+
+  private generateRecommendations(stats: AggregatedPerformanceStats): PerformanceRecommendation[] {
+    const recommendations: PerformanceRecommendation[] = [];
+    const thresholds = this.performanceTracker.getThresholds();
+    const warnings = this.performanceTracker.getWarningsSummary();
+
+    // Reducer performance recommendations
+    if (stats.avgReducerTime > thresholds.maxReducerTime) {
+      recommendations.push({
+        category: 'reducer',
+        title: 'Optimize Reducer Performance',
+        description: `Your reducers are taking an average of ${stats.avgReducerTime.toFixed(2)}ms to execute. For smooth 60fps animations, reducers should complete in under ${thresholds.maxReducerTime}ms.`,
+        impact: stats.avgReducerTime > thresholds.maxReducerTime * 2 ? 'high' : 'medium',
+        codeExample: `// Use immer for immutable updates
+import { createReducer, on } from '@ngrx/store';
+import { produce } from 'immer';
+
+// Or ensure you're not doing expensive operations in reducers
+on(someAction, (state, { items }) => ({
+  ...state,
+  // Avoid: items.map(...).filter(...).sort(...)
+  // Better: Do transformations in selectors with memoization
+  items
+}))`,
+        learnMoreUrl: 'https://ngrx.io/guide/store/reducers#reducer-functions',
+      });
+    }
+
+    // State size recommendations
+    if (stats.currentStateSize > thresholds.maxStateSize * 0.5) {
+      recommendations.push({
+        category: 'state',
+        title: 'Consider State Normalization',
+        description: `Your state size is ${this.formatBytes(stats.currentStateSize)}. Large states can slow down serialization and increase memory usage.`,
+        impact: stats.currentStateSize > thresholds.maxStateSize ? 'high' : 'medium',
+        codeExample: `// Normalize nested data
+// Instead of:
+{ users: [{ id: 1, posts: [{ id: 1, ... }] }] }
+
+// Use:
+{
+  users: { ids: [1], entities: { 1: { id: 1 } } },
+  posts: { ids: [1], entities: { 1: { id: 1, userId: 1 } } }
+}`,
+        learnMoreUrl: 'https://ngrx.io/guide/entity',
+      });
+    }
+
+    // Action frequency recommendations
+    if (stats.actionsPerSecond > thresholds.maxActionsPerSecond * 0.5) {
+      recommendations.push({
+        category: 'actions',
+        title: 'Reduce Action Dispatch Frequency',
+        description: `You're dispatching ${stats.actionsPerSecond.toFixed(1)} actions per second. High frequency can cause performance issues.`,
+        impact: stats.actionsPerSecond > thresholds.maxActionsPerSecond ? 'high' : 'medium',
+        codeExample: `// Debounce rapid actions
+import { debounceTime } from 'rxjs/operators';
+
+// In your component
+searchInput$.pipe(
+  debounceTime(300)
+).subscribe(term => {
+  this.store.dispatch(searchAction({ term }));
+});
+
+// Or batch updates
+this.store.dispatch(batchUpdateAction({ items: allItems }));`,
+      });
+    }
+
+    // Slowest action recommendation
+    if (stats.slowestAction && stats.maxReducerTime > thresholds.maxReducerTime * 2) {
+      recommendations.push({
+        category: 'reducer',
+        title: `Optimize "${stats.slowestAction}"`,
+        description: `This action has the highest execution time (${stats.maxReducerTime.toFixed(2)}ms). Focus optimization efforts here for maximum impact. Profile this specific action to identify bottlenecks.`,
+        impact: 'high',
+      });
+    }
+
+    // Memory warnings
+    const memoryWarnings = warnings.filter(w => w.type === 'MEMORY_PRESSURE');
+    if (memoryWarnings.length > 0) {
+      recommendations.push({
+        category: 'memory',
+        title: 'Address Memory Pressure',
+        description: 'Your application is using a significant portion of available memory. This can lead to garbage collection pauses.',
+        impact: 'high',
+        codeExample: `// Clear old data when navigating away
+ngOnDestroy() {
+  this.store.dispatch(clearTemporaryData());
+}
+
+// Implement pagination instead of loading all data
+this.store.dispatch(loadPage({ page: 1, pageSize: 50 }));`,
+      });
+    }
+
+    // General recommendations for good scores
+    if (stats.performanceScore >= 80 && recommendations.length === 0) {
+      recommendations.push({
+        category: 'general',
+        title: 'Performance is Good! 🎉',
+        description: 'Your NgRx store is performing well. Continue following best practices.',
+        impact: 'low',
+      });
+    }
+
+    return recommendations;
+  }
+
+  private identifyHotspots(stats: AggregatedPerformanceStats): HotspotInfo[] {
+    const hotspots: HotspotInfo[] = [];
+    const totalTime = Array.from(stats.actionTypeStats.values())
+      .reduce((sum, s) => sum + s.totalTime, 0);
+
+    stats.actionTypeStats.forEach((actionStats, actionType) => {
+      const percentOfTotal = (actionStats.totalTime / totalTime) * 100;
+      const thresholds = this.performanceTracker.getThresholds();
+
+      // Identify if this action is a hotspot
+      let issue = '';
+      if (actionStats.avgTime > thresholds.maxReducerTime) {
+        issue = 'Slow reducer execution';
+      } else if (percentOfTotal > 20 && actionStats.count > 5) {
+        issue = 'High time consumption';
+      } else if (actionStats.maxTime > actionStats.avgTime * 5) {
+        issue = 'Inconsistent performance';
+      }
+
+      if (issue) {
+        hotspots.push({
+          actionType,
+          issue,
+          avgTime: actionStats.avgTime,
+          callCount: actionStats.count,
+          totalTime: actionStats.totalTime,
+          percentOfTotal,
+        });
+      }
+    });
+
+    // Sort by total time impact
+    return hotspots.sort((a, b) => b.totalTime - a.totalTime).slice(0, 5);
+  }
+
+  private analyzeTrends(currentStats: AggregatedPerformanceStats): PerformanceTrends {
+    if (!this.previousStats) {
+      return {
+        reducerTimesTrend: 'stable',
+        stateSizeTrend: 'stable',
+        actionFrequencyTrend: 'stable',
+      };
+    }
+
+    const prev = this.previousStats;
+
+    // Reducer times trend
+    let reducerTimesTrend: 'improving' | 'stable' | 'degrading' = 'stable';
+    const timeDiff = currentStats.avgReducerTime - prev.avgReducerTime;
+    if (timeDiff > 2) reducerTimesTrend = 'degrading';
+    else if (timeDiff < -2) reducerTimesTrend = 'improving';
+
+    // State size trend
+    let stateSizeTrend: 'stable' | 'growing' | 'shrinking' = 'stable';
+    const sizeDiff = currentStats.currentStateSize - prev.currentStateSize;
+    const sizeChangePercent = Math.abs(sizeDiff) / (prev.currentStateSize || 1) * 100;
+    if (sizeChangePercent > 10) {
+      stateSizeTrend = sizeDiff > 0 ? 'growing' : 'shrinking';
+    }
+
+    // Action frequency trend
+    let actionFrequencyTrend: 'stable' | 'increasing' | 'decreasing' = 'stable';
+    const freqDiff = currentStats.actionsPerSecond - prev.actionsPerSecond;
+    if (freqDiff > 5) actionFrequencyTrend = 'increasing';
+    else if (freqDiff < -5) actionFrequencyTrend = 'decreasing';
+
+    return {
+      reducerTimesTrend,
+      stateSizeTrend,
+      actionFrequencyTrend,
+    };
+  }
+
+  private getScoreGrade(score: number): 'A' | 'B' | 'C' | 'D' | 'F' {
+    if (score >= 90) return 'A';
+    if (score >= 80) return 'B';
+    if (score >= 70) return 'C';
+    if (score >= 60) return 'D';
+    return 'F';
+  }
+
+  private getWarningDescription(type: string): string {
+    const descriptions: Record<string, string> = {
+      SLOW_REDUCER: 'Slow reducer execution',
+      LARGE_STATE: 'Large state size',
+      LARGE_STATE_CHANGE: 'Large state changes',
+      FREQUENT_ACTIONS: 'High action frequency',
+      LARGE_PAYLOAD: 'Large action payloads',
+      MEMORY_PRESSURE: 'Memory pressure',
+    };
+    return descriptions[type] || type;
+  }
+
+  private formatBytes(bytes: number): string {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(Math.abs(bytes)) / Math.log(k));
+    return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
+  }
+}

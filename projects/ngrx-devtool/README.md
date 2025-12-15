@@ -52,6 +52,56 @@ Implements JSON Patch (RFC 6902) for efficient delta calculations:
 }
 ```
 
+### 📊 Performance Monitoring (NEW!)
+
+Real-time performance tracking to help developers identify and fix performance bottlenecks:
+
+```typescript
+interface PerformanceMetrics {
+  reducerExecutionTime: number;  // Time in ms
+  stateSize: number;             // Bytes
+  stateSizeChange: number;       // Delta in bytes
+  actionPayloadSize: number;     // Bytes
+  warnings: PerformanceWarning[];
+}
+
+interface PerformanceWarning {
+  type: 'SLOW_REDUCER' | 'LARGE_STATE' | 'LARGE_STATE_CHANGE' | 
+        'FREQUENT_ACTIONS' | 'LARGE_PAYLOAD' | 'MEMORY_PRESSURE';
+  message: string;
+  severity: 'low' | 'medium' | 'high';
+  suggestion?: string;
+}
+```
+
+#### Features:
+- **Reducer Execution Time**: Measure how long each reducer takes to execute
+- **State Size Tracking**: Monitor state growth and identify large state trees
+- **Action Payload Analysis**: Detect oversized action payloads
+- **Action Frequency Monitoring**: Identify rapid action dispatching patterns
+- **Performance Score**: Get an overall health score (A-F grade) for your store
+- **Smart Warnings**: Receive actionable suggestions for performance improvements
+
+#### Configuration:
+```typescript
+import { createDevToolMetaReducer } from 'ngrx-devtool';
+
+export const metaReducers = [
+  createDevToolMetaReducer({
+    wsUrl: 'ws://localhost:4000',
+    enablePerformanceTracking: true,
+    performanceThresholds: {
+      maxReducerTime: 16,        // ms (target 60fps)
+      maxStateSize: 5242880,     // 5MB
+      maxStateChangeSize: 102400, // 100KB per action
+      maxActionsPerSecond: 60,
+      maxPayloadSize: 51200,     // 50KB
+    }
+  })
+];
+```
+```
+
 ---
 
 ## 🧩 API Reference  

@@ -16,6 +16,11 @@ This tool provides real-time monitoring and visualization of NgRx actions, state
 - **State Visualization** - View current and previous states
 - **Diff Viewer** - Compare state changes between actions
 - **Visual Indicators** - Blue for user actions, orange for effect results
+- **Performance Tracking** - Monitor reducer execution time, render timing, and state size changes
+
+## Performance Monitoring
+
+The DevTool includes built-in performance tracking that measures reducer execution time, actual render time (including Angular change detection and browser paint), and state size metrics. This helps identify performance bottlenecks and understand the full cost of state changes beyond just reducer execution.
 
 ## Project Structure
 
