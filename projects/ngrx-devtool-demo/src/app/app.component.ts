@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BooksActions } from './state/book.actions';
 import { map, mergeMap, tap } from 'rxjs/operators';
@@ -15,14 +15,14 @@ import { AsyncPipe, NgFor, NgIf } from '@angular/common';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  standalone: true,
   imports: [BookListComponent, BookCollectionComponent, NgFor, AsyncPipe, NgIf]
 })
 export class AppComponent implements OnInit {
   books$!: Observable<ReadonlyArray<Book>>;
   bookCollection$!: Observable<ReadonlyArray<Book>>;
 
-  constructor(private booksService: GoogleBooksService, private store: Store) {}
+  private readonly booksService = inject(GoogleBooksService);
+  private readonly store = inject(Store);
 
   ngOnInit() {
     this.books$ = this.store.select(selectBooks);

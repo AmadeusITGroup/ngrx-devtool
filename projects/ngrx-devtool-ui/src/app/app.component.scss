@@ -1,4 +1,62 @@
 @use "@angular/material" as mat;
+
+:host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+}
+
+// Main tabs styling
+.main-tabs {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 64px);
+  margin-top: 64px;
+
+  ::ng-deep .mat-mdc-tab-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--mat-sys-surface);
+  }
+
+  ::ng-deep .mat-mdc-tab-body-wrapper {
+    flex: 1;
+    overflow: auto;
+  }
+
+  .mat-mdc-tab-labels {
+    background: var(--mat-sys-surface);
+  }
+
+  .mat-mdc-tab {
+    mat-icon {
+      margin-right: 8px;
+    }
+
+    span {
+      margin-right: 8px;
+    }
+  }
+}
+
+.tab-badge {
+  background: #673ab7;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  margin-left: 4px;
+}
+
+.tab-warning-icon {
+  color: #ff9800;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  margin-left: 4px;
+}
+
 .container {
   display: flex;
   flex-direction: row;
@@ -11,7 +69,7 @@
 .actions-container{
     padding: 10px;
     width: 90%;
-    margin-top: 100px;
+    margin-top: 20px;
 }
 .actions {
     display: flex;
@@ -22,6 +80,9 @@ mat-toolbar {
   background-color: var(--mat-sys-primary-container);
   color: var(--mat-sys-on-primary-container);
   position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
 }
 .cls-1 {
@@ -38,6 +99,19 @@ mat-toolbar {
 
 .user-action {
   border-left: 4px solid #2196f3 !important;
+}
+
+// Fix expansion panel overflow for button
+mat-expansion-panel-header {
+  overflow: visible !important;
+
+  ::ng-deep .mat-expansion-panel-header-title {
+    overflow: visible !important;
+  }
+
+  ::ng-deep .mat-expansion-panel-header-description {
+    overflow: visible !important;
+  }
 }
 
 .action-icon {
@@ -88,5 +162,270 @@ mat-toolbar {
 
   strong {
     color: #9c27b0;
+  }
+}
+
+// Performance indicator in action header
+mat-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: visible !important;
+}
+
+.perf-link-btn {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  padding: 0 !important;
+  margin: 0;
+  color: #673ab7;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50% !important;
+  overflow: visible !important;
+  position: relative;
+
+  ::ng-deep .mat-mdc-button-touch-target {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+  }
+
+  ::ng-deep .mat-mdc-button-persistent-ripple {
+    border-radius: 50% !important;
+  }
+
+  ::ng-deep .mdc-button__ripple {
+    border-radius: 50% !important;
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+  }
+
+  &:hover {
+    background: rgba(103, 58, 183, 0.15) !important;
+    color: #512da8;
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.perf-warning-icon {
+  color: #ff9800;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+}
+
+.perf-time {
+  font-family: monospace;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+  margin-right: 12px;
+
+  &.slow {
+    background: rgba(244, 67, 54, 0.1);
+    color: #f44336;
+  }
+}
+
+// Action performance tab content
+.action-performance {
+  padding: 16px;
+}
+
+.perf-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.perf-stat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+
+  mat-icon {
+    color: #673ab7;
+  }
+}
+
+.perf-stat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.perf-stat-label {
+  font-size: 12px;
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
+.perf-stat-value {
+  font-size: 16px;
+  font-weight: 500;
+  font-family: monospace;
+
+  &.warning {
+    color: #f44336;
+  }
+
+  &.positive {
+    color: #4caf50;
+  }
+
+  &.negative {
+    color: #2196f3;
+  }
+}
+
+.perf-warnings {
+  h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px 0;
+    color: #ff9800;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.perf-warning {
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+
+  &.severity-high {
+    background: rgba(244, 67, 54, 0.1);
+    border-left: 3px solid #f44336;
+  }
+
+  &.severity-medium {
+    background: rgba(255, 152, 0, 0.1);
+    border-left: 3px solid #ff9800;
+  }
+
+  &.severity-low {
+    background: rgba(255, 193, 7, 0.1);
+    border-left: 3px solid #ffc107;
+  }
+}
+
+.warning-message {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.warning-suggestion {
+  display: block;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+// Render timing styles
+.render-time {
+  color: #9c27b0 !important;
+}
+
+.total-time {
+  color: #2196f3 !important;
+}
+
+.perf-time.slow {
+  color: #f44336 !important;
+}
+
+// Timing breakdown visualization
+.timing-breakdown {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+  h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px 0;
+    font-size: 14px;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      opacity: 0.7;
+    }
+  }
+}
+
+.timing-bar {
+  display: flex;
+  height: 24px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  margin-bottom: 12px;
+}
+
+.timing-segment {
+  height: 100%;
+  min-width: 4px;
+  transition: width 0.3s ease;
+
+  &.reducer-segment {
+    background: linear-gradient(135deg, #4caf50, #8bc34a);
+  }
+
+  &.render-segment {
+    background: linear-gradient(135deg, #9c27b0, #e91e63);
+  }
+}
+
+.timing-legend {
+  display: flex;
+  gap: 24px;
+  font-size: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+
+  &.reducer {
+    background: linear-gradient(135deg, #4caf50, #8bc34a);
+  }
+
+  &.render {
+    background: linear-gradient(135deg, #9c27b0, #e91e63);
   }
 }

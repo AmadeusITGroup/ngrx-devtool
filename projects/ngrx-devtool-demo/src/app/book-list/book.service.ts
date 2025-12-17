@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -7,7 +7,7 @@ import { Book } from './book.model';
 
 @Injectable({ providedIn: 'root' })
 export class GoogleBooksService {
-  constructor(private http: HttpClient) {}
+  private readonly http = inject(HttpClient);
 
   getBooks(): Observable<Array<Book>> {
     return this.http

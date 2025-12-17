@@ -1,4 +1,11 @@
 import { ActionReducer, Action } from '@ngrx/store';
+import { inject } from '@angular/core';
+import { PerformanceTrackerService, ComponentRenderMetrics } from './performance-tracker.service';
+
+export interface RenderPerformanceData {
+  totalRenderTime: number;
+  componentsRendered: ComponentRenderMetrics[];
+}
 
 export interface StateChangeMessage {
   type: 'STATE_CHANGE';
@@ -11,6 +18,7 @@ export interface StateChangeMessage {
     chainIndex: number;
   };
   timestamp: string;
+  renderPerformance?: RenderPerformanceData;
 }
 
 // Effect detection patterns based on NgRx conventions
@@ -48,9 +56,26 @@ const EFFECT_RESULT_PATTERNS = [
 ];
 
 /**
+ * Configuration options for the DevTool meta-reducer.
+ */
+export interface DevToolMetaReducerConfig {
+  wsUrl?: string;
+  enablePerformanceTracking?: boolean;
+}
+
+/**
  * Create a meta-reducer factory with configurable WebSocket URL.
  */
-export function createDevToolMetaReducer(wsUrl: string = 'ws://localhost:4000') {
+export function createDevToolMetaReducer(
+  wsUrlOrConfig: string | DevToolMetaReducerConfig = 'ws://localhost:4000'
+) {
+  const config: DevToolMetaReducerConfig = typeof wsUrlOrConfig === 'string'
+    ? { wsUrl: wsUrlOrConfig }
+    : wsUrlOrConfig;
+
+  const wsUrl = config.wsUrl ?? 'ws://localhost:4000';
+  const enablePerf = config.enablePerformanceTracking ?? true;
+
   const socket = new WebSocket(wsUrl);
   const messageBuffer: string[] = [];
   let lastUserAction: string | null = null;
@@ -74,10 +99,11 @@ export function createDevToolMetaReducer(wsUrl: string = 'ws://localhost:4000') 
   return function devToolMetaReducer<State>(
     reducer: ActionReducer<State>
   ): ActionReducer<State> {
+    // Get performance tracker via dependency injection
+    const performanceTracker = inject(PerformanceTrackerService);
+
     return function (state, action) {
       const prevState = state;
-      const nextState = reducer(state, action);
-
       const isEffect = isEffectAction(action.type);
 
       // Track action chain correlation
@@ -88,11 +114,12 @@ export function createDevToolMetaReducer(wsUrl: string = 'ws://localhost:4000') 
         actionChainIndex++;
       }
 
-      const message: StateChangeMessage = {
+      // Send initial message without render performance
+      const initialMessage: StateChangeMessage = {
         type: 'STATE_CHANGE',
         action,
         prevState,
-        nextState,
+        nextState: null as any, // Will be set below
         isEffectResult: isEffect,
         correlation: {
           triggeredBy: isEffect ? lastUserAction : null,
@@ -101,7 +128,41 @@ export function createDevToolMetaReducer(wsUrl: string = 'ws://localhost:4000') 
         timestamp: new Date().toISOString(),
       };
 
-      const payload = JSON.stringify(message);
+      let nextState: State;
+
+      if (enablePerf) {
+        // Measure render time and send updated message when complete
+        nextState = performanceTracker.measureRenderTime(
+          action.type,
+          () => reducer(state, action),
+          (renderTime) => {
+            console.log('[Meta-Reducer] Render complete for', action.type, renderTime + 'ms');
+            // Send updated message with render performance
+            const perfMessage: StateChangeMessage = {
+              ...initialMessage,
+              nextState,
+              renderPerformance: {
+                totalRenderTime: renderTime,
+                componentsRendered: []
+              }
+            };
+
+            const payload = JSON.stringify(perfMessage);
+            if (socket.readyState === WebSocket.OPEN) {
+              socket.send(payload);
+              console.log('[Meta-Reducer] Sent render performance to UI');
+            } else {
+              console.warn('[Meta-Reducer] WebSocket not open, cannot send render performance');
+            }
+          }
+        );
+      } else {
+        nextState = reducer(state, action);
+      }
+
+      // Send initial message immediately
+      initialMessage.nextState = nextState;
+      const payload = JSON.stringify(initialMessage);
 
       if (socket.readyState === WebSocket.OPEN) {
         socket.send(payload);

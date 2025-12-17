@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// This is a script which runs a local websocket server, and spawn the ngrx-devtool ui. 
+// This is a script which runs a local websocket server, and spawn the ngrx-devtool ui.
 // thus allowing the library to communicate with the UI via the websocket server.
 import { spawn } from 'child_process';
 import { WebSocket, WebSocketServer } from 'ws';
@@ -29,12 +29,21 @@ wss.on('connection', (socket) => {
 });
 const ui = spawn(
   'npx',
-  ['http-server', path.resolve(__dirname, 'ngrx-devtool-ui/browser'), '-p', PORT_UI],
+  ['http-server', path.resolve(__dirname, 'ngrx-devtool-ui/browser'), '-p', PORT_UI, '-c-1'],
   {
     shell: true,
-    stdio: ['ignore', 'ignore', 'pipe'],
+    stdio: ['ignore', 'pipe', 'pipe'],
   }
 );
+
+ui.stdout?.on('data', (data) => {
+  console.log(chalk.gray(`[UI] ${data.toString().trim()}`));
+});
+
+ui.stderr?.on('data', (data) => {
+  console.error(chalk.red(`[UI Error] ${data.toString().trim()}`));
+});
+
 ui.on('error', (error) => {
   console.error('Failed to start UI server: ', error);
 });

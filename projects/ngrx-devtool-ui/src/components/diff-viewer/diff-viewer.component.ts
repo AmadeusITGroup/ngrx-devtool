@@ -1,11 +1,10 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, inject, Input, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DiffService } from '../../services/diff.service';
 import { MatTabChangeEvent } from '@angular/material/tabs';
 
 @Component({
   selector: 'app-diff-viewer',
-  standalone: true,
   imports: [CommonModule],
   templateUrl: './diff-viewer.component.html',
   styleUrls: ['./diff-viewer.component.scss']
@@ -13,10 +12,10 @@ import { MatTabChangeEvent } from '@angular/material/tabs';
 export class DiffViewerComponent implements OnChanges {
   @Input() previousState: any;
   @Input() currentState: any;
-  
+
   diffs: any[] = [];
 
-  constructor(private diffService: DiffService) {}
+  private readonly diffService = inject(DiffService);
 
   ngOnChanges(): void {
     if (this.previousState !== undefined || this.currentState !== undefined) {
