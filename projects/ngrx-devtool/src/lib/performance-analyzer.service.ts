@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   PerformanceTrackerService,
   AggregatedPerformanceStats,
   PerformanceWarning,
   ActionTypeStats
 } from './performance-tracker.service';
+import { PerformanceWarningType } from '../types/state.model';
 
 export interface PerformanceRecommendation {
   category: 'reducer' | 'state' | 'actions' | 'memory' | 'general';
@@ -43,8 +44,7 @@ export interface PerformanceTrends {
 @Injectable({ providedIn: 'root' })
 export class PerformanceAnalyzerService {
   private previousStats: AggregatedPerformanceStats | null = null;
-
-  constructor(private performanceTracker: PerformanceTrackerService) {}
+  private readonly performanceTracker = inject(PerformanceTrackerService);
 
   /**
    * Generate a comprehensive performance report.
@@ -227,7 +227,7 @@ this.store.dispatch(batchUpdateAction({ items: allItems }));`,
     }
 
     // Memory warnings
-    const memoryWarnings = warnings.filter(w => w.type === 'MEMORY_PRESSURE');
+    const memoryWarnings = warnings.filter(w => w.type === PerformanceWarningType.MEMORY_PRESSURE);
     if (memoryWarnings.length > 0) {
       recommendations.push({
         category: 'memory',

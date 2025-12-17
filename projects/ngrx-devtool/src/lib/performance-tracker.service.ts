@@ -32,8 +32,7 @@ export interface RenderPerformanceStats {
 @Injectable({ providedIn: 'root' })
 export class PerformanceTrackerService {
   private entries: RenderPerformanceEntry[] = [];
-  private pendingMeasurements = new Map<string, { startTime: number; callback: (renderTime: number) => void }>();
-  private appRef = inject(ApplicationRef);
+  private readonly appRef = inject(ApplicationRef);
 
   constructor() {
     console.log('[NgRx DevTool] PerformanceTrackerService initialized');

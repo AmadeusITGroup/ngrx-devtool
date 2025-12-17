@@ -51,10 +51,6 @@ export class SelectorTrackerService {
   private pendingAction: { type: string; dispatchTime: number } | null = null;
   private endToEndTimings: EndToEndTiming[] = [];
 
-  constructor() {
-    console.log('[NgRx DevTool] SelectorTrackerService initialized');
-  }
-
   /**
    * Mark the start of an action dispatch for end-to-end timing.
    */

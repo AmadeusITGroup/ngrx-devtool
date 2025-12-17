@@ -4,7 +4,7 @@ import { SelectorTrackerService } from './selector-tracker.service';
 /**
  * Global reference to the selector tracker (set during app initialization).
  */
-let globalSelectorTracker: SelectorTrackerService | null = null;
+let globalSelectorTracker: SelectorTrackerService;
 
 /**
  * Set the global selector tracker instance.

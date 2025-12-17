@@ -4,6 +4,16 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 
+interface RenderPerformance {
+  totalRenderTime: number;
+}
+
+interface StateChangeMessage {
+  type: string;
+  action: { type: string };
+  renderPerformance?: RenderPerformance;
+}
+
 interface RenderEntry {
   actionType: string;
   totalRenderTime: number;
@@ -31,7 +41,6 @@ const OPTIMIZATION_TIPS = [
 
 @Component({
   selector: 'app-performance-panel',
-  standalone: true,
   imports: [MatCardModule, MatIconModule, MatTableModule, MatButtonModule],
   templateUrl: './performance-panel.component.html',
   styleUrl: './performance-panel.component.scss',
@@ -39,7 +48,7 @@ const OPTIMIZATION_TIPS = [
 export class PerformancePanelComponent implements OnChanges {
   private readonly FRAME_BUDGET_MS = 16;
 
-  @Input() messages: any[] = [];
+  @Input() messages: StateChangeMessage[] = [];
   @Input() selectedActionType: string | null = null;
 
   private entries = signal<RenderEntry[]>([]);
@@ -64,7 +73,7 @@ export class PerformancePanelComponent implements OnChanges {
       .slice(0, 10)
   );
 
-  ngOnChanges(changes: SimpleChanges): void {
+  public ngOnChanges(changes: SimpleChanges): void {
     if (changes['messages']) {
       this.processMessages();
     }
@@ -75,7 +84,8 @@ export class PerformancePanelComponent implements OnChanges {
 
   private processMessages(): void {
     const entries = this.messages
-      .filter(msg => msg.type === 'STATE_CHANGE' && msg.renderPerformance)
+      .filter((msg): msg is StateChangeMessage & { renderPerformance: RenderPerformance } =>
+        msg.type === 'STATE_CHANGE' && !!msg.renderPerformance)
       .map(msg => ({
         actionType: msg.action.type,
         totalRenderTime: msg.renderPerformance.totalRenderTime,
@@ -92,29 +102,29 @@ export class PerformancePanelComponent implements OnChanges {
     }, 100);
   }
 
-  formatMs(ms: number): string {
+  public formatMs(ms: number): string {
     return `${ms.toFixed(2)}ms`;
   }
 
-  getRenderStatus(ms: number): 'good' | 'warning' | 'critical' {
+  public getRenderStatus(ms: number): 'good' | 'warning' | 'critical' {
     if (ms <= this.FRAME_BUDGET_MS) return 'good';
     if (ms <= this.FRAME_BUDGET_MS * 2) return 'warning';
     return 'critical';
   }
 
-  getStatusColor(status: 'good' | 'warning' | 'critical'): string {
+  public getStatusColor(status: 'good' | 'warning' | 'critical'): string {
     return STATUS_COLORS[status];
   }
 
-  hasPerformanceIssues(): boolean {
+  public hasPerformanceIssues(): boolean {
     return this.renderStats().maxRenderTime > this.FRAME_BUDGET_MS;
   }
 
-  openAngularProfiler(): void {
+  public openAngularProfiler(): void {
     window.open('https://angular.dev/tools/devtools', '_blank');
   }
 
-  getOptimizationTips(): { text: string; docUrl?: string }[] {
+  public getOptimizationTips(): { text: string; docUrl?: string }[] {
     const { maxRenderTime } = this.renderStats();
     const tips = OPTIMIZATION_TIPS
       .filter(tip => maxRenderTime > tip.threshold)
@@ -123,7 +133,7 @@ export class PerformancePanelComponent implements OnChanges {
     return tips.length ? tips : [{ text: 'Performance looks good!' }];
   }
 
-  isSelectedAction(actionType: string): boolean {
+  public isSelectedAction(actionType: string): boolean {
     return this.selectedActionType === actionType;
   }
 }

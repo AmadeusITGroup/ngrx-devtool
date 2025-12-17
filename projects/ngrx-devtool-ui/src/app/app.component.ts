@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, ViewChild } from '@angular/core';
 import { WebsocketService } from '../services/websocket.service';
 import { Subscription } from 'rxjs';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -75,7 +75,8 @@ export class AppComponent implements OnInit {
   });
 
   private subscription?: Subscription;
-  constructor(private _webSocketService: WebsocketService) {}
+  private readonly _webSocketService = inject(WebsocketService);
+
   ngOnInit(): void {
     this._webSocketService.connect('ws://localhost:4000');
     this.subscription = this._webSocketService.messages$?.subscribe((msg) => {

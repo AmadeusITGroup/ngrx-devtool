@@ -31,14 +31,15 @@ export interface PerformanceWarning {
   suggestion?: string;
 }
 
-export type PerformanceWarningType =
-  | 'SLOW_REDUCER'
-  | 'LARGE_STATE'
-  | 'LARGE_STATE_CHANGE'
-  | 'FREQUENT_ACTIONS'
-  | 'LARGE_PAYLOAD'
-  | 'MEMORY_PRESSURE'
-  | 'HIGH_RENDER_IMPACT';
+export enum PerformanceWarningType {
+  SLOW_REDUCER = 'SLOW_REDUCER',
+  LARGE_STATE = 'LARGE_STATE',
+  LARGE_STATE_CHANGE = 'LARGE_STATE_CHANGE',
+  FREQUENT_ACTIONS = 'FREQUENT_ACTIONS',
+  LARGE_PAYLOAD = 'LARGE_PAYLOAD',
+  MEMORY_PRESSURE = 'MEMORY_PRESSURE',
+  HIGH_RENDER_IMPACT = 'HIGH_RENDER_IMPACT',
+}
 
 export interface PerformanceThresholds {
   /** Max acceptable reducer execution time (ms) */
