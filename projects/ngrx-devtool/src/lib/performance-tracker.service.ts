@@ -1,4 +1,4 @@
-import { Injectable, ApplicationRef, inject } from '@angular/core';
+import { Injectable, ApplicationRef, inject, NgZone } from '@angular/core';
 import { Action } from '@ngrx/store';
 
 export interface ComponentRenderMetrics {
@@ -33,6 +33,7 @@ export interface RenderPerformanceStats {
 export class PerformanceTrackerService {
   private entries: RenderPerformanceEntry[] = [];
   private readonly appRef = inject(ApplicationRef);
+  private readonly ngZone = inject(NgZone);
 
   constructor() {
     console.log('[NgRx DevTool] PerformanceTrackerService initialized');
@@ -40,7 +41,7 @@ export class PerformanceTrackerService {
 
   /**
    * Measure render time for an action and execute callback with the result.
-   * Measures the synchronous time for reducer + change detection to complete.
+   * Uses Angular's ApplicationRef.isStable to detect when change detection completes.
    */
   measureRenderTime<State>(
     actionType: string,
@@ -52,33 +53,36 @@ export class PerformanceTrackerService {
     // Execute reducer
     const nextState = reducer();
 
-    const reducerEndTime = performance.now();
-    const reducerTime = reducerEndTime - startTime;
+    // Use requestAnimationFrame to measure after the browser has painted
+    // This gives us a more accurate measure of actual render time
+    this.ngZone.runOutsideAngular(() => {
+      // First RAF: Angular processes change detection
+      requestAnimationFrame(() => {
+        // Second RAF: Browser has painted the changes
+        requestAnimationFrame(() => {
+          const endTime = performance.now();
+          const renderTime = endTime - startTime;
 
-    // Use setTimeout(0) to measure when the current execution context completes
-    // This captures the synchronous rendering work without waiting for async operations
-    setTimeout(() => {
-      const endTime = performance.now();
-      const renderTime = endTime - reducerEndTime; // Time after reducer completes
+          // Record entry
+          const entry: RenderPerformanceEntry = {
+            actionType,
+            timestamp: Date.now(),
+            totalRenderTime: parseFloat(renderTime.toFixed(2)),
+            componentsRendered: []
+          };
 
-      // Record entry
-      const entry: RenderPerformanceEntry = {
-        actionType,
-        timestamp: Date.now(),
-        totalRenderTime: renderTime,
-        componentsRendered: []
-      };
+          this.entries.push(entry);
 
-      this.entries.push(entry);
+          // Keep entries bounded
+          if (this.entries.length > 1000) {
+            this.entries = this.entries.slice(-500);
+          }
 
-      // Keep entries bounded
-      if (this.entries.length > 1000) {
-        this.entries = this.entries.slice(-500);
-      }
-
-      // Call the callback with render time
-      callback(renderTime);
-    }, 0);
+          // Call the callback with render time
+          callback(parseFloat(renderTime.toFixed(2)));
+        });
+      });
+    });
 
     return nextState;
   }
