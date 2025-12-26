@@ -1,22 +1,23 @@
 # NgRx DevTool - Architecture Visualization Tool
 
-A powerful development tool for visualizing and debugging NgRx state management in Angular applications. Features **automatic effect detection** and **action correlation tracking**.
+A powerful development tool for visualizing and debugging NgRx state management in Angular applications. Features real-time effect lifecycle tracking and performance monitoring.
 
 ## Overview
 
-This tool provides real-time monitoring and visualization of NgRx actions, state changes, and effects. It automatically detects which actions are dispatched by effects and correlates them back to their triggering user actions.
+This tool provides real-time monitoring and visualization of NgRx actions, state changes, and effects. It tracks effect lifecycle events (started, emitted, completed, error) and correlates actions with the effects that emitted them.
 
 ![NgRx DevTool Demo](assets/devtool-on-pct.gif)
 
 ## Features
 
 - **Real-time Action Monitoring** - Track all dispatched actions as they happen
-- **Automatic Effect Detection** - Distinguishes user actions from effect-dispatched actions
-- **Action Correlation** - Links effect results back to their triggering actions
+- **Effect Lifecycle Tracking** - Monitor effect execution with start, emit, complete, and error events
+- **Action-Effect Correlation** - See which effect emitted each action
 - **State Visualization** - View current and previous states
 - **Diff Viewer** - Compare state changes between actions
 - **Visual Indicators** - Blue for user actions, orange for effect results
 - **Performance Tracking** - Monitor reducer execution time, render timing, and state size changes
+- **Effects Panel** - Dedicated panel showing all effect executions with duration and status
 
 ## Performance Monitoring
 
@@ -53,33 +54,30 @@ npm link
 npm link ngrx-devtool
 ```
 
-> ⚠️ **Important:** If you encounter module resolution issues, see the [npm Link Issues](#npm-link-issues) section in Troubleshooting.
+Note: If you encounter module resolution issues, see the npm Link Issues section in Troubleshooting.
 
-### Step 3: Add one line to your app
+### Step 3: Configure your app
 
 ```typescript
-// app.config.ts (standalone) or app.module.ts (NgModule)
-import { loggerMetaReducer } from 'ngrx-devtool';
+// app.config.ts
+import { provideNgrxDevTool, createDevToolMetaReducer } from 'ngrx-devtool';
 
-// Standalone API
 export const appConfig: ApplicationConfig = {
   providers: [
     provideStore(
       { /* your reducers */ },
-      { metaReducers: [loggerMetaReducer] }  // ← Add this
+      { metaReducers: [createDevToolMetaReducer()] }
     ),
+    provideEffects([...]),
+    provideNgrxDevTool({
+      wsUrl: 'ws://localhost:4000',
+      trackEffects: true,  // Enable effect lifecycle tracking
+    }),
   ]
 };
-
-// Or NgModule
-@NgModule({
-  imports: [
-    StoreModule.forRoot({ /* reducers */ }, { metaReducers: [loggerMetaReducer] }),
-  ]
-})
 ```
 
-> ⚠️ **Important:** If your app fails to compile or run after this step, see the [npm Link Issues](#npm-link-issues) section in Troubleshooting to configure `preserveSymlinks`.
+Note: If your app fails to compile or run after this step, see the npm Link Issues section in Troubleshooting to configure `preserveSymlinks`.
 
 ### Step 4: Run the DevTool server
 
@@ -90,64 +88,44 @@ node dist/index.js
 
 ### Step 5: Open the DevTool UI
 
-Open **http://localhost:3000** and start your Angular app. All actions will appear:
-- 🔵 **Blue border** = User action
-- 🟠 **Orange border** = Effect result (with "Triggered by" info)
-
----
-
-## AI-Assisted Setup
-
-**Prefer a hands-off approach?** Let an AI assistant set up the tool for you!
-
-1. Copy this entire README
-2. Open **GitHub Copilot Chat** in VS Code (Claude Sonnet 4 or Claude Opus 4.5 recommended)
-3. Paste the README and prompt:
-
-> "Set up ngrx-devtool in my Angular project following this README"
-
-The AI will:
-- Clone and build the library
-- Link it to your project
-- Add the meta-reducer to your store configuration
-- Guide you through running the DevTool server
+Open http://localhost:3000 and start your Angular app. All actions will appear:
+- Blue border = User action
+- Orange border = Effect result (shows which effect emitted the action)
 
 ---
 
 ## How Effect Tracking Works
 
-The DevTool detects effect-dispatched actions by **pattern matching on action names**:
+The DevTool uses `DevToolsEffectSources` to intercept the NgRx effect lifecycle. When `trackEffects: true` is set, it:
 
-| Pattern | Example | Detected As |
-|---------|---------|-------------|
-| `[* API *]` | `[Books API] Retrieved Book List` | Effect |
-| `[* Service *]` | `[Auth Service] Login Success` | Effect |
-| `*Success` | `loadBooksSuccess` | Effect |
-| `*Failure` | `loadBooksFailure` | Effect |
-| `*Error` | `fetchDataError` | Effect |
-| `-> Succeeded` | `[Users] Fetch -> Succeeded` | Effect |
-| Everything else | `[Books] Load Books` | User Action |
+1. Wraps each effect observable to track when it starts processing an action
+2. Monitors when effects emit new actions
+3. Tracks completion and error states
+4. Measures effect execution duration
 
-### Recommended Action Naming
+This provides accurate effect tracking without relying on action naming conventions.
+
+### Effect Events
+
+The Effects Panel shows:
+- **Started** - When an effect begins processing a triggering action
+- **Emitted** - When an effect dispatches a new action
+- **Completed** - When an effect observable completes
+- **Error** - When an effect encounters an error
+
+### Custom Effect Names
+
+For readable effect names in production builds, implement `OnIdentifyEffects`:
 
 ```typescript
-// User-initiated actions
-export const BooksActions = createActionGroup({
-  source: 'Books',  // No "API" suffix
-  events: {
-    'Load Books': emptyProps(),
-    'Add Book': props<{ bookId: string }>(),
-  },
-});
+@Injectable()
+export class BooksEffects implements OnIdentifyEffects {
+  loadBooks$ = createEffect(() => ...);
 
-// Effect-dispatched actions
-export const BooksApiActions = createActionGroup({
-  source: 'Books API',  // "API" suffix indicates effect result
-  events: {
-    'Retrieved Book List': props<{ books: Book[] }>(),
-    'Load Failed': props<{ error: string }>(),
-  },
-});
+  ngrxOnIdentifyEffects(): string {
+    return 'BooksEffects';  // This name appears in the DevTool
+  }
+}
 ```
 
 ---
@@ -157,20 +135,36 @@ export const BooksApiActions = createActionGroup({
 ### Custom WebSocket URL
 
 ```typescript
-import { createDevToolMetaReducer } from 'ngrx-devtool';
+import { createDevToolMetaReducer, provideNgrxDevTool } from 'ngrx-devtool';
 
 provideStore(
   { /* reducers */ },
-  { metaReducers: [createDevToolMetaReducer('ws://custom-host:4000')] }
-)
+  { metaReducers: [createDevToolMetaReducer({ wsUrl: 'ws://custom-host:4000' })] }
+),
+provideNgrxDevTool({
+  wsUrl: 'ws://custom-host:4000',
+  trackEffects: true,
+})
 ```
 
 ### Conditional Enable (Production Safety)
 
 ```typescript
-const metaReducers = !environment.production ? [loggerMetaReducer] : [];
+import { createDevToolMetaReducer, provideNgrxDevTool } from 'ngrx-devtool';
 
-provideStore({ /* reducers */ }, { metaReducers })
+const devToolProviders = !environment.production ? [
+  provideNgrxDevTool({ trackEffects: true }),
+] : [];
+
+const metaReducers = !environment.production ? [createDevToolMetaReducer()] : [];
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideStore({ /* reducers */ }, { metaReducers }),
+    provideEffects([...]),
+    ...devToolProviders,
+  ]
+};
 ```
 
 ---
@@ -181,9 +175,9 @@ provideStore({ /* reducers */ }, { metaReducers })
 
 If you get module resolution errors after `npm link`, you need to enable symlink preservation.
 
-> **Note:** This is required for **Amadeus Product Catalogue UI** and similar Nx/Angular monorepo projects.
+Note: This is required for Nx/Angular monorepo projects.
 
-**tsconfig.json:**
+tsconfig.json:
 ```json
 {
   "compilerOptions": {
@@ -192,7 +186,7 @@ If you get module resolution errors after `npm link`, you need to enable symlink
 }
 ```
 
-**angular.json** (in build options):
+angular.json (in build options):
 ```json
 {
   "architect": {
@@ -205,11 +199,13 @@ If you get module resolution errors after `npm link`, you need to enable symlink
 }
 ```
 
-> **Note:** After running `npm install`, you may need to re-run `npm link ngrx-devtool`.
+Note: After running `npm install`, you may need to re-run `npm link ngrx-devtool`.
 
-### Effects not being detected
+### Effects not being tracked
 
-Check that your effect action names include `API`, `Service`, `Success`, `Failure`, `Error`, `Complete`, or arrow notation like `-> Succeeded`. See the patterns table above.
+Ensure you have:
+1. Added `provideNgrxDevTool({ trackEffects: true })` to your providers
+2. Called `provideEffects([...])` before `provideNgrxDevTool()`
 
 ### WebSocket connection issues
 

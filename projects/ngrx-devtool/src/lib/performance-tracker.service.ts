@@ -1,4 +1,5 @@
-import { Injectable, ApplicationRef, inject, NgZone } from '@angular/core';
+import { Injectable, ApplicationRef, inject, NgZone, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Action } from '@ngrx/store';
 
 export interface ComponentRenderMetrics {
@@ -34,9 +35,10 @@ export class PerformanceTrackerService {
   private entries: RenderPerformanceEntry[] = [];
   private readonly appRef = inject(ApplicationRef);
   private readonly ngZone = inject(NgZone);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
 
   constructor() {
-    console.log('[NgRx DevTool] PerformanceTrackerService initialized');
   }
 
   /**
@@ -52,6 +54,12 @@ export class PerformanceTrackerService {
 
     // Execute reducer
     const nextState = reducer();
+
+    // Skip RAF-based timing on server
+    if (!this.isBrowser) {
+      callback(0);
+      return nextState;
+    }
 
     // Use requestAnimationFrame to measure after the browser has painted
     // This gives us a more accurate measure of actual render time

@@ -54,6 +54,7 @@
         <h2 matSubheader>Dispatched Actions</h2>
         <div class="actions">
           @for (message of messagesWithPrevState(); track message.timestamp) {
+          @if (message.action?.type) {
           <mat-expansion-panel [class.effect-action]="message.isEffectResult" [class.user-action]="!message.isEffectResult">
             <mat-expansion-panel-header>
               <mat-panel-title>
@@ -62,7 +63,13 @@
                 } @else {
                   <mat-icon class="action-icon user-icon">person</mat-icon>
                 }
-                {{ message.action?.type }}
+                <span class="action-type">{{ message.action?.type || '[Unknown Action]' }}</span>
+                @if (message.effectName) {
+                  <span class="effect-source-badge" [matTooltip]="'Emitted by effect: ' + message.effectName">
+                    <mat-icon>functions</mat-icon>
+                    {{ message.effectName }}
+                  </span>
+                }
                 <button mat-icon-button
                         class="perf-link-btn"
                         (click)="navigateToPerformance(message.action?.type); $event.stopPropagation()"
@@ -86,22 +93,9 @@
                     {{ message.performance.reducerExecutionTime.toFixed(2) }}ms
                   </span>
                 }
-                @if (message.correlation?.triggeredBy) {
-                  <span class="correlation-badge">
-                    <mat-icon>link</mat-icon>
-                    Chain #{{ message.correlation.chainIndex }}
-                  </span>
-                }
                 {{ message.timestamp | date : "medium" }}
               </mat-panel-description>
             </mat-expansion-panel-header>
-
-            @if (message.correlation?.triggeredBy) {
-              <div class="correlation-info">
-                <mat-icon>subdirectory_arrow_right</mat-icon>
-                <span>Triggered by: <strong>{{ message.correlation.triggeredBy }}</strong></span>
-              </div>
-            }
 
             <mat-tab-group (selectedTabChange)="onTabChange($event, message)">
               <mat-tab label="Action">
@@ -213,7 +207,9 @@
               }
             </mat-tab-group>
           </mat-expansion-panel>
-          } @empty {
+          }
+          }
+          @empty {
           <div class="empty-container">
             <mat-icon matListItemIcon fontIcon="info"></mat-icon>
             <div matListItemTitle>No actions dispatched yet</div>
@@ -240,5 +236,17 @@
       [messages]="messages()"
       [selectedActionType]="selectedActionType()">
     </app-performance-panel>
+  </mat-tab>
+
+  <!-- Effects Tab -->
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon>bolt</mat-icon>
+      <span>Effects</span>
+      @if (effectExecutionsCount() > 0) {
+        <span class="tab-badge">{{ effectExecutionsCount() }}</span>
+      }
+    </ng-template>
+    <app-effects-panel [effectEvents]="effectEvents()"></app-effects-panel>
   </mat-tab>
 </mat-tab-group>

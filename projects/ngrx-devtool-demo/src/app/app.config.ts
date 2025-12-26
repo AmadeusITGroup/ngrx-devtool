@@ -1,6 +1,6 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { loggerMetaReducer } from 'ngrx-devtool';
+import { loggerMetaReducer, provideNgrxDevTool } from 'ngrx-devtool';
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { booksReducer } from './state/book.reducer';
@@ -13,6 +13,11 @@ import { BooksEffects } from './state/book.effect';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideHttpClient(),
+    // DevTool with effect tracking MUST come before provideEffects
+    provideNgrxDevTool({
+      wsUrl: 'ws://localhost:4000',
+      trackEffects: true,
+    }),
     provideStore(
       {books: booksReducer, collection: collectionReducer},
       {metaReducers: [loggerMetaReducer]}

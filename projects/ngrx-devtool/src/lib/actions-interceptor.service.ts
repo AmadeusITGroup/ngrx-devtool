@@ -1,32 +1,42 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { inject, Injectable, OnDestroy, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Actions } from '@ngrx/effects';
 import { Action } from '@ngrx/store';
 import { Subject, takeUntil, tap } from 'rxjs';
 import { EffectTrackerService, TrackedAction } from './effect-tracker.service';
+import { EffectEvent } from './devtools-effect-sources';
 
 export interface DevToolMessage {
-  type: 'ACTION_TRACKED' | 'EFFECT_CHAIN' | 'TIMELINE_CLEARED';
+  type: 'ACTION_TRACKED' | 'EFFECT_CHAIN' | 'EFFECT_EVENT' | 'TIMELINE_CLEARED';
   action?: string;
   payload?: any;
   isEffectResult?: boolean;
+  effectName?: string;
   correlation?: {
     id: string;
     triggeredBy?: string;
+  };
+  effectEvent?: {
+    name: string;
+    lifecycle: string;
+    duration?: number;
+    executionId?: string;
+    dispatch?: boolean;
   };
   timestamp: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class ActionsInterceptorService implements OnDestroy {
+  private readonly actions$ = inject(Actions);
+  private readonly effectTracker = inject(EffectTrackerService);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
+
   private destroy$ = new Subject<void>();
   private socket: WebSocket | null = null;
   private messageBuffer: string[] = [];
   private isConnected = false;
-
-  constructor(
-    private actions$: Actions,
-    private effectTracker: EffectTrackerService
-  ) {}
 
   /**
    * Initialize the interceptor with WebSocket connection.
@@ -35,6 +45,7 @@ export class ActionsInterceptorService implements OnDestroy {
   initialize(wsUrl: string = 'ws://localhost:4000'): void {
     this.setupWebSocket(wsUrl);
     this.setupActionInterception();
+    this.setupEffectEventForwarding();
   }
 
   /**
@@ -70,6 +81,12 @@ export class ActionsInterceptorService implements OnDestroy {
   }
 
   private setupWebSocket(wsUrl: string): void {
+    // Only create WebSocket in browser environment
+    if (!this.isBrowser) {
+      console.log('[NgRx DevTool] Skipping WebSocket setup (not in browser)');
+      return;
+    }
+
     this.socket = new WebSocket(wsUrl);
 
     this.socket.onopen = () => {
@@ -97,6 +114,7 @@ export class ActionsInterceptorService implements OnDestroy {
           action: action.type,
           payload: this.sanitizePayload(action),
           isEffectResult: tracked.source === 'effect',
+          effectName: tracked.effectName,
           correlation: tracked.correlationId
             ? { id: tracked.correlationId }
             : undefined,
@@ -108,12 +126,47 @@ export class ActionsInterceptorService implements OnDestroy {
     ).subscribe();
   }
 
+  /**
+   * Forward effect lifecycle events to WebSocket.
+   * This provides real-time effect tracking to the DevTools UI.
+   */
+  private setupEffectEventForwarding(): void {
+    console.log('[NgRx DevTool] Setting up effect event forwarding');
+
+    this.effectTracker.effectEvents$.pipe(
+      takeUntil(this.destroy$),
+      tap((event: EffectEvent) => {
+        console.log('[NgRx DevTool] Forwarding effect event:', event.effectName, event.lifecycle);
+
+        const message: DevToolMessage = {
+          type: 'EFFECT_EVENT',
+          action: event.action?.type,
+          effectName: event.effectName,
+          effectEvent: {
+            name: event.effectName,
+            lifecycle: event.lifecycle,
+            duration: event.duration,
+            executionId: event.executionId,
+            dispatch: event.dispatch,
+          },
+          timestamp: new Date().toISOString(),
+        };
+
+        this.sendMessage(message);
+      })
+    ).subscribe({
+      error: (err) => console.error('[NgRx DevTool] Effect event forwarding error:', err)
+    });
+  }
+
   private sendMessage(message: DevToolMessage): void {
     const payload = JSON.stringify(message);
 
     if (this.isConnected && this.socket?.readyState === WebSocket.OPEN) {
+      console.log('[NgRx DevTool] Sending message:', message.type, message.effectName || message.action || '');
       this.socket.send(payload);
     } else {
+      console.log('[NgRx DevTool] Buffering message (socket not ready):', message.type);
       this.messageBuffer.push(payload);
     }
   }
