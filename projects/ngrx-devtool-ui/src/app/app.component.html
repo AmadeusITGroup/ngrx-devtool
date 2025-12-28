@@ -54,6 +54,7 @@
         <h2 matSubheader>Dispatched Actions</h2>
         <div class="actions">
           @for (message of messagesWithPrevState(); track message.timestamp) {
+          @if (message.action.type) {
           <mat-expansion-panel [class.effect-action]="message.isEffectResult" [class.user-action]="!message.isEffectResult">
             <mat-expansion-panel-header>
               <mat-panel-title>
@@ -62,17 +63,23 @@
                 } @else {
                   <mat-icon class="action-icon user-icon">person</mat-icon>
                 }
-                {{ message.action?.type }}
+                <span class="action-type">{{ message.action.type || '[Unknown Action]' }}</span>
+                @if (message.effectName) {
+                  <span class="effect-source-badge" [matTooltip]="'Emitted by effect: ' + message.effectName">
+                    <mat-icon>functions</mat-icon>
+                    {{ message.effectName }}
+                  </span>
+                }
+              </mat-panel-title>
+              <mat-panel-description>
                 <button mat-icon-button
                         class="perf-link-btn"
-                        (click)="navigateToPerformance(message.action?.type); $event.stopPropagation()"
+                        (click)="navigateToPerformance(message.action.type); $event.stopPropagation()"
                         matTooltip="View in Performance Panel">
                   <mat-icon>speed</mat-icon>
                 </button>
-              </mat-panel-title>
-              <mat-panel-description>
-                @if (message.performance && message.performance.warnings?.length > 0) {
-                  <mat-icon class="perf-warning-icon" [matTooltip]="message.performance.warnings.length + ' performance warning(s)'">warning</mat-icon>
+                @if (message.performance && message.performance.warnings && message.performance.warnings.length > 0) {
+                  <mat-icon class="perf-warning-icon" [matTooltip]="message.performance.warnings!.length + ' performance warning(s)'">warning</mat-icon>
                 }
                 @if (message.renderTiming) {
                   <span class="perf-time render-time" [class.slow]="message.renderTiming.renderTime > 16" matTooltip="Actual render time (Angular CD + browser paint)">
@@ -82,26 +89,13 @@
                     Σ {{ message.renderTiming.totalTime.toFixed(2) }}ms
                   </span>
                 } @else if (message.performance) {
-                  <span class="perf-time" [class.slow]="message.performance.reducerExecutionTime > 16">
-                    {{ message.performance.reducerExecutionTime.toFixed(2) }}ms
+                  <span class="perf-time" [class.slow]="message.performance!.reducerExecutionTime > 16">
+                    {{ message.performance!.reducerExecutionTime.toFixed(2) }}ms
                   </span>
                 }
-                @if (message.correlation?.triggeredBy) {
-                  <span class="correlation-badge">
-                    <mat-icon>link</mat-icon>
-                    Chain #{{ message.correlation.chainIndex }}
-                  </span>
-                }
-                {{ message.timestamp | date : "medium" }}
+                <span class="timestamp">{{ message.timestamp | date : "medium" }}</span>
               </mat-panel-description>
             </mat-expansion-panel-header>
-
-            @if (message.correlation?.triggeredBy) {
-              <div class="correlation-info">
-                <mat-icon>subdirectory_arrow_right</mat-icon>
-                <span>Triggered by: <strong>{{ message.correlation.triggeredBy }}</strong></span>
-              </div>
-            }
 
             <mat-tab-group (selectedTabChange)="onTabChange($event, message)">
               <mat-tab label="Action">
@@ -127,8 +121,8 @@
                         <mat-icon>timer</mat-icon>
                         <div class="perf-stat-content">
                           <span class="perf-stat-label">Reducer Time</span>
-                          <span class="perf-stat-value" [class.warning]="message.performance.reducerExecutionTime > 16">
-                            {{ message.performance.reducerExecutionTime.toFixed(2) }}ms
+                          <span class="perf-stat-value" [class.warning]="message.performance!.reducerExecutionTime > 16">
+                            {{ message.performance!.reducerExecutionTime.toFixed(2) }}ms
                           </span>
                         </div>
                       </div>
@@ -156,15 +150,15 @@
                         <mat-icon>storage</mat-icon>
                         <div class="perf-stat-content">
                           <span class="perf-stat-label">State Size</span>
-                          <span class="perf-stat-value">{{ formatBytes(message.performance.stateSize) }}</span>
+                          <span class="perf-stat-value">{{ formatBytes(message.performance!.stateSize) }}</span>
                         </div>
                       </div>
                       <div class="perf-stat">
                         <mat-icon>swap_vert</mat-icon>
                         <div class="perf-stat-content">
                           <span class="perf-stat-label">State Change</span>
-                          <span class="perf-stat-value" [class.positive]="message.performance.stateSizeChange > 0" [class.negative]="message.performance.stateSizeChange < 0">
-                            {{ message.performance.stateSizeChange > 0 ? '+' : '' }}{{ formatBytes(message.performance.stateSizeChange) }}
+                          <span class="perf-stat-value" [class.positive]="message.performance!.stateSizeChange! > 0" [class.negative]="message.performance!.stateSizeChange! < 0">
+                            {{ message.performance!.stateSizeChange! > 0 ? '+' : '' }}{{ formatBytes(message.performance!.stateSizeChange) }}
                           </span>
                         </div>
                       </div>
@@ -172,7 +166,7 @@
                         <mat-icon>data_usage</mat-icon>
                         <div class="perf-stat-content">
                           <span class="perf-stat-label">Payload Size</span>
-                          <span class="perf-stat-value">{{ formatBytes(message.performance.actionPayloadSize) }}</span>
+                          <span class="perf-stat-value">{{ formatBytes(message.performance!.actionPayloadSize) }}</span>
                         </div>
                       </div>
                     </div>
@@ -195,10 +189,10 @@
                         </div>
                       </div>
                     }
-                    @if (message.performance.warnings?.length > 0) {
+                    @if (message.performance!.warnings && message.performance!.warnings.length > 0) {
                       <div class="perf-warnings">
                         <h4><mat-icon>warning</mat-icon> Warnings</h4>
-                        @for (warning of message.performance.warnings; track $index) {
+                        @for (warning of message.performance!.warnings; track $index) {
                           <div class="perf-warning" [class]="'severity-' + warning.severity">
                             <span class="warning-message">{{ warning.message }}</span>
                             @if (warning.suggestion) {
@@ -213,13 +207,13 @@
               }
             </mat-tab-group>
           </mat-expansion-panel>
-          } @empty {
-          <div class="empty-container">
-            <mat-icon matListItemIcon fontIcon="info"></mat-icon>
-            <div matListItemTitle>No actions dispatched yet</div>
-            <div matListItemLine>
-              Actions will appear here when they are dispatched
-            </div>
+          }
+          }
+          @empty {
+          <div class="empty-state">
+            <mat-icon>list_alt</mat-icon>
+            <p>No actions dispatched yet</p>
+            <span>Actions will appear here when they are dispatched</span>
           </div>
           }
         </div>
@@ -240,5 +234,17 @@
       [messages]="messages()"
       [selectedActionType]="selectedActionType()">
     </app-performance-panel>
+  </mat-tab>
+
+  <!-- Effects Tab -->
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon>bolt</mat-icon>
+      <span>Effects</span>
+      @if (effectExecutionsCount() > 0) {
+        <span class="tab-badge">{{ effectExecutionsCount() }}</span>
+      }
+    </ng-template>
+    <app-effects-panel [effectEvents]="effectEvents()"></app-effects-panel>
   </mat-tab>
 </mat-tab-group>

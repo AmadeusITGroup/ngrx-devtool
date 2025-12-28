@@ -1,5 +1,5 @@
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
-import { from, map, mergeMap, Observable, of } from 'rxjs';
+import { from, map, mergeMap, Observable, of, filter } from 'rxjs';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { readBlobAsText } from '../util/helpers';
 import { isPlatformBrowser } from '@angular/common';
@@ -24,20 +24,32 @@ export class WebsocketService {
       this.socket$ = webSocket({url, deserializer: (e) => e.data});
       this.messages$ = this.socket$.pipe(
         mergeMap(data => {
-          if (data instanceof Blob){
+          if (data instanceof Blob) {
+            // Handle Blob data asynchronously
             return from(readBlobAsText(data)).pipe(
               map(text => {
                 try {
-                  return JSON.parse(text);
-                }
-                catch (e) {
-                  return text;
+                  const parsed = JSON.parse(text);
+                  return parsed;
+                } catch (e) {
+                  return null;
                 }
               })
-            )
+            );
           }
-          return from(data)
-        })
+          // Data is a string - parse it as JSON
+          if (typeof data === 'string') {
+            try {
+              const parsed = JSON.parse(data);
+              return of(parsed);
+            } catch (e) {
+              return of(null);
+            }
+          }
+          // Data is already an object
+          return of(data);
+        }),
+        filter(msg => msg !== null) // Filter out null messages
       );
     }
   }

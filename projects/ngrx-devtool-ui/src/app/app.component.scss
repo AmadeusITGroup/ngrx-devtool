@@ -47,6 +47,16 @@
   border-radius: 12px;
   font-size: 11px;
   margin-left: 4px;
+
+  &.running {
+    background: #64b5f6;
+    animation: pulse 1.5s infinite;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
 .tab-warning-icon {
@@ -88,6 +98,42 @@ mat-toolbar {
 .cls-1 {
   color: var(--mat-sys-on-primary-container);
 }
+
+// Empty state
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px;
+  background: var(--mat-sys-surface-container);
+  border-radius: 8px;
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: var(--mat-sys-on-surface-variant);
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  p {
+    font-size: 1.1rem;
+    color: var(--mat-sys-on-surface);
+    margin: 0 0 8px 0;
+  }
+
+  span {
+    font-size: 0.85rem;
+  }
+}
+
+.timestamp {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 12px;
+  margin-right: 16px;
+}
 .toolbar-spacer {
   flex: 1 1 auto;
 }
@@ -104,12 +150,24 @@ mat-toolbar {
 // Fix expansion panel overflow for button
 mat-expansion-panel-header {
   overflow: visible !important;
+  height: auto !important;
+  min-height: 48px;
 
   ::ng-deep .mat-expansion-panel-header-title {
     overflow: visible !important;
+    flex-basis: auto;
+    flex-grow: 1;
+    margin-right: 16px;
   }
 
   ::ng-deep .mat-expansion-panel-header-description {
+    overflow: visible !important;
+    flex-shrink: 0;
+    justify-content: flex-end;
+    margin-right: 0;
+  }
+
+  ::ng-deep .mat-content {
     overflow: visible !important;
   }
 }
@@ -171,6 +229,37 @@ mat-panel-title {
   align-items: center;
   gap: 8px;
   overflow: visible !important;
+  flex-wrap: nowrap;
+  min-width: 0;
+
+  .action-type {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 400px;
+  }
+}
+
+.effect-source-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: rgba(255, 152, 0, 0.15);
+  color: #ff9800;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-family: monospace;
+  margin-left: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 12px;
+    width: 12px;
+    height: 12px;
+  }
 }
 
 .perf-link-btn {

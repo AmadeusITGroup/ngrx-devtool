@@ -1,13 +1,21 @@
 // books.effects.ts
 import { Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType, OnIdentifyEffects } from '@ngrx/effects';
 import { BooksActions, BooksApiActions } from './book.actions';
 import { GoogleBooksService } from '../book-list/book.service';
 import { map, mergeMap, tap } from 'rxjs/operators';
 
 @Injectable()
-export class BooksEffects {
+export class BooksEffects implements OnIdentifyEffects {
   loadBooks$;
+
+  /**
+   * Provides a unique identifier for this effects class.
+   * Used by DevTools to track effects with a readable name even in minified builds.
+   */
+  ngrxOnIdentifyEffects(): string {
+    return 'BooksEffects';
+  }
 
   constructor(
     private actions$: Actions,

@@ -15,6 +15,21 @@ import { JsonTreeComponent } from '../components/json-tree/json-tree.component';
 import { DatePipe } from '@angular/common';
 import { DiffViewerComponent } from '../components/diff-viewer/diff-viewer.component';
 import { PerformancePanelComponent } from '../components/performance-panel/performance-panel.component';
+import { EffectsPanelComponent, EffectEventMessage } from '../components/effects-panel/effects-panel.component';
+
+interface PerformanceWarning {
+  severity: string;
+  message: string;
+  suggestion?: string;
+}
+
+interface PerformanceData {
+  reducerExecutionTime: number;
+  stateSize: number;
+  stateSizeChange: number;
+  actionPayloadSize: number;
+  warnings?: PerformanceWarning[];
+}
 
 interface RenderTimingMessage {
   type: 'RENDER_TIMING';
@@ -23,6 +38,25 @@ interface RenderTimingMessage {
   renderTime: number;
   totalTime: number;
   timestamp: string;
+}
+
+/** Message received from WebSocket for state changes */
+interface StateChangeMessage {
+  type: string;
+  action: { type: string };
+  nextState?: unknown;
+  effectName?: string;
+  isEffectResult?: boolean;
+  timestamp: string;
+  performance?: PerformanceData;
+  renderTiming?: RenderTimingMessage;
+}
+
+/** Enriched message with computed fields for display */
+interface EnrichedMessage extends StateChangeMessage {
+  prevState: unknown;
+  diffLoaded?: boolean;
+  diffLoading?: boolean;
 }
 
 @Component({
@@ -42,36 +76,66 @@ interface RenderTimingMessage {
     JsonTreeComponent,
     DiffViewerComponent,
     PerformancePanelComponent,
+    EffectsPanelComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
   title = 'ngrx-devtool-ui';
-  messages = signal<any[]>([]);
+  messages = signal<StateChangeMessage[]>([]);
+  effectEvents = signal<EffectEventMessage[]>([]);
   renderTimings = signal<Map<string, RenderTimingMessage>>(new Map());
   selectedActionType = signal<string | null>(null);
 
   @ViewChild(MatTabGroup) tabGroup!: MatTabGroup;
 
-  messagesWithPrevState = computed(() => {
+  // Count of effect executions for tab badge
+  effectExecutionsCount = computed(() => {
+    const events = this.effectEvents();
+    // Count emitted events (each is a complete execution)
+    return events.filter(e => e.effectEvent?.lifecycle === 'emitted').length;
+  });
+
+  messagesWithPrevState = computed<EnrichedMessage[]>(() => {
     const msgs = this.messages();
     const timings = this.renderTimings();
+    const effects = this.effectEvents();
+
+    // Build a map of action types to effect names that emitted them
+    const actionToEffect = new Map<string, string>();
+    for (const effect of effects) {
+      if (effect.effectEvent?.lifecycle === 'emitted' && effect.action) {
+        actionToEffect.set(effect.action, effect.effectName || effect.effectEvent.name);
+      }
+    }
+
     return msgs.map((msg, index) => {
       const prevState = index > 0 ? msgs[index - 1].nextState : undefined;
       // Find matching render timing by timestamp proximity (within 100ms)
       const timing = timings.get(msg.timestamp);
+
+      // Enrich with effect source if this action was emitted by an effect
+      const actionType = msg.action?.type;
+      const effectSource = actionType ? actionToEffect.get(actionType) : undefined;
+
+      // Use effect data to determine if this is an effect result
+      const isEffectResult = msg.isEffectResult || !!effectSource;
+
       return {
         ...msg,
         prevState,
         renderTiming: timing,
+        // Prefer effect source from actual effect events over heuristics
+        effectName: effectSource || msg.effectName,
+        isEffectResult,
       };
     });
   });
 
   hasPerformanceWarnings = computed(() => {
     const msgs = this.messages();
-    return msgs.some(m => m.performance?.warnings?.length > 0);
+    return msgs.some(m => (m.performance?.warnings?.length ?? 0) > 0);
   });
 
   private subscription?: Subscription;
@@ -80,6 +144,8 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this._webSocketService.connect('ws://localhost:4000');
     this.subscription = this._webSocketService.messages$?.subscribe((msg) => {
+      if (!msg) return; // Skip null messages
+
       if (msg.type === 'RENDER_TIMING') {
         // Store render timing indexed by action type + approximate timestamp
         this.renderTimings.update(map => {
@@ -101,6 +167,9 @@ export class AppComponent implements OnInit {
           }
           return newMap;
         });
+      } else if (msg.type === 'EFFECT_EVENT') {
+        // Store effect events separately for the Effects Panel
+        this.effectEvents.update((arr) => [...arr, msg as EffectEventMessage]);
       } else {
         this.messages.update((arr) => [...arr, msg]);
       }
@@ -122,8 +191,8 @@ export class AppComponent implements OnInit {
     }
   }
 
-  formatBytes(bytes: number): string {
-    if (bytes === 0) return '0 B';
+  formatBytes(bytes: number | undefined): string {
+    if (bytes === undefined || bytes === 0) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(Math.abs(bytes)) / Math.log(k));

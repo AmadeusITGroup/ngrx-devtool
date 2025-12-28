@@ -1,80 +1,155 @@
 import { Injectable } from '@angular/core';
 
+export interface DiffItem {
+  path: string;
+  oldValue?: any;
+  newValue?: any;
+  type: 'added' | 'removed' | 'changed';
+}
+
+export interface DiffResult {
+  diffs: DiffItem[];
+  truncated: boolean;
+  totalChanges: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class DiffService {
-  calculateDiff(prevState: any, nextState: any): any[] {
-    const diffs: any[] = [];
-    
-    // Handle null states
-    if (!prevState) return this.flattenObject(nextState).map(item => ({
-      path: item.path,
-      newValue: item.value,
-      type: 'added'
-    }));
-    
-    if (!nextState) return this.flattenObject(prevState).map(item => ({
-      path: item.path,
-      oldValue: item.value,
-      type: 'removed'
-    }));
+  private readonly MAX_DIFFS = 100;
+  private readonly MAX_DEPTH = 10;
 
-    // Get flattened representation of both objects
+  calculateDiff(prevState: any, nextState: any): DiffResult {
+    const diffs: DiffItem[] = [];
+    let totalChanges = 0;
+
+    // Handle null states
+    if (!prevState && nextState) {
+      const items = this.flattenObject(nextState);
+      totalChanges = items.length;
+      return {
+        diffs: items.slice(0, this.MAX_DIFFS).map(item => ({
+          path: item.path,
+          newValue: item.value,
+          type: 'added' as const
+        })),
+        truncated: items.length > this.MAX_DIFFS,
+        totalChanges
+      };
+    }
+
+    if (prevState && !nextState) {
+      const items = this.flattenObject(prevState);
+      totalChanges = items.length;
+      return {
+        diffs: items.slice(0, this.MAX_DIFFS).map(item => ({
+          path: item.path,
+          oldValue: item.value,
+          type: 'removed' as const
+        })),
+        truncated: items.length > this.MAX_DIFFS,
+        totalChanges
+      };
+    }
+
+    if (!prevState && !nextState) {
+      return { diffs: [], truncated: false, totalChanges: 0 };
+    }
+
+    // Use Map for O(1) lookups instead of O(n) .find()
     const prevFlat = this.flattenObject(prevState);
     const nextFlat = this.flattenObject(nextState);
-    
-    // Find removed and changed items
-    prevFlat.forEach(prevItem => {
-      const nextItem = nextFlat.find(item => item.path === prevItem.path);
-      
-      if (!nextItem) {
-        diffs.push({
-          path: prevItem.path,
-          oldValue: prevItem.value,
-          type: 'removed'
-        });
-      } else if (JSON.stringify(prevItem.value) !== JSON.stringify(nextItem.value)) {
-        diffs.push({
-          path: prevItem.path,
-          oldValue: prevItem.value,
-          newValue: nextItem.value,
-          type: 'changed'
-        });
-      }
-    });
-    
-    // Find added items
-    nextFlat.forEach(nextItem => {
-      const prevItem = prevFlat.find(item => item.path === nextItem.path);
-      
-      if (!prevItem) {
-        diffs.push({
-          path: nextItem.path,
-          newValue: nextItem.value,
-          type: 'added'
-        });
-      }
-    });
 
-    return diffs;
+    const prevMap = new Map(prevFlat.map(item => [item.path, item.value]));
+    const nextMap = new Map(nextFlat.map(item => [item.path, item.value]));
+
+    // Find removed and changed items
+    for (const [path, prevValue] of prevMap) {
+      if (diffs.length >= this.MAX_DIFFS) break;
+
+      if (!nextMap.has(path)) {
+        diffs.push({ path, oldValue: prevValue, type: 'removed' });
+        totalChanges++;
+      } else {
+        const nextValue = nextMap.get(path);
+        if (!this.isEqual(prevValue, nextValue)) {
+          diffs.push({ path, oldValue: prevValue, newValue: nextValue, type: 'changed' });
+          totalChanges++;
+        }
+      }
+    }
+
+    // Find added items
+    for (const [path, nextValue] of nextMap) {
+      if (diffs.length >= this.MAX_DIFFS) break;
+
+      if (!prevMap.has(path)) {
+        diffs.push({ path, newValue: nextValue, type: 'added' });
+        totalChanges++;
+      }
+    }
+
+    // Count remaining changes if truncated
+    if (diffs.length >= this.MAX_DIFFS) {
+      for (const [path] of prevMap) {
+        if (!nextMap.has(path)) totalChanges++;
+      }
+      for (const [path, prevValue] of prevMap) {
+        const nextValue = nextMap.get(path);
+        if (nextMap.has(path) && !this.isEqual(prevValue, nextValue)) totalChanges++;
+      }
+      for (const [path] of nextMap) {
+        if (!prevMap.has(path)) totalChanges++;
+      }
+    }
+
+    return {
+      diffs,
+      truncated: diffs.length >= this.MAX_DIFFS,
+      totalChanges
+    };
   }
 
-  private flattenObject(obj: any, path: string = ''): {path: string, value: any}[] {
-    if (!obj || typeof obj !== 'object') {
+  private isEqual(a: any, b: any): boolean {
+    if (a === b) return true;
+    if (typeof a !== typeof b) return false;
+    if (typeof a !== 'object' || a === null || b === null) return a === b;
+    return JSON.stringify(a) === JSON.stringify(b);
+  }
+
+  private flattenObject(obj: any, path: string = '', depth: number = 0): { path: string; value: any }[] {
+    if (depth > this.MAX_DEPTH) {
+      return [{ path, value: '[Max depth exceeded]' }];
+    }
+
+    if (obj === null || obj === undefined || typeof obj !== 'object') {
       return [{ path, value: obj }];
     }
 
-    return Object.keys(obj).reduce((acc, key) => {
+    // For arrays with many items, summarize instead of expanding
+    if (Array.isArray(obj) && obj.length > 50) {
+      return [{ path, value: `[Array with ${obj.length} items]` }];
+    }
+
+    const keys = Object.keys(obj);
+
+    // For objects with many keys, summarize
+    if (keys.length > 50) {
+      return [{ path, value: `{Object with ${keys.length} keys}` }];
+    }
+
+    return keys.reduce((acc, key) => {
       const currentPath = path ? `${path}.${key}` : key;
-      
-      if (obj[key] === null || typeof obj[key] !== 'object') {
-        acc.push({ path: currentPath, value: obj[key] });
+      const value = obj[key];
+
+      if (value === null || value === undefined || typeof value !== 'object') {
+        acc.push({ path: currentPath, value });
       } else {
-        acc = acc.concat(this.flattenObject(obj[key], currentPath));
+        acc.push(...this.flattenObject(value, currentPath, depth + 1));
       }
-      
+
       return acc;
-    }, [] as {path: string, value: any}[]);
+    }, [] as { path: string; value: any }[]);
   }
 }

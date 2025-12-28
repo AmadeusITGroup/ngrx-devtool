@@ -1,10 +1,10 @@
 import { ActionReducer, Action } from '@ngrx/store';
 import { inject } from '@angular/core';
-import { PerformanceTrackerService, ComponentRenderMetrics } from './performance-tracker.service';
+import { PerformanceTrackerService } from './performance-tracker.service';
 
 export interface RenderPerformanceData {
-  totalRenderTime: number;
-  componentsRendered: ComponentRenderMetrics[];
+  /** Time for Angular to render components (ms) */
+  renderTime: number;
 }
 
 export interface StateChangeMessage {
@@ -12,48 +12,9 @@ export interface StateChangeMessage {
   action: Action;
   prevState: any;
   nextState: any;
-  isEffectResult: boolean;
-  correlation?: {
-    triggeredBy: string | null;
-    chainIndex: number;
-  };
   timestamp: string;
   renderPerformance?: RenderPerformanceData;
 }
-
-// Effect detection patterns based on NgRx conventions
-// These patterns identify actions that are RESULTS of effects (dispatched by effects)
-const EFFECT_RESULT_PATTERNS = [
-  // API response patterns
-  /\[.*API.*\]/i,           // [Books API], [Users API], etc.
-  /\[.*Service.*\]/i,       // [Auth Service], etc.
-  /\[.*Effect.*\]/i,        // [Router Effect], etc.
-
-  // Arrow notation (common in enterprise apps)
-  /-> Succeeded/i,          // [Competitors API] Fetch -> Succeeded
-  /-> Failed/i,             // [Competitors API] Fetch -> Failed
-  /-> Success/i,            // [API] Action -> Success
-  /-> Failure/i,            // [API] Action -> Failure
-  /-> Error/i,              // [API] Action -> Error
-  /-> Complete/i,           // [API] Action -> Complete
-  /-> Loaded/i,             // [API] Action -> Loaded
-
-  // Suffix patterns (camelCase and separate words)
-  /Success$/i,              // loadBooksSuccess, Load Books Success
-  /Succeeded$/i,            // fetchCompetitorsSucceeded
-  /Failure$/i,              // loadBooksFailure
-  /Failed$/i,               // fetchCompetitorsFailed
-  /Error$/i,                // loadBooksError
-  /Complete$/i,             // loadBooksComplete
-  /Completed$/i,            // loadBooksCompleted
-  /Retrieved/i,             // retrievedBookList, Retrieved Book List
-  /Loaded$/i,               // booksLoaded, Books Loaded
-  /Fetched$/i,              // booksFetched, Books Fetched
-  /Received$/i,             // dataReceived
-  /Updated$/i,              // stateUpdated (when from API)
-  /Created$/i,              // itemCreated (when from API)
-  /Deleted$/i,              // itemDeleted (when from API)
-];
 
 /**
  * Configuration options for the DevTool meta-reducer.
@@ -76,24 +37,22 @@ export function createDevToolMetaReducer(
   const wsUrl = config.wsUrl ?? 'ws://localhost:4000';
   const enablePerf = config.enablePerformanceTracking ?? true;
 
-  const socket = new WebSocket(wsUrl);
+  // Only create WebSocket in browser environment
+  const isBrowser = typeof window !== 'undefined' && typeof WebSocket !== 'undefined';
+  const socket = isBrowser ? new WebSocket(wsUrl) : null;
   const messageBuffer: string[] = [];
-  let lastUserAction: string | null = null;
-  let actionChainIndex = 0;
 
   function flushBuffer() {
-    while (messageBuffer.length > 0 && socket.readyState === WebSocket.OPEN) {
+    while (messageBuffer.length > 0 && socket?.readyState === WebSocket.OPEN) {
       const message = messageBuffer.shift();
-      if (message) {
+      if (message && socket) {
         socket.send(message);
       }
     }
   }
 
-  socket.onopen = flushBuffer;
-
-  function isEffectAction(actionType: string): boolean {
-    return EFFECT_RESULT_PATTERNS.some(pattern => pattern.test(actionType));
+  if (socket) {
+    socket.onopen = flushBuffer;
   }
 
   return function devToolMetaReducer<State>(
@@ -104,15 +63,6 @@ export function createDevToolMetaReducer(
 
     return function (state, action) {
       const prevState = state;
-      const isEffect = isEffectAction(action.type);
-
-      // Track action chain correlation
-      if (!isEffect) {
-        lastUserAction = action.type;
-        actionChainIndex = 0;
-      } else {
-        actionChainIndex++;
-      }
 
       // Send initial message without render performance
       const initialMessage: StateChangeMessage = {
@@ -120,11 +70,6 @@ export function createDevToolMetaReducer(
         action,
         prevState,
         nextState: null as any, // Will be set below
-        isEffectResult: isEffect,
-        correlation: {
-          triggeredBy: isEffect ? lastUserAction : null,
-          chainIndex: actionChainIndex,
-        },
         timestamp: new Date().toISOString(),
       };
 
@@ -136,21 +81,19 @@ export function createDevToolMetaReducer(
           action.type,
           () => reducer(state, action),
           (renderTime) => {
-            console.log('[Meta-Reducer] Render complete for', action.type, renderTime + 'ms');
+            console.log(`[Meta-Reducer] Render complete for ${action.type}: ${renderTime}ms`);
             // Send updated message with render performance
             const perfMessage: StateChangeMessage = {
               ...initialMessage,
               nextState,
               renderPerformance: {
-                totalRenderTime: renderTime,
-                componentsRendered: []
+                renderTime
               }
             };
 
             const payload = JSON.stringify(perfMessage);
-            if (socket.readyState === WebSocket.OPEN) {
+            if (socket?.readyState === WebSocket.OPEN) {
               socket.send(payload);
-              console.log('[Meta-Reducer] Sent render performance to UI');
             } else {
               console.warn('[Meta-Reducer] WebSocket not open, cannot send render performance');
             }
@@ -164,9 +107,9 @@ export function createDevToolMetaReducer(
       initialMessage.nextState = nextState;
       const payload = JSON.stringify(initialMessage);
 
-      if (socket.readyState === WebSocket.OPEN) {
+      if (socket?.readyState === WebSocket.OPEN) {
         socket.send(payload);
-      } else {
+      } else if (isBrowser) {
         messageBuffer.push(payload);
       }
 

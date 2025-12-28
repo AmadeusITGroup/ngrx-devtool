@@ -1,0 +1,88 @@
+<div class="container">
+  <div class="actions-container">
+    <h2 matSubheader>Effect Executions</h2>
+
+    <!-- Registered Effects Chips -->
+    @if (uniqueEffects().length > 0) {
+      <div class="effects-summary">
+        <h3><mat-icon>bolt</mat-icon> Registered Effects</h3>
+        <div class="effect-chips">
+          @for (effect of uniqueEffects(); track effect) {
+            <span class="effect-chip">
+              <mat-icon>bolt</mat-icon>
+              {{ effect }}
+              <span class="chip-count">({{ getEffectCount(effect) }})</span>
+            </span>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Effects List -->
+    <div class="actions">
+      @if (effectExecutions().completed.length === 0) {
+        <div class="empty-state">
+          <mat-icon>bolt</mat-icon>
+          <p>No effect executions yet</p>
+          <span>Effect events will appear here when effects run</span>
+        </div>
+      }
+
+      <!-- Completed Effects -->
+      @for (execution of effectExecutions().completed; track $index) {
+        <mat-expansion-panel
+          [class.effect-action]="true"
+          [class.error-effect]="execution.status === 'error'"
+          [class.side-effect-action]="execution.status === 'executed'">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              @if (execution.status === 'error') {
+                <mat-icon class="action-icon error-icon">error</mat-icon>
+              } @else if (execution.status === 'executed') {
+                <mat-icon class="action-icon side-effect-icon">play_circle</mat-icon>
+              }
+              <span class="action-type">{{ execution.effectName }}</span>
+              @if (execution.emittedAction) {
+                <span class="emitted-action-text" [matTooltip]="execution.emittedAction">
+                  → {{ execution.emittedAction }}
+                </span>
+              } @else if (execution.status === 'executed') {
+                <span class="no-dispatch-badge">(no dispatch)</span>
+              }
+            </mat-panel-title>
+            <mat-panel-description>
+              <span class="timestamp">{{ execution.endTime | date:'medium' }}</span>
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <div class="execution-details">
+            <div class="detail-row">
+              <span class="detail-label">Effect Class:</span>
+              <span class="detail-value">{{ execution.sourceName }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Property:</span>
+              <span class="detail-value">{{ execution.propertyName }}</span>
+            </div>
+            @if (execution.emittedAction) {
+              <div class="detail-row">
+                <span class="detail-label">Emitted Action:</span>
+                <span class="detail-value emitted-action">{{ execution.emittedAction }}</span>
+              </div>
+            }
+            <div class="detail-row">
+              <span class="detail-label">Status:</span>
+              <span class="detail-value status-value" [class]="execution.status">
+                {{ execution.status }}
+              </span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Time:</span>
+              <span class="detail-value">{{ execution.endTime | date:'medium' }}</span>
+            </div>
+          </div>
+        </mat-expansion-panel>
+      }
+    </div>
+  </div>
+</div>
