@@ -1,11 +1,30 @@
 import { ErrorHandler, inject, Injectable, OnDestroy } from '@angular/core';
 import { Action } from '@ngrx/store';
-import { EffectSources, EFFECTS_ERROR_HANDLER, getEffectsMetadata } from '@ngrx/effects';
+import { EffectSources, EFFECTS_ERROR_HANDLER } from '@ngrx/effects';
 import { Observable, ReplaySubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 /** NgRx's internal metadata key for createEffect */
 const CREATE_EFFECT_METADATA_KEY = '__@ngrx/effects_create__';
+
+/**
+ * Represents an NgRx effect instance (class with effect properties).
+ * Effects can be observables or functions returning observables.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type EffectInstance = Record<string, any>;
+
+/** Observable with optional NgRx effect metadata */
+interface EffectObservable<T = unknown> extends Observable<T> {
+  [CREATE_EFFECT_METADATA_KEY]?: EffectConfig;
+}
+
+/** Effect configuration from createEffect metadata */
+interface EffectConfig {
+  dispatch?: boolean;
+  functional?: boolean;
+  useEffectsErrorHandler?: boolean;
+}
 
 /**
  * Effect lifecycle event types
@@ -33,7 +52,7 @@ export interface EffectEvent {
   /** The action emitted by the effect (for 'emitted' lifecycle) */
   action?: Action;
   /** The error thrown (for 'error' lifecycle) */
-  error?: any;
+  error?: unknown;
   /** Timestamp of the event */
   timestamp: number;
   /** Duration in ms (available on 'emitted' events) */
@@ -102,7 +121,7 @@ export class DevToolsEffectSources extends EffectSources implements OnDestroy {
    * Override addEffects to wrap effect observables with instrumentation.
    * This is where we intercept effects without modifying source code.
    */
-  override addEffects(effectSourceInstance: any): void {
+  override addEffects(effectSourceInstance: EffectInstance): void {
     const sourceName = this.getSourceName(effectSourceInstance);
 
     if (sourceName) {
@@ -126,7 +145,7 @@ export class DevToolsEffectSources extends EffectSources implements OnDestroy {
    * This provides lifecycle tracking without modifying the effect's behavior.
    */
   private instrumentEffects(
-    instance: any,
+    instance: EffectInstance,
     sourceName: string,
     metadata: EffectMetadataInfo[]
   ): void {
@@ -164,10 +183,10 @@ export class DevToolsEffectSources extends EffectSources implements OnDestroy {
    * - 'error' if the inner observable errors
    */
   private wrapEffectObservable(
-    source$: Observable<any>,
+    source$: Observable<Action>,
     effectName: string,
     dispatch: boolean
-  ): Observable<any> {
+  ): Observable<Action> {
     // Track last emission time for this effect to calculate duration
     let lastEmitTime = Date.now();
 
@@ -239,7 +258,7 @@ export class DevToolsEffectSources extends EffectSources implements OnDestroy {
   /**
    * Copy NgRx effect metadata from original to wrapped observable.
    */
-  private copyEffectMetadata(original: any, wrapped: any): void {
+  private copyEffectMetadata(original: EffectObservable, wrapped: EffectObservable): void {
     if (original && original[CREATE_EFFECT_METADATA_KEY]) {
       Object.defineProperty(wrapped, CREATE_EFFECT_METADATA_KEY, {
         value: original[CREATE_EFFECT_METADATA_KEY],
@@ -259,7 +278,7 @@ export class DevToolsEffectSources extends EffectSources implements OnDestroy {
    * Extract effect metadata from an effect instance.
    * Uses NgRx's internal metadata key.
    */
-  private extractEffectMetadata(instance: any): EffectMetadataInfo[] {
+  private extractEffectMetadata(instance: EffectInstance): EffectMetadataInfo[] {
     const metadata: EffectMetadataInfo[] = [];
 
     // Get property names from the instance
@@ -267,7 +286,7 @@ export class DevToolsEffectSources extends EffectSources implements OnDestroy {
 
     for (const propertyName of propertyNames) {
       try {
-        const property = instance[propertyName];
+        const property = instance[propertyName] as EffectObservable | undefined;
 
         // Check for NgRx effect metadata
         if (property && property[CREATE_EFFECT_METADATA_KEY]) {
@@ -291,13 +310,14 @@ export class DevToolsEffectSources extends EffectSources implements OnDestroy {
    * Get the class name from an effect instance.
    * Falls back to various strategies when minified.
    */
-  private getSourceName(instance: any): string | null {
+  private getSourceName(instance: EffectInstance): string | null {
     if (!instance) return null;
 
     // Check for ngrxOnIdentifyEffects hook first (most reliable)
-    if (typeof instance.ngrxOnIdentifyEffects === 'function') {
-      const id = instance.ngrxOnIdentifyEffects();
-      if (id) return id;
+    const identifyFn = instance['ngrxOnIdentifyEffects'];
+    if (typeof identifyFn === 'function') {
+      const id = identifyFn.call(instance);
+      if (id) return id as string;
     }
 
     // Try constructor name

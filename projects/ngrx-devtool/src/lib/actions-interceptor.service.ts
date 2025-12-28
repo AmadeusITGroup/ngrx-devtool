@@ -9,7 +9,7 @@ import { EffectEvent } from './devtools-effect-sources';
 export interface DevToolMessage {
   type: 'ACTION_TRACKED' | 'EFFECT_CHAIN' | 'EFFECT_EVENT' | 'TIMELINE_CLEARED';
   action?: string;
-  payload?: any;
+  payload?: unknown;
   isEffectResult?: boolean;
   effectName?: string;
   correlation?: {
@@ -180,7 +180,7 @@ export class ActionsInterceptorService implements OnDestroy {
     }
   }
 
-  private sanitizePayload(action: Action): any {
+  private sanitizePayload(action: Action): unknown {
     try {
       // Attempt to serialize to catch circular references
       JSON.stringify(action);

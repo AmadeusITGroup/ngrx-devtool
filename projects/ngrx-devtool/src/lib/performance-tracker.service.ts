@@ -1,18 +1,11 @@
-import { Injectable, ApplicationRef, inject, NgZone, PLATFORM_ID } from '@angular/core';
+import { Injectable, inject, NgZone, PLATFORM_ID, Injector, afterNextRender } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Action } from '@ngrx/store';
-
-export interface ComponentRenderMetrics {
-  componentName: string;
-  renderTime: number;
-  phase: 'mount' | 'update';
-}
 
 export interface RenderPerformanceEntry {
   actionType: string;
   timestamp: number;
-  totalRenderTime: number;
-  componentsRendered: ComponentRenderMetrics[];
+  /** Time for Angular to render components after state change (ms) */
+  renderTime: number;
 }
 
 export interface RenderPerformanceStats {
@@ -24,26 +17,25 @@ export interface RenderPerformanceStats {
   slowestAction: string | null;
   /** Total actions processed */
   totalActions: number;
-  /** Most frequently re-rendered component */
-  hottestComponent: string | null;
-  /** Average number of components re-rendered per action */
-  avgComponentsPerAction: number;
 }
 
 @Injectable({ providedIn: 'root' })
 export class PerformanceTrackerService {
   private entries: RenderPerformanceEntry[] = [];
-  private readonly appRef = inject(ApplicationRef);
   private readonly ngZone = inject(NgZone);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly injector = inject(Injector);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
-  constructor() {
-  }
-
   /**
-   * Measure render time for an action and execute callback with the result.
-   * Uses Angular's ApplicationRef.isStable to detect when change detection completes.
+   * Measure the actual component render time after a state change.
+   *
+   * Uses `afterNextRender` which fires after Angular has:
+   * 1. Run change detection
+   * 2. Updated the DOM
+   * 3. Completed component rendering
+   *
+   * This gives accurate measurement of actual render work.
    */
   measureRenderTime<State>(
     actionType: string,
@@ -55,42 +47,34 @@ export class PerformanceTrackerService {
     // Execute reducer
     const nextState = reducer();
 
-    // Skip RAF-based timing on server
+    // Skip timing on server
     if (!this.isBrowser) {
       callback(0);
       return nextState;
     }
 
-    // Use requestAnimationFrame to measure after the browser has painted
-    // This gives us a more accurate measure of actual render time
-    this.ngZone.runOutsideAngular(() => {
-      // First RAF: Angular processes change detection
-      requestAnimationFrame(() => {
-        // Second RAF: Browser has painted the changes
-        requestAnimationFrame(() => {
-          const endTime = performance.now();
-          const renderTime = endTime - startTime;
+    // Use afterNextRender to measure when Angular finishes rendering
+    // This is the most accurate way to measure component render time
+    afterNextRender(() => {
+      const endTime = performance.now();
+      const renderTime = parseFloat((endTime - startTime).toFixed(2));
 
-          // Record entry
-          const entry: RenderPerformanceEntry = {
-            actionType,
-            timestamp: Date.now(),
-            totalRenderTime: parseFloat(renderTime.toFixed(2)),
-            componentsRendered: []
-          };
+      // Record entry
+      const entry: RenderPerformanceEntry = {
+        actionType,
+        timestamp: Date.now(),
+        renderTime,
+      };
 
-          this.entries.push(entry);
+      this.entries.push(entry);
 
-          // Keep entries bounded
-          if (this.entries.length > 1000) {
-            this.entries = this.entries.slice(-500);
-          }
+      // Keep entries bounded
+      if (this.entries.length > 1000) {
+        this.entries = this.entries.slice(-500);
+      }
 
-          // Call the callback with render time
-          callback(parseFloat(renderTime.toFixed(2)));
-        });
-      });
-    });
+      callback(renderTime);
+    }, { injector: this.injector });
 
     return nextState;
   }
@@ -112,30 +96,22 @@ export class PerformanceTrackerService {
         maxRenderTime: 0,
         slowestAction: null,
         totalActions: 0,
-        hottestComponent: null,
-        avgComponentsPerAction: 0
       };
     }
 
-    const renderTimes = this.entries.map(e => e.totalRenderTime);
+    const renderTimes = this.entries.map(e => e.renderTime);
     const avgRenderTime = renderTimes.reduce((a, b) => a + b, 0) / renderTimes.length;
     const maxRenderTime = Math.max(...renderTimes);
 
     const slowestEntry = this.entries.reduce((prev, curr) =>
-      curr.totalRenderTime > prev.totalRenderTime ? curr : prev
+      curr.renderTime > prev.renderTime ? curr : prev
     );
-
-    // Calculate avg components per action
-    const totalComponents = this.entries.reduce((sum, e) => sum + e.componentsRendered.length, 0);
-    const avgComponentsPerAction = totalComponents / this.entries.length;
 
     return {
       avgRenderTime,
       maxRenderTime,
       slowestAction: slowestEntry.actionType,
       totalActions: this.entries.length,
-      hottestComponent: null,
-      avgComponentsPerAction
     };
   }
 
@@ -144,7 +120,7 @@ export class PerformanceTrackerService {
    */
   getSlowestRenders(limit: number = 10): RenderPerformanceEntry[] {
     return [...this.entries]
-      .sort((a, b) => b.totalRenderTime - a.totalRenderTime)
+      .sort((a, b) => b.renderTime - a.renderTime)
       .slice(0, limit);
   }
 

@@ -17,6 +17,20 @@ import { DiffViewerComponent } from '../components/diff-viewer/diff-viewer.compo
 import { PerformancePanelComponent } from '../components/performance-panel/performance-panel.component';
 import { EffectsPanelComponent, EffectEventMessage } from '../components/effects-panel/effects-panel.component';
 
+interface PerformanceWarning {
+  severity: string;
+  message: string;
+  suggestion?: string;
+}
+
+interface PerformanceData {
+  reducerExecutionTime: number;
+  stateSize: number;
+  stateSizeChange: number;
+  actionPayloadSize: number;
+  warnings?: PerformanceWarning[];
+}
+
 interface RenderTimingMessage {
   type: 'RENDER_TIMING';
   actionType: string;
@@ -26,12 +40,23 @@ interface RenderTimingMessage {
   timestamp: string;
 }
 
-interface ActionMessage {
+/** Message received from WebSocket for state changes */
+interface StateChangeMessage {
   type: string;
-  action?: { type: string };
+  action: { type: string };
+  nextState?: unknown;
   effectName?: string;
   isEffectResult?: boolean;
   timestamp: string;
+  performance?: PerformanceData;
+  renderTiming?: RenderTimingMessage;
+}
+
+/** Enriched message with computed fields for display */
+interface EnrichedMessage extends StateChangeMessage {
+  prevState: unknown;
+  diffLoaded?: boolean;
+  diffLoading?: boolean;
 }
 
 @Component({
@@ -58,7 +83,7 @@ interface ActionMessage {
 })
 export class AppComponent implements OnInit {
   title = 'ngrx-devtool-ui';
-  messages = signal<any[]>([]);
+  messages = signal<StateChangeMessage[]>([]);
   effectEvents = signal<EffectEventMessage[]>([]);
   renderTimings = signal<Map<string, RenderTimingMessage>>(new Map());
   selectedActionType = signal<string | null>(null);
@@ -72,7 +97,7 @@ export class AppComponent implements OnInit {
     return events.filter(e => e.effectEvent?.lifecycle === 'emitted').length;
   });
 
-  messagesWithPrevState = computed(() => {
+  messagesWithPrevState = computed<EnrichedMessage[]>(() => {
     const msgs = this.messages();
     const timings = this.renderTimings();
     const effects = this.effectEvents();
@@ -110,7 +135,7 @@ export class AppComponent implements OnInit {
 
   hasPerformanceWarnings = computed(() => {
     const msgs = this.messages();
-    return msgs.some(m => m.performance?.warnings?.length > 0);
+    return msgs.some(m => (m.performance?.warnings?.length ?? 0) > 0);
   });
 
   private subscription?: Subscription;
@@ -166,8 +191,8 @@ export class AppComponent implements OnInit {
     }
   }
 
-  formatBytes(bytes: number): string {
-    if (bytes === 0) return '0 B';
+  formatBytes(bytes: number | undefined): string {
+    if (bytes === undefined || bytes === 0) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(Math.abs(bytes)) / Math.log(k));

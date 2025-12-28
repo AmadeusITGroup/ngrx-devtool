@@ -1,10 +1,10 @@
 import { ActionReducer, Action } from '@ngrx/store';
 import { inject } from '@angular/core';
-import { PerformanceTrackerService, ComponentRenderMetrics } from './performance-tracker.service';
+import { PerformanceTrackerService } from './performance-tracker.service';
 
 export interface RenderPerformanceData {
-  totalRenderTime: number;
-  componentsRendered: ComponentRenderMetrics[];
+  /** Time for Angular to render components (ms) */
+  renderTime: number;
 }
 
 export interface StateChangeMessage {
@@ -81,14 +81,13 @@ export function createDevToolMetaReducer(
           action.type,
           () => reducer(state, action),
           (renderTime) => {
-            console.log('[Meta-Reducer] Render complete for', action.type, renderTime + 'ms');
+            console.log(`[Meta-Reducer] Render complete for ${action.type}: ${renderTime}ms`);
             // Send updated message with render performance
             const perfMessage: StateChangeMessage = {
               ...initialMessage,
               nextState,
               renderPerformance: {
-                totalRenderTime: renderTime,
-                componentsRendered: []
+                renderTime
               }
             };
 

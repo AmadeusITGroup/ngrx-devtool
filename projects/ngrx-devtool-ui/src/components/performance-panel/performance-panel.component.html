@@ -3,29 +3,38 @@
   <mat-card class="overview-card">
     <mat-card-header>
       <mat-icon mat-card-avatar>speed</mat-icon>
-      <mat-card-title>Component Render Performance</mat-card-title>
-      <mat-card-subtitle>Actual rendering time from Angular Profiler</mat-card-subtitle>
+      <mat-card-title>Component Render Time</mat-card-title>
+      <mat-card-subtitle>Measured using afterNextRender</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
       <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-label">Avg Render Time</div>
+        <div class="stat-card" [matTooltip]="tooltips.avgRenderTime" matTooltipClass="metric-tooltip">
+          <div class="stat-label">
+            Avg Render Time
+            <mat-icon class="info-icon">info_outline</mat-icon>
+          </div>
           <div class="stat-value" [style.color]="getStatusColor(getRenderStatus(renderStats().avgRenderTime))">
             {{ formatMs(renderStats().avgRenderTime) }}
           </div>
           <div class="stat-subtitle">Per Action</div>
         </div>
 
-        <div class="stat-card">
-          <div class="stat-label">Max Render Time</div>
+        <div class="stat-card" [matTooltip]="tooltips.maxRenderTime" matTooltipClass="metric-tooltip">
+          <div class="stat-label">
+            Max Render Time
+            <mat-icon class="info-icon">info_outline</mat-icon>
+          </div>
           <div class="stat-value" [style.color]="getStatusColor(getRenderStatus(renderStats().maxRenderTime))">
             {{ formatMs(renderStats().maxRenderTime) }}
           </div>
           <div class="stat-subtitle">Worst Case</div>
         </div>
 
-        <div class="stat-card">
-          <div class="stat-label">Total Actions</div>
+        <div class="stat-card" [matTooltip]="tooltips.totalActions" matTooltipClass="metric-tooltip">
+          <div class="stat-label">
+            Total Actions
+            <mat-icon class="info-icon">info_outline</mat-icon>
+          </div>
           <div class="stat-value">{{ renderStats().totalActions }}</div>
           <div class="stat-subtitle">Tracked</div>
         </div>
@@ -49,19 +58,25 @@
         </ng-container>
 
         <ng-container matColumnDef="renderTime">
-          <th mat-header-cell *matHeaderCellDef>Render Time</th>
+          <th mat-header-cell *matHeaderCellDef [matTooltip]="tooltips.renderTime" matTooltipClass="metric-tooltip">
+            Render Time
+            <mat-icon class="header-info-icon">info_outline</mat-icon>
+          </th>
           <td mat-cell *matCellDef="let element">
-            <span [style.color]="getStatusColor(getRenderStatus(element.totalRenderTime))">
-              {{ formatMs(element.totalRenderTime) }}
+            <span [style.color]="getStatusColor(getRenderStatus(element.renderTime))">
+              {{ formatMs(element.renderTime) }}
             </span>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <th mat-header-cell *matHeaderCellDef [matTooltip]="tooltips.status" matTooltipClass="metric-tooltip">
+            Status
+            <mat-icon class="header-info-icon">info_outline</mat-icon>
+          </th>
           <td mat-cell *matCellDef="let element">
-            <span class="status-badge" [attr.data-status]="getRenderStatus(element.totalRenderTime)">
-              {{ getRenderStatus(element.totalRenderTime).toUpperCase() }}
+            <span class="status-badge" [attr.data-status]="getRenderStatus(element.renderTime)">
+              {{ getRenderStatus(element.renderTime).toUpperCase() }}
             </span>
           </td>
         </ng-container>

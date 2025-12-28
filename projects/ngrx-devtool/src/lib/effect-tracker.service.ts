@@ -16,7 +16,7 @@ export interface EffectInvocation {
 
 export interface TrackedAction {
   action: string;
-  payload: any;
+  payload: unknown;
   timestamp: number;
   source: 'user' | 'effect';
   correlationId?: string;
@@ -36,7 +36,7 @@ export interface TrackedEffect {
   endTime?: number;
   duration?: number;
   status: 'running' | 'completed' | 'error';
-  error?: any;
+  error?: unknown;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -70,9 +70,9 @@ export class EffectTrackerService {
   private subscribeToEffectEvents(): void {
     // Check if effectSources has effectEvents$ (duck typing for DevToolsEffectSources)
     // This is more reliable than instanceof check which can fail due to DI timing
-    const devToolsSources = this.effectSources as any;
+    const devToolsSources = this.effectSources as DevToolsEffectSources | null;
 
-    if (devToolsSources && devToolsSources.effectEvents$ && typeof devToolsSources.effectEvents$.subscribe === 'function') {
+    if (devToolsSources?.effectEvents$ && typeof devToolsSources.effectEvents$.subscribe === 'function') {
       console.log('[NgRx DevTool] DevToolsEffectSources detected - enabling effect lifecycle tracking');
 
       devToolsSources.effectEvents$.pipe(
