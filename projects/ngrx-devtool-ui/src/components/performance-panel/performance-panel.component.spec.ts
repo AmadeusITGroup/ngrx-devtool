@@ -10,17 +10,17 @@ describe('PerformancePanelComponent', () => {
     {
       type: 'STATE_CHANGE',
       action: { type: '[Books] Load Success' },
-      renderPerformance: { totalRenderTime: 10 },
+      renderPerformance: { renderTime: 10 },
     },
     {
       type: 'STATE_CHANGE',
       action: { type: '[Books] Add Book' },
-      renderPerformance: { totalRenderTime: 25 },
+      renderPerformance: { renderTime: 25 },
     },
     {
       type: 'STATE_CHANGE',
       action: { type: '[Books] Remove Book' },
-      renderPerformance: { totalRenderTime: 50 },
+      renderPerformance: { renderTime: 50 },
     },
     {
       type: 'OTHER_TYPE',
@@ -111,16 +111,16 @@ describe('PerformancePanelComponent', () => {
 
       const slowest = component.slowestRenders();
 
-      expect(slowest[0].totalRenderTime).toBe(50);
-      expect(slowest[1].totalRenderTime).toBe(25);
-      expect(slowest[2].totalRenderTime).toBe(10);
+      expect(slowest[0].renderTime).toBe(50);
+      expect(slowest[1].renderTime).toBe(25);
+      expect(slowest[2].renderTime).toBe(10);
     });
 
     it('should limit to 10 entries', () => {
       const manyMessages = Array.from({ length: 15 }, (_, i) => ({
         type: 'STATE_CHANGE',
         action: { type: `[Action ${i}]` },
-        renderPerformance: { totalRenderTime: i * 10 },
+        renderPerformance: { renderTime: i * 10 },
       }));
 
       component.messages = manyMessages;
@@ -175,7 +175,7 @@ describe('PerformancePanelComponent', () => {
         {
           type: 'STATE_CHANGE',
           action: { type: '[Test]' },
-          renderPerformance: { totalRenderTime: 10 },
+          renderPerformance: { renderTime: 10 },
         },
       ];
       component.ngOnChanges({
@@ -190,7 +190,7 @@ describe('PerformancePanelComponent', () => {
         {
           type: 'STATE_CHANGE',
           action: { type: '[Test]' },
-          renderPerformance: { totalRenderTime: 50 },
+          renderPerformance: { renderTime: 50 },
         },
       ];
       component.ngOnChanges({
@@ -213,7 +213,7 @@ describe('PerformancePanelComponent', () => {
         {
           type: 'STATE_CHANGE',
           action: { type: '[Test]' },
-          renderPerformance: { totalRenderTime: 40 },
+          renderPerformance: { renderTime: 40 },
         },
       ];
       component.ngOnChanges({
@@ -230,7 +230,7 @@ describe('PerformancePanelComponent', () => {
         {
           type: 'STATE_CHANGE',
           action: { type: '[Test]' },
-          renderPerformance: { totalRenderTime: 200 },
+          renderPerformance: { renderTime: 200 },
         },
       ];
       component.ngOnChanges({
@@ -289,12 +289,12 @@ describe('PerformancePanelComponent', () => {
         {
           type: 'STATE_CHANGE',
           action: { type: '[Valid]' },
-          renderPerformance: { totalRenderTime: 10 },
+          renderPerformance: { renderTime: 10 },
         },
         {
           type: 'OTHER',
           action: { type: '[Invalid Type]' },
-          renderPerformance: { totalRenderTime: 20 },
+          renderPerformance: { renderTime: 20 },
         },
         {
           type: 'STATE_CHANGE',
