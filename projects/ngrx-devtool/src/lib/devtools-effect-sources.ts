@@ -1,134 +1,93 @@
 import { ErrorHandler, inject, Injectable, OnDestroy } from '@angular/core';
 import { Action } from '@ngrx/store';
-import { EffectSources, EFFECTS_ERROR_HANDLER, getEffectsMetadata } from '@ngrx/effects';
+import { EffectSources, EFFECTS_ERROR_HANDLER } from '@ngrx/effects';
 import { Observable, ReplaySubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-/** NgRx's internal metadata key for createEffect */
 const CREATE_EFFECT_METADATA_KEY = '__@ngrx/effects_create__';
+const REPLAY_BUFFER_SIZE = 100;
 
-/**
- * Effect lifecycle event types
- * - 'triggered': Effect received an action and started processing
- * - 'emitted': Effect emitted a result action (dispatch: true)
- * - 'executed': Effect ran but didn't dispatch an action (dispatch: false)
- * - 'error': Effect encountered an error
- */
 export type EffectLifecycle = 'triggered' | 'emitted' | 'executed' | 'error';
 
-/**
- * Represents an effect execution event captured from NgRx's internal pipeline.
- */
 export interface EffectEvent {
-  /** Full effect name: ClassName.propertyName */
-  effectName: string;
-  /** The class name containing the effect */
-  sourceName: string | null;
-  /** The property name of the effect */
-  propertyName: string;
-  /** Lifecycle stage of the effect */
-  lifecycle: EffectLifecycle;
-  /** The action that triggered this effect (for 'triggered' lifecycle) */
-  triggerAction?: Action;
-  /** The action emitted by the effect (for 'emitted' lifecycle) */
-  action?: Action;
-  /** The error thrown (for 'error' lifecycle) */
-  error?: any;
-  /** Timestamp of the event */
-  timestamp: number;
-  /** Duration in ms (available on 'emitted' events) */
-  duration?: number;
-  /** Unique execution ID to correlate triggered -> emitted */
-  executionId?: string;
-  /** Whether this effect dispatches actions */
-  dispatch?: boolean;
+  readonly effectName: string;
+  readonly sourceName: string;
+  readonly propertyName: string;
+  readonly lifecycle: EffectLifecycle;
+  readonly timestamp: number;
+  readonly triggerAction?: Action;
+  readonly action?: Action;
+  readonly error?: unknown;
+  readonly duration?: number;
+  readonly executionId?: string;
+  readonly dispatch?: boolean;
 }
 
+interface EffectMetadataInfo {
+  readonly propertyName: string;
+  readonly dispatch: boolean;
+  readonly functional: boolean;
+  readonly useEffectsErrorHandler: boolean;
+}
+
+interface EffectConfig {
+  readonly dispatch?: boolean;
+  readonly functional?: boolean;
+  readonly useEffectsErrorHandler?: boolean;
+}
+
+interface EffectSourceInstance {
+  ngrxOnIdentifyEffects?(): string;
+  constructor: { name?: string };
+  [key: string]: unknown;
+}
+
+type EffectObservable = Observable<Action> & {
+  [CREATE_EFFECT_METADATA_KEY]?: EffectConfig;
+};
+
 /**
- * DevTools-enhanced EffectSources that intercepts effect notifications
- * without modifying any application effect code.
- *
- * This works by wrapping effect observables when effects are registered,
- * allowing us to observe each execution cycle (triggered -> emitted/error)
- * while forwarding actions unchanged to NgRx's pipeline.
- *
- * **Key Features:**
- * - No modification of application effect code
- * - Full effect name tracking (ClassName.propertyName)
- * - Per-execution lifecycle events: triggered, emitted, error
- * - Duration tracking for each effect execution
- * - Compatible with both class-based and functional effects
- *
- * **How it works:**
- * NgRx effects are long-running observables. We track each "execution cycle":
- * 1. When an action flows through ofType() and triggers processing -> 'triggered'
- * 2. When the effect emits a result action -> 'emitted' (with duration)
- * 3. If an error occurs -> 'error'
- *
- * @example
- * ```typescript
- * // In your app config or module
- * providers: [
- *   provideEffects([...]),
- *   { provide: EffectSources, useClass: DevToolsEffectSources }
- * ]
- * ```
+ * Intercepts NgRx effects to track lifecycle events without modifying application code.
+ * Wraps effect observables during registration to emit triggered/emitted/error events.
  */
 @Injectable()
 export class DevToolsEffectSources extends EffectSources implements OnDestroy {
-  /**
-   * Observable stream of all effect events.
-   * Uses ReplaySubject to allow late subscribers to receive recent events.
-   */
-  readonly effectEvents$ = new ReplaySubject<EffectEvent>(100);
+  readonly effectEvents$ = new ReplaySubject<EffectEvent>(REPLAY_BUFFER_SIZE);
 
-  /** Map of effect names to their registered metadata */
-  private registeredEffects = new Map<string, EffectMetadataInfo[]>();
-
-  /** Track execution times: executionId -> startTime */
-  private executionStartTimes = new Map<string, number>();
-
-  /** Counter for generating unique execution IDs */
+  private readonly registeredEffects = new Map<string, readonly EffectMetadataInfo[]>();
   private executionCounter = 0;
 
   constructor() {
-    // EffectSources requires ErrorHandler and EFFECTS_ERROR_HANDLER
-    const errorHandler = inject(ErrorHandler);
-    const effectsErrorHandler = inject(EFFECTS_ERROR_HANDLER);
-    super(errorHandler, effectsErrorHandler);
+    super(inject(ErrorHandler), inject(EFFECTS_ERROR_HANDLER));
   }
 
-  /**
-   * Override addEffects to wrap effect observables with instrumentation.
-   * This is where we intercept effects without modifying source code.
-   */
-  override addEffects(effectSourceInstance: any): void {
-    const sourceName = this.getSourceName(effectSourceInstance);
+  override addEffects(effectSourceInstance: EffectSourceInstance): void {
+    const sourceName = this.resolveSourceName(effectSourceInstance);
 
     if (sourceName) {
-      // Get effect metadata and wrap each effect observable
       const metadata = this.extractEffectMetadata(effectSourceInstance);
 
       if (metadata.length > 0) {
         this.registeredEffects.set(sourceName, metadata);
-
-        // Wrap each effect with instrumentation
         this.instrumentEffects(effectSourceInstance, sourceName, metadata);
       }
     }
 
-    // Call parent to register the (now instrumented) effects
     super.addEffects(effectSourceInstance);
   }
 
-  /**
-   * Instrument effect observables by wrapping them with tap operators.
-   * This provides lifecycle tracking without modifying the effect's behavior.
-   */
+  getRegisteredEffects(): ReadonlyMap<string, readonly EffectMetadataInfo[]> {
+    return this.registeredEffects;
+  }
+
+  ngOnDestroy(): void {
+    this.effectEvents$.complete();
+  }
+
   private instrumentEffects(
-    instance: any,
+    instance: EffectSourceInstance,
     sourceName: string,
-    metadata: EffectMetadataInfo[]
+    metadata: readonly EffectMetadataInfo[]
   ): void {
     for (const { propertyName, dispatch } of metadata) {
       const original = instance[propertyName];
@@ -136,97 +95,57 @@ export class DevToolsEffectSources extends EffectSources implements OnDestroy {
 
       const effectName = `${sourceName}.${propertyName}`;
 
-      // Handle both observable and function effects
       if (typeof original === 'function') {
-        // Functional effect - wrap the factory function
-        instance[propertyName] = () => {
-          return this.wrapEffectObservable(original(), effectName, dispatch);
-        };
-        // Preserve the metadata
-        this.copyEffectMetadata(original, instance[propertyName]);
-      } else if (typeof original.subscribe === 'function') {
-        // Observable effect - wrap the observable
-        instance[propertyName] = this.wrapEffectObservable(original, effectName, dispatch);
-        // Preserve the metadata
-        this.copyEffectMetadata(original, instance[propertyName]);
+        const factory = original as () => EffectObservable;
+        const wrapped = () => this.wrapEffectObservable(factory(), effectName, dispatch);
+        this.copyEffectMetadata(factory, wrapped);
+        instance[propertyName] = wrapped;
+      } else if (this.isObservable(original)) {
+        const wrapped = this.wrapEffectObservable(original, effectName, dispatch);
+        this.copyEffectMetadata(original as EffectObservable, wrapped);
+        instance[propertyName] = wrapped;
       }
     }
   }
 
-  /**
-   * Wrap an effect observable to intercept lifecycle events.
-   *
-   * Since NgRx effects are long-running (subscribed once, process many actions),
-   * we track each action emission as a complete execution cycle.
-   *
-   * For effects using switchMap/mergeMap/etc, we emit:
-   * - 'emitted' for each action the effect produces (with timing from last emit or subscribe)
-   * - 'error' if the inner observable errors
-   */
   private wrapEffectObservable(
-    source$: Observable<any>,
+    source$: Observable<Action>,
     effectName: string,
     dispatch: boolean
-  ): Observable<any> {
-    // Track last emission time for this effect to calculate duration
-    let lastEmitTime = Date.now();
+  ): Observable<Action> {
+    const [sourceName, propertyName] = this.parseEffectName(effectName);
 
     return new Observable(subscriber => {
-      // Record initial subscription time
-      const subscribeTime = Date.now();
-      lastEmitTime = subscribeTime;
+      let lastEmitTime = Date.now();
 
       const subscription = source$.pipe(
         tap({
-          next: (value) => {
+          next: (value: Action) => {
             const now = Date.now();
-            const duration = now - lastEmitTime;
-            const executionId = `${effectName}_${++this.executionCounter}`;
-
-            if (dispatch) {
-              // Dispatching effect - emit 'emitted' with the action
-              this.emitEvent({
-                effectName,
-                sourceName: effectName.split('.')[0],
-                propertyName: effectName.split('.')[1] || 'unknown',
-                lifecycle: 'emitted',
-                action: value,
-                timestamp: now,
-                duration,
-                executionId,
-                dispatch: true,
-              });
-            } else {
-              // Non-dispatching effect - emit 'executed' (no action)
-              this.emitEvent({
-                effectName,
-                sourceName: effectName.split('.')[0],
-                propertyName: effectName.split('.')[1] || 'unknown',
-                lifecycle: 'executed',
-                timestamp: now,
-                duration,
-                executionId,
-                dispatch: false,
-              });
-            }
-
-            // Update for next emission
-            lastEmitTime = now;
-          },
-          error: (error) => {
-            const now = Date.now();
-            const duration = now - lastEmitTime;
-            const executionId = `${effectName}_${++this.executionCounter}`;
-
             this.emitEvent({
               effectName,
-              sourceName: effectName.split('.')[0],
-              propertyName: effectName.split('.')[1] || 'unknown',
-              lifecycle: 'error',
-              error,
+              sourceName,
+              propertyName,
+              lifecycle: dispatch ? 'emitted' : 'executed',
+              action: dispatch ? value : undefined,
               timestamp: now,
-              duration,
-              executionId,
+              duration: now - lastEmitTime,
+              executionId: this.generateExecutionId(effectName),
+              dispatch,
+            });
+            lastEmitTime = now;
+          },
+          error: (err: unknown) => {
+            const now = Date.now();
+            this.emitEvent({
+              effectName,
+              sourceName,
+              propertyName,
+              lifecycle: 'error',
+              error: err,
+              timestamp: now,
+              duration: now - lastEmitTime,
+              executionId: this.generateExecutionId(effectName),
             });
           },
         })
@@ -236,42 +155,29 @@ export class DevToolsEffectSources extends EffectSources implements OnDestroy {
     });
   }
 
-  /**
-   * Copy NgRx effect metadata from original to wrapped observable.
-   */
-  private copyEffectMetadata(original: any, wrapped: any): void {
-    if (original && original[CREATE_EFFECT_METADATA_KEY]) {
+  private copyEffectMetadata(
+    original: EffectObservable | (() => EffectObservable),
+    wrapped: EffectObservable | (() => EffectObservable)
+  ): void {
+    const originalRecord = original as unknown as Record<string, unknown>;
+    const metadata = originalRecord[CREATE_EFFECT_METADATA_KEY];
+    if (metadata) {
       Object.defineProperty(wrapped, CREATE_EFFECT_METADATA_KEY, {
-        value: original[CREATE_EFFECT_METADATA_KEY],
+        value: metadata,
         configurable: true,
       });
     }
   }
 
-  /**
-   * Emit an effect event to subscribers.
-   */
-  private emitEvent(event: EffectEvent): void {
-    this.effectEvents$.next(event);
-  }
-
-  /**
-   * Extract effect metadata from an effect instance.
-   * Uses NgRx's internal metadata key.
-   */
-  private extractEffectMetadata(instance: any): EffectMetadataInfo[] {
+  private extractEffectMetadata(instance: EffectSourceInstance): EffectMetadataInfo[] {
     const metadata: EffectMetadataInfo[] = [];
 
-    // Get property names from the instance
-    const propertyNames = Object.getOwnPropertyNames(instance);
-
-    for (const propertyName of propertyNames) {
+    for (const propertyName of Object.getOwnPropertyNames(instance)) {
       try {
-        const property = instance[propertyName];
+        const property = instance[propertyName] as EffectObservable | undefined;
+        const config = property?.[CREATE_EFFECT_METADATA_KEY];
 
-        // Check for NgRx effect metadata
-        if (property && property[CREATE_EFFECT_METADATA_KEY]) {
-          const config = property[CREATE_EFFECT_METADATA_KEY];
+        if (config) {
           metadata.push({
             propertyName,
             dispatch: config.dispatch !== false,
@@ -280,73 +186,60 @@ export class DevToolsEffectSources extends EffectSources implements OnDestroy {
           });
         }
       } catch {
-        // Skip properties that throw on access
+        // Skip inaccessible properties
       }
     }
 
     return metadata;
   }
 
-  /**
-   * Get the class name from an effect instance.
-   * Falls back to various strategies when minified.
-   */
-  private getSourceName(instance: any): string | null {
+  private resolveSourceName(instance: EffectSourceInstance): string | null {
     if (!instance) return null;
 
-    // Check for ngrxOnIdentifyEffects hook first (most reliable)
     if (typeof instance.ngrxOnIdentifyEffects === 'function') {
       const id = instance.ngrxOnIdentifyEffects();
       if (id) return id;
     }
 
-    // Try constructor name
     const constructorName = instance.constructor?.name;
-    if (constructorName && constructorName !== 'Object' && constructorName !== 'Function') {
-      // If the name is very short (minified), try to get a better name
-      if (constructorName.length > 1) {
-        return constructorName;
-      }
+    if (this.isValidClassName(constructorName)) {
+      return constructorName;
     }
 
-    // Try to find Effect in the name to detect effect classes
-    const proto = Object.getPrototypeOf(instance);
-    if (proto && proto.constructor && proto.constructor.name) {
-      const protoName = proto.constructor.name;
-      if (protoName.length > 1 && protoName !== 'Object') {
-        return protoName;
-      }
+    const proto = Object.getPrototypeOf(instance) as EffectSourceInstance | null;
+    const protoName = proto?.constructor?.name;
+    if (this.isValidClassName(protoName)) {
+      return protoName;
     }
 
-    // Fallback: Use a descriptive name based on the properties
-    const props = Object.getOwnPropertyNames(instance).filter(
-      p => p.endsWith('$') || p.startsWith('load') || p.startsWith('fetch')
-    );
-    if (props.length > 0) {
-      return `Effects(${props.slice(0, 2).join(', ')}...)`;
+    const effectProps = Object.getOwnPropertyNames(instance)
+      .filter(p => p.endsWith('$') || p.startsWith('load') || p.startsWith('fetch'));
+
+    if (effectProps.length > 0) {
+      return `Effects(${effectProps.slice(0, 2).join(', ')}...)`;
     }
 
-    return constructorName || 'UnknownEffect';
+    return constructorName ?? 'UnknownEffect';
   }
 
-  /**
-   * Get all registered effect names.
-   */
-  getRegisteredEffects(): Map<string, EffectMetadataInfo[]> {
-    return new Map(this.registeredEffects);
+  private isValidClassName(name: string | undefined): name is string {
+    return Boolean(name && name.length > 1 && name !== 'Object' && name !== 'Function');
   }
 
-  ngOnDestroy(): void {
-    this.effectEvents$.complete();
+  private isObservable(value: unknown): value is Observable<Action> {
+    return Boolean(value && typeof (value as Observable<Action>).subscribe === 'function');
   }
-}
 
-/**
- * Internal interface for effect metadata
- */
-interface EffectMetadataInfo {
-  propertyName: string;
-  dispatch: boolean;
-  functional: boolean;
-  useEffectsErrorHandler: boolean;
+  private parseEffectName(effectName: string): [string, string] {
+    const [sourceName, propertyName = 'unknown'] = effectName.split('.');
+    return [sourceName, propertyName];
+  }
+
+  private generateExecutionId(effectName: string): string {
+    return `${effectName}_${++this.executionCounter}`;
+  }
+
+  private emitEvent(event: EffectEvent): void {
+    this.effectEvents$.next(event);
+  }
 }

@@ -8,37 +8,37 @@ import {
 import { PerformanceWarningType } from '../types/state.model';
 
 export interface PerformanceRecommendation {
-  category: 'reducer' | 'state' | 'actions' | 'memory' | 'general';
-  title: string;
-  description: string;
-  impact: 'low' | 'medium' | 'high';
-  codeExample?: string;
-  learnMoreUrl?: string;
+  readonly category: 'reducer' | 'state' | 'actions' | 'memory' | 'general';
+  readonly title: string;
+  readonly description: string;
+  readonly impact: 'low' | 'medium' | 'high';
+  readonly codeExample?: string;
+  readonly learnMoreUrl?: string;
 }
 
 export interface PerformanceReport {
-  timestamp: string;
-  overallScore: number;
-  scoreGrade: 'A' | 'B' | 'C' | 'D' | 'F';
-  stats: AggregatedPerformanceStats;
-  recommendations: PerformanceRecommendation[];
-  hotspots: HotspotInfo[];
-  trends: PerformanceTrends;
+  readonly timestamp: string;
+  readonly overallScore: number;
+  readonly scoreGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+  readonly stats: AggregatedPerformanceStats;
+  readonly recommendations: readonly PerformanceRecommendation[];
+  readonly hotspots: readonly HotspotInfo[];
+  readonly trends: PerformanceTrends;
 }
 
 export interface HotspotInfo {
-  actionType: string;
-  issue: string;
-  avgTime: number;
-  callCount: number;
-  totalTime: number;
-  percentOfTotal: number;
+  readonly actionType: string;
+  readonly issue: string;
+  readonly avgTime: number;
+  readonly callCount: number;
+  readonly totalTime: number;
+  readonly percentOfTotal: number;
 }
 
 export interface PerformanceTrends {
-  reducerTimesTrend: 'improving' | 'stable' | 'degrading';
-  stateSizeTrend: 'stable' | 'growing' | 'shrinking';
-  actionFrequencyTrend: 'stable' | 'increasing' | 'decreasing';
+  readonly reducerTimesTrend: 'improving' | 'stable' | 'degrading';
+  readonly stateSizeTrend: 'stable' | 'growing' | 'shrinking';
+  readonly actionFrequencyTrend: 'stable' | 'increasing' | 'decreasing';
 }
 
 @Injectable({ providedIn: 'root' })
@@ -46,9 +46,6 @@ export class PerformanceAnalyzerService {
   private previousStats: AggregatedPerformanceStats | null = null;
   private readonly performanceTracker = inject(PerformanceTrackerService);
 
-  /**
-   * Generate a comprehensive performance report.
-   */
   generateReport(): PerformanceReport {
     const stats = this.performanceTracker.getAggregatedStats();
     const recommendations = this.generateRecommendations(stats);
@@ -71,9 +68,6 @@ export class PerformanceAnalyzerService {
     return report;
   }
 
-  /**
-   * Get quick performance summary for display.
-   */
   getQuickSummary(): {
     score: number;
     grade: string;
@@ -99,9 +93,6 @@ export class PerformanceAnalyzerService {
     };
   }
 
-  /**
-   * Analyze specific action type for performance issues.
-   */
   analyzeActionType(actionType: string): {
     stats: ActionTypeStats | undefined;
     isProblematic: boolean;

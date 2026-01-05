@@ -177,6 +177,19 @@ If you get module resolution errors after `npm link`, you need to enable symlink
 
 Note: This is required for Nx/Angular monorepo projects.
 
+**Step 1:** Build and link the library first:
+```bash
+# In the ngrx-devtool directory
+ng build ngrx-devtool
+cd dist/ngrx-devtool
+npm link
+
+# Then in YOUR project directory
+npm link ngrx-devtool
+```
+
+**Step 2:** Configure symlink preservation:
+
 tsconfig.json:
 ```json
 {
@@ -200,6 +213,23 @@ angular.json (in build options):
 ```
 
 Note: After running `npm install`, you may need to re-run `npm link ngrx-devtool`.
+
+### Build Errors with @types/jest and @types/jasmine
+
+If you see TypeScript errors like:
+```
+error TS2428: All declarations of 'ArrayContaining' must have identical type parameters
+```
+
+This is caused by having both `@types/jest` and `@types/jasmine` installed. Remove the one you're not using:
+
+```bash
+# If using Jest (recommended)
+npm uninstall @types/jasmine
+
+# If using Jasmine
+npm uninstall @types/jest
+```
 
 ### Effects not being tracked
 

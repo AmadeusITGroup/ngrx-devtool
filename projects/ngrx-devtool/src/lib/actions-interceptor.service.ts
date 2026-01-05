@@ -7,23 +7,23 @@ import { EffectTrackerService, TrackedAction } from './effect-tracker.service';
 import { EffectEvent } from './devtools-effect-sources';
 
 export interface DevToolMessage {
-  type: 'ACTION_TRACKED' | 'EFFECT_CHAIN' | 'EFFECT_EVENT' | 'TIMELINE_CLEARED';
-  action?: string;
-  payload?: unknown;
-  isEffectResult?: boolean;
-  effectName?: string;
-  correlation?: {
-    id: string;
-    triggeredBy?: string;
+  readonly type: 'ACTION_TRACKED' | 'EFFECT_CHAIN' | 'EFFECT_EVENT' | 'TIMELINE_CLEARED';
+  readonly action?: string;
+  readonly payload?: unknown;
+  readonly isEffectResult?: boolean;
+  readonly effectName?: string;
+  readonly correlation?: {
+    readonly id: string;
+    readonly triggeredBy?: string;
   };
-  effectEvent?: {
-    name: string;
-    lifecycle: string;
-    duration?: number;
-    executionId?: string;
-    dispatch?: boolean;
+  readonly effectEvent?: {
+    readonly name: string;
+    readonly lifecycle: string;
+    readonly duration?: number;
+    readonly executionId?: string;
+    readonly dispatch?: boolean;
   };
-  timestamp: string;
+  readonly timestamp: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -33,39 +33,25 @@ export class ActionsInterceptorService implements OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
   private socket: WebSocket | null = null;
   private messageBuffer: string[] = [];
   private isConnected = false;
 
-  /**
-   * Initialize the interceptor with WebSocket connection.
-   * Call this once during app initialization.
-   */
-  initialize(wsUrl: string = 'ws://localhost:4000'): void {
+  initialize(wsUrl = 'ws://localhost:4000'): void {
     this.setupWebSocket(wsUrl);
     this.setupActionInterception();
     this.setupEffectEventForwarding();
   }
 
-  /**
-   * Register action types that are dispatched by effects.
-   * This improves tracking accuracy.
-   */
-  registerEffectActions(actionTypes: string[]): void {
+  registerEffectActions(actionTypes: readonly string[]): void {
     this.effectTracker.registerEffectActionTypes(actionTypes);
   }
 
-  /**
-   * Get the current action timeline.
-   */
-  getTimeline(): TrackedAction[] {
+  getTimeline(): readonly TrackedAction[] {
     return this.effectTracker.getTimeline();
   }
 
-  /**
-   * Clear the action timeline.
-   */
   clearTimeline(): void {
     this.effectTracker.clearTimeline();
     this.sendMessage({
@@ -81,9 +67,7 @@ export class ActionsInterceptorService implements OnDestroy {
   }
 
   private setupWebSocket(wsUrl: string): void {
-    // Only create WebSocket in browser environment
     if (!this.isBrowser) {
-      console.log('[NgRx DevTool] Skipping WebSocket setup (not in browser)');
       return;
     }
 
@@ -126,18 +110,10 @@ export class ActionsInterceptorService implements OnDestroy {
     ).subscribe();
   }
 
-  /**
-   * Forward effect lifecycle events to WebSocket.
-   * This provides real-time effect tracking to the DevTools UI.
-   */
   private setupEffectEventForwarding(): void {
-    console.log('[NgRx DevTool] Setting up effect event forwarding');
-
     this.effectTracker.effectEvents$.pipe(
       takeUntil(this.destroy$),
       tap((event: EffectEvent) => {
-        console.log('[NgRx DevTool] Forwarding effect event:', event.effectName, event.lifecycle);
-
         const message: DevToolMessage = {
           type: 'EFFECT_EVENT',
           action: event.action?.type,
@@ -163,10 +139,8 @@ export class ActionsInterceptorService implements OnDestroy {
     const payload = JSON.stringify(message);
 
     if (this.isConnected && this.socket?.readyState === WebSocket.OPEN) {
-      console.log('[NgRx DevTool] Sending message:', message.type, message.effectName || message.action || '');
       this.socket.send(payload);
     } else {
-      console.log('[NgRx DevTool] Buffering message (socket not ready):', message.type);
       this.messageBuffer.push(payload);
     }
   }
@@ -182,14 +156,10 @@ export class ActionsInterceptorService implements OnDestroy {
 
   private sanitizePayload(action: Action): unknown {
     try {
-      // Attempt to serialize to catch circular references
       JSON.stringify(action);
       return action;
     } catch {
-      return {
-        type: action.type,
-        _note: 'Payload contained non-serializable data',
-      };
+      return { type: action.type, _note: 'Non-serializable payload' };
     }
   }
 }
