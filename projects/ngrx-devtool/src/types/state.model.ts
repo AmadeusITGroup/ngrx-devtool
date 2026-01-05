@@ -1,34 +1,29 @@
 export interface ActionDispatchedPayload {
-  actionType: string;
-  previousState: Record<string, any>;
-  action: Record<string, any>;
-  nextState: Record<string, any>;
+  readonly actionType: string;
+  readonly previousState: Record<string, unknown>;
+  readonly action: Record<string, unknown>;
+  readonly nextState: Record<string, unknown>;
 }
 
 export interface PerformanceMetrics {
-  /** Time taken by the reducer to process the action (ms) */
-  reducerExecutionTime: number;
-  /** Size of the state after the action (bytes) */
-  stateSize: number;
-  /** Size change from previous state (bytes) */
-  stateSizeChange: number;
-  /** Memory usage if available */
-  memoryUsage?: MemoryInfo;
-  /** Action payload size (bytes) */
-  actionPayloadSize: number;
+  readonly reducerExecutionTime: number;
+  readonly stateSize: number;
+  readonly stateSizeChange: number;
+  readonly memoryUsage?: MemoryInfo;
+  readonly actionPayloadSize: number;
 }
 
 export interface MemoryInfo {
-  usedJSHeapSize: number;
-  totalJSHeapSize: number;
-  jsHeapSizeLimit: number;
+  readonly usedJSHeapSize: number;
+  readonly totalJSHeapSize: number;
+  readonly jsHeapSizeLimit: number;
 }
 
 export interface PerformanceWarning {
-  type: PerformanceWarningType;
-  message: string;
-  severity: 'low' | 'medium' | 'high';
-  suggestion?: string;
+  readonly type: PerformanceWarningType;
+  readonly message: string;
+  readonly severity: 'low' | 'medium' | 'high';
+  readonly suggestion?: string;
 }
 
 export enum PerformanceWarningType {
@@ -42,16 +37,11 @@ export enum PerformanceWarningType {
 }
 
 export interface PerformanceThresholds {
-  /** Max acceptable reducer execution time (ms) */
-  maxReducerTime: number;
-  /** Max acceptable state size (bytes) */
-  maxStateSize: number;
-  /** Max acceptable state change per action (bytes) */
-  maxStateChangeSize: number;
-  /** Max actions per second before warning */
-  maxActionsPerSecond: number;
-  /** Max action payload size (bytes) */
-  maxPayloadSize: number;
+  readonly maxReducerTime: number;
+  readonly maxStateSize: number;
+  readonly maxStateChangeSize: number;
+  readonly maxActionsPerSecond: number;
+  readonly maxPayloadSize: number;
 }
 
 export interface ActionTypeStats {
@@ -63,41 +53,33 @@ export interface ActionTypeStats {
 }
 
 export interface ActionPerformanceEntry {
-  actionType: string;
-  timestamp: number;
-  metrics: PerformanceMetrics;
-  /** Performance warnings for this action */
-  warnings: PerformanceWarning[];
+  readonly actionType: string;
+  readonly timestamp: number;
+  readonly metrics: PerformanceMetrics;
+  readonly warnings: readonly PerformanceWarning[];
 }
 
-/** Render impact estimation for a state change */
 export interface RenderImpactData {
-  /** Impact score (0-100) */
-  score: number;
-  /** Impact level */
-  level: 'low' | 'medium' | 'high' | 'critical';
-  /** Estimated components affected */
-  estimatedComponentsAffected: number;
-  /** Factors contributing to impact */
-  factors: RenderImpactFactorData[];
-  /** Recommendations */
-  recommendations: string[];
+  readonly score: number;
+  readonly level: 'low' | 'medium' | 'high' | 'critical';
+  readonly estimatedComponentsAffected: number;
+  readonly factors: readonly RenderImpactFactorData[];
+  readonly recommendations: readonly string[];
 }
 
 export interface RenderImpactFactorData {
-  name: string;
-  description: string;
-  impact: number;
-  details?: string;
+  readonly name: string;
+  readonly description: string;
+  readonly impact: number;
+  readonly details?: string;
 }
 
-/** Selector performance metrics */
 export interface SelectorMetricsData {
-  name: string;
-  invocationCount: number;
-  recomputationCount: number;
-  totalComputationTime: number;
-  avgComputationTime: number;
+  readonly name: string;
+  readonly invocationCount: number;
+  readonly recomputationCount: number;
+  readonly totalComputationTime: number;
+  readonly avgComputationTime: number;
   maxComputationTime: number;
   cacheHitRate: number;
 }

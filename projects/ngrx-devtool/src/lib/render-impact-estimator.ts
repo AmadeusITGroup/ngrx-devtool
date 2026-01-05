@@ -1,64 +1,43 @@
-/**
- * Render Impact Estimator
- *
- * Estimates the potential rendering cost based on state changes.
- * This helps developers understand why the Angular Profiler shows
- * slow component rendering even when reducers are fast.
- */
-
 export interface RenderImpactEstimate {
-  /** Overall impact score (0-100, higher = more impact) */
-  score: number;
-  /** Impact level classification */
-  level: 'low' | 'medium' | 'high' | 'critical';
-  /** Estimated components that may re-render */
-  estimatedComponentsAffected: number;
-  /** Factors contributing to render impact */
-  factors: RenderImpactFactor[];
-  /** Recommendations to reduce render impact */
-  recommendations: string[];
+  readonly score: number;
+  readonly level: 'low' | 'medium' | 'high' | 'critical';
+  readonly estimatedComponentsAffected: number;
+  readonly factors: readonly RenderImpactFactor[];
+  readonly recommendations: readonly string[];
 }
 
 export interface RenderImpactFactor {
-  name: string;
-  description: string;
-  impact: number; // 0-100
-  details?: string;
+  readonly name: string;
+  readonly description: string;
+  readonly impact: number;
+  readonly details?: string;
 }
 
 export interface StateChangeAnalysis {
-  /** Number of properties changed at root level */
   rootPropertiesChanged: number;
-  /** Total properties changed (deep) */
   totalPropertiesChanged: number;
-  /** Arrays that changed size */
   arrayChanges: ArrayChangeInfo[];
-  /** Large objects that changed */
   largeObjectChanges: LargeObjectChange[];
-  /** Depth of changes */
   maxChangeDepth: number;
 }
 
 export interface ArrayChangeInfo {
-  path: string;
-  previousLength: number;
-  newLength: number;
-  itemsAdded: number;
-  itemsRemoved: number;
+  readonly path: string;
+  readonly previousLength: number;
+  readonly newLength: number;
+  readonly itemsAdded: number;
+  readonly itemsRemoved: number;
 }
 
 export interface LargeObjectChange {
-  path: string;
-  size: number;
-  changeType: 'added' | 'modified' | 'replaced';
+  readonly path: string;
+  readonly size: number;
+  readonly changeType: 'added' | 'modified' | 'replaced';
 }
 
-/**
- * Estimate the render impact of a state change.
- */
 export function estimateRenderImpact(
-  prevState: any,
-  nextState: any,
+  prevState: unknown,
+  nextState: unknown,
   actionType: string
 ): RenderImpactEstimate {
   const analysis = analyzeStateChange(prevState, nextState);
@@ -157,10 +136,7 @@ export function estimateRenderImpact(
   };
 }
 
-/**
- * Analyze the differences between two states.
- */
-function analyzeStateChange(prevState: any, nextState: any): StateChangeAnalysis {
+function analyzeStateChange(prevState: unknown, nextState: unknown): StateChangeAnalysis {
   const analysis: StateChangeAnalysis = {
     rootPropertiesChanged: 0,
     totalPropertiesChanged: 0,
@@ -169,17 +145,18 @@ function analyzeStateChange(prevState: any, nextState: any): StateChangeAnalysis
     maxChangeDepth: 0,
   };
 
-  if (!prevState || !nextState) {
+  if (!prevState || !nextState || typeof prevState !== 'object' || typeof nextState !== 'object') {
     return analysis;
   }
 
-  // Analyze root level changes
-  const allKeys = new Set([...Object.keys(prevState || {}), ...Object.keys(nextState || {})]);
+  const prevObj = prevState as Record<string, unknown>;
+  const nextObj = nextState as Record<string, unknown>;
+  const allKeys = new Set([...Object.keys(prevObj), ...Object.keys(nextObj)]);
 
   for (const key of allKeys) {
-    if (prevState?.[key] !== nextState?.[key]) {
+    if (prevObj[key] !== nextObj[key]) {
       analysis.rootPropertiesChanged++;
-      analyzeDeep(prevState?.[key], nextState?.[key], key, 1, analysis);
+      analyzeDeep(prevObj[key], nextObj[key], key, 1, analysis);
     }
   }
 
@@ -187,8 +164,8 @@ function analyzeStateChange(prevState: any, nextState: any): StateChangeAnalysis
 }
 
 function analyzeDeep(
-  prev: any,
-  next: any,
+  prev: unknown,
+  next: unknown,
   path: string,
   depth: number,
   analysis: StateChangeAnalysis
@@ -196,7 +173,6 @@ function analyzeDeep(
   analysis.maxChangeDepth = Math.max(analysis.maxChangeDepth, depth);
   analysis.totalPropertiesChanged++;
 
-  // Check for array changes
   if (Array.isArray(prev) || Array.isArray(next)) {
     const prevArr = Array.isArray(prev) ? prev : [];
     const nextArr = Array.isArray(next) ? next : [];
@@ -213,30 +189,31 @@ function analyzeDeep(
     return;
   }
 
-  // Check for large object changes
   if (typeof next === 'object' && next !== null) {
     const size = estimateSize(next);
-    if (size > 5000) { // 5KB threshold
+    if (size > 5000) {
       analysis.largeObjectChanges.push({
         path,
         size,
-        changeType: prev === undefined ? 'added' : prev === null ? 'added' : 'modified',
+        changeType: prev === undefined || prev === null ? 'added' : 'modified',
       });
     }
 
-    // Recurse into object (limit depth to prevent infinite loops)
     if (depth < 10) {
-      const allKeys = new Set([...Object.keys(prev || {}), ...Object.keys(next || {})]);
+      const prevObj = (prev && typeof prev === 'object' ? prev : {}) as Record<string, unknown>;
+      const nextObj = next as Record<string, unknown>;
+      const allKeys = new Set([...Object.keys(prevObj), ...Object.keys(nextObj)]);
+
       for (const key of allKeys) {
-        if (prev?.[key] !== next?.[key]) {
-          analyzeDeep(prev?.[key], next?.[key], `${path}.${key}`, depth + 1, analysis);
+        if (prevObj[key] !== nextObj[key]) {
+          analyzeDeep(prevObj[key], nextObj[key], `${path}.${key}`, depth + 1, analysis);
         }
       }
     }
   }
 }
 
-function estimateSize(obj: any): number {
+function estimateSize(obj: unknown): number {
   try {
     return JSON.stringify(obj).length;
   } catch {
@@ -252,8 +229,8 @@ function formatBytes(bytes: number): string {
 
 function generateRecommendations(
   analysis: StateChangeAnalysis,
-  factors: RenderImpactFactor[],
-  actionType: string
+  factors: readonly RenderImpactFactor[],
+  _actionType: string
 ): string[] {
   const recommendations: string[] = [];
 

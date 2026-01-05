@@ -1,46 +1,18 @@
 import { MemoizedSelector, createSelector, Selector } from '@ngrx/store';
 import { SelectorTrackerService } from './selector-tracker.service';
 
-/**
- * Global reference to the selector tracker (set during app initialization).
- */
-let globalSelectorTracker: SelectorTrackerService;
+let globalSelectorTracker: SelectorTrackerService | null = null;
 
-/**
- * Set the global selector tracker instance.
- * Call this during app initialization.
- */
 export function setSelectorTracker(tracker: SelectorTrackerService): void {
   globalSelectorTracker = tracker;
 }
 
-/**
- * Wrap a selector to track its performance.
- *
- * @example
- * ```typescript
- * // Original selector
- * export const selectBooks = createSelector(
- *   selectBooksState,
- *   (state) => state.books
- * );
- *
- * // Tracked selector
- * export const selectBooks = trackSelector(
- *   'selectBooks',
- *   createSelector(
- *     selectBooksState,
- *     (state) => state.books
- *   )
- * );
- * ```
- */
 export function trackSelector<State, Result>(
   name: string,
   selector: MemoizedSelector<State, Result>
 ): MemoizedSelector<State, Result> {
   let lastResult: Result | undefined;
-  let lastInput: any;
+  let lastInput: State | undefined;
 
   // Create a wrapper that tracks invocations
   const trackedSelector = ((state: State) => {
@@ -77,10 +49,6 @@ export function trackSelector<State, Result>(
   return trackedSelector;
 }
 
-/**
- * Create a tracked selector factory.
- * Automatically names selectors based on creation order.
- */
 export function createTrackedSelector<State, S1, Result>(
   name: string,
   s1: Selector<State, S1>,
@@ -119,24 +87,9 @@ export function createTrackedSelector(
   return trackSelector(name, selector);
 }
 
-/**
- * Decorator to track selector performance.
- * Use on static selector properties in a class.
- *
- * @example
- * ```typescript
- * class BookSelectors {
- *   @TrackedSelector('selectAllBooks')
- *   static selectAllBooks = createSelector(
- *     selectBooksState,
- *     (state) => state.books
- *   );
- * }
- * ```
- */
 export function TrackedSelector(name: string) {
-  return function (target: any, propertyKey: string) {
-    const originalSelector = target[propertyKey];
+  return function (target: Record<string, unknown>, propertyKey: string) {
+    const originalSelector = target[propertyKey] as MemoizedSelector<unknown, unknown>;
     if (originalSelector) {
       target[propertyKey] = trackSelector(name, originalSelector);
     }
