@@ -35,7 +35,28 @@
       d="m309.0293,215.1374h-77.6173v41.1487c36.9843-1.5635,47.4027-2.0797,63.5516-2.0797,25.5239,0,40.6309,9.3729,40.6309,34.379v16.1495h-40.6309c-68.2401,0-89.0769,27.6093-89.0769,63.5516,0,46.3551,34.3804,61.9884,68.7608,61.9884s55.2179-16.1498,61.989-20.8397v18.2293h44.7988v-145.3324c0-48.9653-26.5659-67.1946-72.4059-67.1946Zm26.5652,167.2119c-11.4597,4.1667-32.2964,11.4598-52.0912,11.4598-18.7528,0-33.8598-8.3331-33.8598-28.6491,0-18.2365,11.4597-27.6093,36.4636-28.6493l49.4873-2.0867v47.9253Z"
     />
   </svg>
+
+  @if (isImportedSession()) {
+    <span class="imported-badge">
+      <mat-icon>history</mat-icon>
+      Imported Session
+      @if (importedSessionName()) {
+        <span class="session-name">{{ importedSessionName() }}</span>
+      }
+    </span>
+  }
+
   <span class="toolbar-spacer"></span>
+
+  <button mat-icon-button matTooltip="Export Session" (click)="exportSession()">
+    <mat-icon>save</mat-icon>
+  </button>
+  <button mat-icon-button matTooltip="Import Session" (click)="importSession()">
+    <mat-icon>folder_open</mat-icon>
+  </button>
+  <button mat-icon-button matTooltip="Clear Session" (click)="clearSession()">
+    <mat-icon>delete_sweep</mat-icon>
+  </button>
   <mat-icon fontIcon="help"></mat-icon>
 </mat-toolbar>
 

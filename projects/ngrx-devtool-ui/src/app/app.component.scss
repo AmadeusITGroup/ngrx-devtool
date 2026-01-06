@@ -94,6 +94,39 @@ mat-toolbar {
   left: 0;
   right: 0;
   z-index: 1000;
+  gap: 8px;
+
+  button[mat-icon-button] {
+    color: var(--mat-sys-on-primary-container);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+.imported-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(255, 152, 0, 0.2);
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #ff9800;
+  margin-left: 16px;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .session-name {
+    color: var(--mat-sys-on-primary-container);
+    opacity: 0.8;
+  }
 }
 .cls-1 {
   color: var(--mat-sys-on-primary-container);

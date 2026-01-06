@@ -1,5 +1,6 @@
-import { Component, inject, OnInit, signal, computed, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, computed, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { WebsocketService } from '../services/websocket.service';
+import { SessionService, RenderTimingMessage } from '../services/session.service';
 import { Subscription } from 'rxjs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,46 +12,12 @@ import { MatTabChangeEvent, MatTabsModule, MatTabGroup } from '@angular/material
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { JsonTreeComponent } from '../components/json-tree/json-tree.component';
 import { DatePipe } from '@angular/common';
 import { DiffViewerComponent } from '../components/diff-viewer/diff-viewer.component';
-import { PerformancePanelComponent } from '../components/performance-panel/performance-panel.component';
+import { PerformancePanelComponent, StateChangeMessage } from '../components/performance-panel/performance-panel.component';
 import { EffectsPanelComponent, EffectEventMessage } from '../components/effects-panel/effects-panel.component';
-
-interface PerformanceWarning {
-  severity: string;
-  message: string;
-  suggestion?: string;
-}
-
-interface PerformanceData {
-  reducerExecutionTime: number;
-  stateSize: number;
-  stateSizeChange: number;
-  actionPayloadSize: number;
-  warnings?: PerformanceWarning[];
-}
-
-interface RenderTimingMessage {
-  type: 'RENDER_TIMING';
-  actionType: string;
-  reducerTime: number;
-  renderTime: number;
-  totalTime: number;
-  timestamp: string;
-}
-
-/** Message received from WebSocket for state changes */
-interface StateChangeMessage {
-  type: string;
-  action: { type: string };
-  nextState?: unknown;
-  effectName?: string;
-  isEffectResult?: boolean;
-  timestamp: string;
-  performance?: PerformanceData;
-  renderTiming?: RenderTimingMessage;
-}
 
 /** Enriched message with computed fields for display */
 interface EnrichedMessage extends StateChangeMessage {
@@ -73,6 +40,7 @@ interface EnrichedMessage extends StateChangeMessage {
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatButtonModule,
+    MatSnackBarModule,
     JsonTreeComponent,
     DiffViewerComponent,
     PerformancePanelComponent,
@@ -80,13 +48,16 @@ interface EnrichedMessage extends StateChangeMessage {
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'ngrx-devtool-ui';
   messages = signal<StateChangeMessage[]>([]);
   effectEvents = signal<EffectEventMessage[]>([]);
   renderTimings = signal<Map<string, RenderTimingMessage>>(new Map());
   selectedActionType = signal<string | null>(null);
+  isImportedSession = signal<boolean>(false);
+  importedSessionName = signal<string | null>(null);
 
   @ViewChild(MatTabGroup) tabGroup!: MatTabGroup;
 
@@ -140,39 +111,14 @@ export class AppComponent implements OnInit {
 
   private subscription?: Subscription;
   private readonly _webSocketService = inject(WebsocketService);
+  private readonly _sessionService = inject(SessionService);
+  private readonly _snackBar = inject(MatSnackBar);
 
   ngOnInit(): void {
     this._webSocketService.connect('ws://localhost:4000');
     this.subscription = this._webSocketService.messages$?.subscribe((msg) => {
-      if (!msg) return; // Skip null messages
-
-      if (msg.type === 'RENDER_TIMING') {
-        // Store render timing indexed by action type + approximate timestamp
-        this.renderTimings.update(map => {
-          const newMap = new Map(map);
-          // Find the most recent state change message for this action type
-          const msgs = this.messages();
-          for (let i = msgs.length - 1; i >= 0; i--) {
-            const m = msgs[i];
-            if (m.action?.type === msg.actionType && !m.renderTiming) {
-              newMap.set(m.timestamp, msg);
-              // Update the message with render timing
-              this.messages.update(arr => {
-                const updated = [...arr];
-                updated[i] = { ...updated[i], renderTiming: msg };
-                return updated;
-              });
-              break;
-            }
-          }
-          return newMap;
-        });
-      } else if (msg.type === 'EFFECT_EVENT') {
-        // Store effect events separately for the Effects Panel
-        this.effectEvents.update((arr) => [...arr, msg as EffectEventMessage]);
-      } else {
-        this.messages.update((arr) => [...arr, msg]);
-      }
+      if (!msg) return;
+      this.handleWebSocketMessage(msg);
     });
   }
   ngOnDestroy() {
@@ -202,5 +148,98 @@ export class AppComponent implements OnInit {
   navigateToPerformance(actionType: string) {
     this.selectedActionType.set(actionType);
     this.tabGroup.selectedIndex = 1; // Switch to Performance tab (0-indexed)
+  }
+
+  exportSession(): void {
+    const messages = this.messages();
+    if (messages.length === 0) {
+      this._snackBar.open('No session data to export', 'Close', { duration: 3000 });
+      return;
+    }
+
+    this._sessionService.exportSession(
+      messages,
+      this.effectEvents(),
+      this.renderTimings()
+    );
+
+    this._snackBar.open('Session exported successfully', 'Close', { duration: 3000 });
+  }
+
+  async importSession(): Promise<void> {
+    try {
+      const sessionData = await this._sessionService.importSession();
+
+      // Clear existing data and load imported session
+      this.messages.set([...sessionData.messages]);
+      this.effectEvents.set([...sessionData.effectEvents]);
+      this.renderTimings.set(new Map(sessionData.renderTimings));
+
+      // Mark as imported session
+      this.isImportedSession.set(true);
+      this.importedSessionName.set(sessionData.appName || null);
+
+      // Disconnect WebSocket since we're viewing an imported session
+      this._webSocketService.close();
+      this.subscription?.unsubscribe();
+
+      const dateStr = new Date(sessionData.exportedAt).toLocaleString();
+      this._snackBar.open(
+        `Loaded session from ${dateStr} (${sessionData.messages.length} actions)`,
+        'Close',
+        { duration: 5000 }
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to import session';
+      if (message !== 'File selection cancelled') {
+        this._snackBar.open(message, 'Close', { duration: 3000 });
+      }
+    }
+  }
+
+  clearSession(): void {
+    this.messages.set([]);
+    this.effectEvents.set([]);
+    this.renderTimings.set(new Map());
+    this.isImportedSession.set(false);
+    this.importedSessionName.set(null);
+
+    // Reconnect WebSocket for live data
+    this._webSocketService.connect('ws://localhost:4000');
+    this.subscription = this._webSocketService.messages$?.subscribe((msg) => {
+      if (!msg) return;
+      this.handleWebSocketMessage(msg);
+    });
+
+    this._snackBar.open('Session cleared', 'Close', { duration: 2000 });
+  }
+
+  private handleWebSocketMessage(msg: unknown): void {
+    const message = msg as StateChangeMessage & { type: string };
+
+    if (message.type === 'RENDER_TIMING') {
+      const renderMsg = msg as RenderTimingMessage;
+      this.renderTimings.update(map => {
+        const newMap = new Map(map);
+        const msgs = this.messages();
+        for (let i = msgs.length - 1; i >= 0; i--) {
+          const m = msgs[i];
+          if (m.action?.type === renderMsg.actionType && !m.renderTiming) {
+            newMap.set(m.timestamp, renderMsg);
+            this.messages.update(arr => {
+              const updated = [...arr];
+              updated[i] = { ...updated[i], renderTiming: renderMsg };
+              return updated;
+            });
+            break;
+          }
+        }
+        return newMap;
+      });
+    } else if (message.type === 'EFFECT_EVENT') {
+      this.effectEvents.update((arr) => [...arr, msg as EffectEventMessage]);
+    } else {
+      this.messages.update((arr) => [...arr, message]);
+    }
   }
 }
