@@ -53,14 +53,7 @@ export function createDevToolMetaReducer(
 
     return function (state, action) {
       const prevState = state;
-
-      const initialMessage: StateChangeMessage = {
-        type: 'STATE_CHANGE',
-        action,
-        prevState,
-        nextState: null as unknown,
-        timestamp: new Date().toISOString(),
-      };
+      const timestamp = new Date().toISOString();
 
       let nextState: State;
 
@@ -69,30 +62,40 @@ export function createDevToolMetaReducer(
           action.type,
           () => reducer(state, action),
           (renderTime) => {
-            const perfMessage: StateChangeMessage = {
-              ...initialMessage,
+            const message: StateChangeMessage = {
+              type: 'STATE_CHANGE',
+              action,
+              prevState,
               nextState,
+              timestamp,
               renderPerformance: { renderTime }
             };
 
-            const payload = JSON.stringify(perfMessage);
+            const payload = JSON.stringify(message);
             if (socket?.readyState === WebSocket.OPEN) {
               socket.send(payload);
+            } else if (isBrowser) {
+              messageBuffer.push(payload);
             }
           }
         );
       } else {
         nextState = reducer(state, action);
-      }
 
-      // Send initial message immediately
-      initialMessage.nextState = nextState;
-      const payload = JSON.stringify(initialMessage);
+        const message: StateChangeMessage = {
+          type: 'STATE_CHANGE',
+          action,
+          prevState,
+          nextState,
+          timestamp,
+        };
 
-      if (socket?.readyState === WebSocket.OPEN) {
-        socket.send(payload);
-      } else if (isBrowser) {
-        messageBuffer.push(payload);
+        const payload = JSON.stringify(message);
+        if (socket?.readyState === WebSocket.OPEN) {
+          socket.send(payload);
+        } else if (isBrowser) {
+          messageBuffer.push(payload);
+        }
       }
 
       return nextState;

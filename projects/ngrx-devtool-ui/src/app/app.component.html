@@ -102,18 +102,6 @@
                 @if (message.performance && message.performance.warnings && message.performance.warnings.length > 0) {
                   <mat-icon class="perf-warning-icon" [matTooltip]="message.performance.warnings!.length + ' performance warning(s)'">warning</mat-icon>
                 }
-                @if (message.renderTiming) {
-                  <span class="perf-time render-time" [class.slow]="message.renderTiming.renderTime > 16" matTooltip="Actual render time (Angular CD + browser paint)">
-                    {{ message.renderTiming.renderTime.toFixed(2) }}ms
-                  </span>
-                  <span class="perf-time total-time" [class.slow]="message.renderTiming.totalTime > 32" matTooltip="Total end-to-end time">
-                    Σ {{ message.renderTiming.totalTime.toFixed(2) }}ms
-                  </span>
-                } @else if (message.performance) {
-                  <span class="perf-time" [class.slow]="message.performance!.reducerExecutionTime > 16">
-                    {{ message.performance!.reducerExecutionTime.toFixed(2) }}ms
-                  </span>
-                }
                 <span class="timestamp">{{ message.timestamp | date : "medium" }}</span>
               </mat-panel-description>
             </mat-expansion-panel-header>
