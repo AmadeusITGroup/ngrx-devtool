@@ -1,4 +1,3 @@
-// books.effects.ts
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType, OnIdentifyEffects } from '@ngrx/effects';
 import { BooksActions, BooksApiActions } from './book.actions';
