@@ -43,9 +43,12 @@ export type SessionImportError =
   providedIn: 'root',
 })
 export class SessionService {
+  /** Maximum items to stringify at once to avoid memory issues */
+  private readonly CHUNK_SIZE = 1000;
+
   /**
    * Exports session data to a JSON file and triggers download.
-   * Uses strongly typed parameters for type safety.
+   * Uses chunked serialization to handle large datasets without hitting string length limits.
    */
   exportSession(
     messages: readonly StateChangeMessage[],
@@ -53,23 +56,73 @@ export class SessionService {
     renderTimings: ReadonlyMap<string, RenderTimingMessage>,
     appName?: string
   ): void {
-    const sessionData: SessionData = {
-      version: SESSION_FILE_VERSION,
-      exportedAt: new Date().toISOString(),
-      appName,
-      messages,
-      effectEvents,
-      renderTimings: Array.from(renderTimings.entries()),
-    };
+    try {
+      const blob = this.buildSessionBlob(messages, effectEvents, renderTimings, appName);
+      const url = URL.createObjectURL(blob);
+      const filename = this.generateFilename(appName);
 
-    const json = JSON.stringify(sessionData, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
+      this.triggerDownload(url, filename);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to export session:', error);
+      throw new Error('Export failed: Session data is too large to export. Try clearing some history first.');
+    }
+  }
 
-    const filename = this.generateFilename(appName);
+  /**
+   * Builds a Blob by streaming JSON parts to avoid creating one massive string.
+   * This prevents RangeError on very large sessions.
+   */
+  private buildSessionBlob(
+    messages: readonly StateChangeMessage[],
+    effectEvents: readonly EffectEventMessage[],
+    renderTimings: ReadonlyMap<string, RenderTimingMessage>,
+    appName?: string
+  ): Blob {
+    const parts: BlobPart[] = [];
 
-    this.triggerDownload(url, filename);
-    URL.revokeObjectURL(url);
+    // Write header
+    parts.push('{\n');
+    parts.push(`  "version": ${SESSION_FILE_VERSION},\n`);
+    parts.push(`  "exportedAt": ${JSON.stringify(new Date().toISOString())},\n`);
+    if (appName) {
+      parts.push(`  "appName": ${JSON.stringify(appName)},\n`);
+    }
+
+    // Write messages array in chunks
+    parts.push('  "messages": [\n');
+    this.writeArrayChunked(parts, messages, '    ');
+    parts.push('  ],\n');
+
+    // Write effectEvents array in chunks
+    parts.push('  "effectEvents": [\n');
+    this.writeArrayChunked(parts, effectEvents, '    ');
+    parts.push('  ],\n');
+
+    // Write renderTimings array in chunks
+    const renderTimingsArray = Array.from(renderTimings.entries());
+    parts.push('  "renderTimings": [\n');
+    this.writeArrayChunked(parts, renderTimingsArray, '    ');
+    parts.push('  ]\n');
+
+    parts.push('}');
+
+    return new Blob(parts, { type: 'application/json' });
+  }
+
+  /**
+   * Writes array items to blob parts in chunks to prevent memory issues.
+   */
+  private writeArrayChunked<T>(parts: BlobPart[], items: readonly T[], indent: string): void {
+    for (let i = 0; i < items.length; i += this.CHUNK_SIZE) {
+      const chunk = items.slice(i, Math.min(i + this.CHUNK_SIZE, items.length));
+
+      for (let j = 0; j < chunk.length; j++) {
+        const isLast = i + j === items.length - 1;
+        const itemJson = JSON.stringify(chunk[j]);
+        parts.push(`${indent}${itemJson}${isLast ? '\n' : ',\n'}`);
+      }
+    }
   }
 
   /**
