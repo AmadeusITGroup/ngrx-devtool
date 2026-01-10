@@ -39,7 +39,7 @@ Since the package is not yet published to npm, use the development setup:
 
 ```bash
 git clone <repository-url>
-cd ngrx-devtool-proto
+cd ngrx-devtool
 npm install
 npm run build
 ```
