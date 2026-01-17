@@ -7,15 +7,12 @@ import { EffectTrackerService, TrackedAction } from './effect-tracker.service';
 import { EffectEvent } from './devtools-effect-sources';
 
 export interface DevToolMessage {
-  readonly type: 'ACTION_TRACKED' | 'EFFECT_CHAIN' | 'EFFECT_EVENT' | 'TIMELINE_CLEARED';
+  readonly type: 'ACTION_TRACKED' | 'EFFECT_EVENT' | 'TIMELINE_CLEARED';
   readonly action?: string;
   readonly payload?: unknown;
   readonly isEffectResult?: boolean;
   readonly effectName?: string;
-  readonly correlation?: {
-    readonly id: string;
-    readonly triggeredBy?: string;
-  };
+  readonly correlationId?: string;
   readonly effectEvent?: {
     readonly name: string;
     readonly lifecycle: string;
@@ -42,10 +39,6 @@ export class ActionsInterceptorService implements OnDestroy {
     this.setupWebSocket(wsUrl);
     this.setupActionInterception();
     this.setupEffectEventForwarding();
-  }
-
-  registerEffectActions(actionTypes: readonly string[]): void {
-    this.effectTracker.registerEffectActionTypes(actionTypes);
   }
 
   getTimeline(): readonly TrackedAction[] {
@@ -99,9 +92,7 @@ export class ActionsInterceptorService implements OnDestroy {
           payload: this.sanitizePayload(action),
           isEffectResult: tracked.source === 'effect',
           effectName: tracked.effectName,
-          correlation: tracked.correlationId
-            ? { id: tracked.correlationId }
-            : undefined,
+          correlationId: tracked.correlationId,
           timestamp: new Date().toISOString(),
         };
 
