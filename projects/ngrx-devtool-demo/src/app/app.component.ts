@@ -1,21 +1,18 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BooksActions } from './state/book.actions';
-import { map, mergeMap, tap } from 'rxjs/operators';
-
+import { BooksActions, BooksApiActions } from './state/book.actions';
 import { selectBookCollection, selectBooks } from './state/book.selectors';
-import { BooksApiActions } from './state/book.actions';
 import { GoogleBooksService } from './book-list/book.service';
 import { Book } from './book-list/book.model';
 import { Observable } from 'rxjs';
 import { BookListComponent } from './book-list/book-list.component';
 import { BookCollectionComponent } from './book-collection/book-collection.component';
-import { AsyncPipe, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  imports: [BookListComponent, BookCollectionComponent, NgFor, AsyncPipe, NgIf]
+  imports: [BookListComponent, BookCollectionComponent, AsyncPipe]
 })
 export class AppComponent implements OnInit {
   books$!: Observable<ReadonlyArray<Book>>;

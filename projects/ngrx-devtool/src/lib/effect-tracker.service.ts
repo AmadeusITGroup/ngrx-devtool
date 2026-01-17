@@ -5,15 +5,6 @@ import { DevToolsEffectSources, EffectEvent } from './devtools-effect-sources';
 import { ReplaySubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-export interface EffectInvocation {
-  readonly triggerAction: string;
-  readonly resultAction: string | null;
-  readonly effectId: string;
-  readonly effectName?: string;
-  readonly timestamp: string;
-  readonly duration?: number;
-}
-
 export interface TrackedAction {
   readonly action: string;
   readonly payload: unknown;
@@ -32,7 +23,7 @@ export interface TrackedEffect {
   readonly startTime: number;
   readonly endTime?: number;
   readonly duration?: number;
-  readonly status: 'running' | 'completed' | 'error';
+  readonly status: 'completed' | 'error';
   readonly error?: unknown;
 }
 
@@ -50,8 +41,7 @@ export class EffectTrackerService implements OnDestroy {
   private actionTimeline: TrackedAction[] = [];
   private effectTimeline: TrackedEffect[] = [];
   private readonly effectActionPatterns = new Set<string>();
-  private readonly pendingCorrelations = new Map<string, { action: Action; timestamp: number; effectName?: string }>();
-  private readonly runningEffects = new Map<string, TrackedEffect>();
+  private readonly pendingCorrelations = new Map<string, { action: Action; timestamp: number }>();
   private correlationCounter = 0;
   private lastTriggerAction: Action | null = null;
 
@@ -117,42 +107,8 @@ export class EffectTrackerService implements OnDestroy {
     }
   }
 
-  registerEffectActionType(actionType: string): void {
-    this.effectActionPatterns.add(actionType);
-  }
-
-  registerEffectActionTypes(actionTypes: readonly string[]): void {
-    actionTypes.forEach(type => this.effectActionPatterns.add(type));
-  }
-
   isEffectAction(actionType: string): boolean {
-    // Check registered patterns first
-    if (this.effectActionPatterns.has(actionType)) {
-      return true;
-    }
-
-    // Heuristic detection based on NgRx conventions
-    // These patterns identify actions that are RESULTS of effects (not triggers)
-    const effectPatterns = [
-      /-> Succeeded/i,          // [Competitors API] Fetch -> Succeeded
-      /-> Failed/i,             // [Competitors API] Fetch -> Failed
-      /-> Success/i,            // [API] Action -> Success
-      /-> Failure/i,            // [API] Action -> Failure
-      /-> Error/i,              // [API] Action -> Error
-      /-> Complete/i,           // [API] Action -> Complete
-      /Success$/i,              // loadBooksSuccess
-      /Succeeded$/i,            // fetchCompetitorsSucceeded
-      /Failure$/i,              // loadBooksFailure
-      /Failed$/i,               // fetchCompetitorsFailed
-      /Error$/i,                // loadBooksError
-      /Complete$/i,             // loadBooksComplete
-      /Completed$/i,            // loadBooksCompleted
-      /Retrieved/i,             // retrievedBookList
-      /Loaded$/i,               // booksLoaded
-      /Fetched$/i,              // booksFetched
-    ];
-
-    return effectPatterns.some(pattern => pattern.test(actionType));
+    return this.effectActionPatterns.has(actionType);
   }
 
   trackAction(action: Action): TrackedAction {
@@ -190,21 +146,6 @@ export class EffectTrackerService implements OnDestroy {
     return [...this.actionTimeline];
   }
 
-  getCorrelatedActions(): ReadonlyMap<string, TrackedAction[]> {
-    const groups = new Map<string, TrackedAction[]>();
-
-    this.actionTimeline.forEach(tracked => {
-      if (tracked.correlationId) {
-        if (!groups.has(tracked.correlationId)) {
-          groups.set(tracked.correlationId, []);
-        }
-        groups.get(tracked.correlationId)!.push(tracked);
-      }
-    });
-
-    return groups;
-  }
-
   clearTimeline(): void {
     this.actionTimeline = [];
     this.pendingCorrelations.clear();
@@ -230,13 +171,6 @@ export class EffectTrackerService implements OnDestroy {
   }
 
   private findEffectNameForAction(actionType: string): string | undefined {
-    // Check running effects first
-    for (const [_, effect] of this.runningEffects) {
-      if (effect.resultAction === actionType) {
-        return effect.effectName;
-      }
-    }
-
     // Check recent completed effects
     for (let i = this.effectTimeline.length - 1; i >= Math.max(0, this.effectTimeline.length - 10); i--) {
       const effect = this.effectTimeline[i];
@@ -246,22 +180,6 @@ export class EffectTrackerService implements OnDestroy {
     }
 
     return undefined;
-  }
-
-  getEffectTimeline(): readonly TrackedEffect[] {
-    return [...this.effectTimeline];
-  }
-
-  getRunningEffects(): readonly TrackedEffect[] {
-    return Array.from(this.runningEffects.values());
-  }
-
-  clearAll(): void {
-    this.actionTimeline = [];
-    this.effectTimeline = [];
-    this.pendingCorrelations.clear();
-    this.runningEffects.clear();
-    this.lastTriggerAction = null;
   }
 
   ngOnDestroy(): void {

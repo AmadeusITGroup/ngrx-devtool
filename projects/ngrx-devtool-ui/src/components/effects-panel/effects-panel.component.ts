@@ -10,32 +10,32 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTabsModule } from '@angular/material/tabs';
 
-export interface EffectEventMessage {
-  type: 'EFFECT_EVENT';
-  action?: string;
-  effectName?: string;
-  effectEvent?: {
-    name: string;
-    lifecycle: 'triggered' | 'emitted' | 'executed' | 'error';
-    duration?: number;
-    executionId?: string;
-    dispatch?: boolean;
+export interface EffectEventMessage { //received
+  readonly type: 'EFFECT_EVENT';
+  readonly action?: string;
+  readonly effectName?: string;
+  readonly effectEvent?: {
+    readonly name: string;
+    readonly lifecycle: 'triggered' | 'emitted' | 'executed' | 'error';
+    readonly duration?: number;
+    readonly executionId?: string;
+    readonly dispatch?: boolean;
   };
-  timestamp: string;
+  readonly timestamp: string;
 }
 
-export interface EffectExecution {
-  effectName: string;
-  sourceName: string;
-  propertyName: string;
-  startTime: Date;
-  endTime?: Date;
-  duration?: number;
-  status: 'completed' | 'executed' | 'error';
-  triggeredAction?: string;
-  emittedAction?: string;
-  executionId?: string;
-  dispatch?: boolean;
+export interface EffectExecution { //computed
+  readonly effectName: string;
+  readonly sourceName: string;
+  readonly propertyName: string;
+  readonly startTime: Date;
+  readonly endTime?: Date;
+  readonly duration?: number;
+  readonly status: 'completed' | 'executed' | 'error';
+  readonly triggeredAction?: string;
+  readonly emittedAction?: string;
+  readonly executionId?: string;
+  readonly dispatch?: boolean;
 }
 
 @Component({
@@ -56,6 +56,7 @@ export interface EffectExecution {
   templateUrl: './effects-panel.component.html',
   styleUrl: './effects-panel.component.scss',
 })
+
 export class EffectsPanelComponent {
   @Input() set effectEvents(events: EffectEventMessage[]) {
     this._effectEvents.set(events || []);
@@ -72,62 +73,50 @@ export class EffectsPanelComponent {
     for (const event of events) {
       if (!event.effectEvent) continue;
 
-      const effectName = event.effectEvent.name;
-      const [sourceName, propertyName] = effectName.split('.');
+      const { name, lifecycle, duration: rawDuration, executionId } = event.effectEvent;
+      const [sourceName, propertyName] = name.split('.');
+      const duration = rawDuration || 0;
 
-      if (event.effectEvent.lifecycle === 'emitted') {
-        // Dispatching effect emitted an action
-        const duration = event.effectEvent.duration || 0;
-        completedExecutions.push({
-          effectName,
-          sourceName: sourceName || 'Unknown',
-          propertyName: propertyName || 'unknown',
-          startTime: new Date(new Date(event.timestamp).getTime() - duration),
-          endTime: new Date(event.timestamp),
-          duration: duration,
-          status: 'completed',
-          emittedAction: event.action,
-          executionId: event.effectEvent.executionId,
-          dispatch: true,
-        });
-      } else if (event.effectEvent.lifecycle === 'executed') {
-        // Non-dispatching effect executed (dispatch: false)
-        const duration = event.effectEvent.duration || 0;
-        completedExecutions.push({
-          effectName,
-          sourceName: sourceName || 'Unknown',
-          propertyName: propertyName || 'unknown',
-          startTime: new Date(new Date(event.timestamp).getTime() - duration),
-          endTime: new Date(event.timestamp),
-          duration: duration,
-          status: 'executed',
-          executionId: event.effectEvent.executionId,
-          dispatch: false,
-        });
-      } else if (event.effectEvent.lifecycle === 'error') {
-        // Error is also a complete (failed) execution
-        const duration = event.effectEvent.duration || 0;
-        completedExecutions.push({
-          effectName,
-          sourceName: sourceName || 'Unknown',
-          propertyName: propertyName || 'unknown',
-          startTime: new Date(new Date(event.timestamp).getTime() - duration),
-          endTime: new Date(event.timestamp),
-          duration: duration,
-          status: 'error',
-          executionId: event.effectEvent.executionId,
-        });
+      // Only process terminal lifecycle states
+      if (lifecycle !== 'emitted' && lifecycle !== 'executed' && lifecycle !== 'error') {
+        continue;
       }
+
+      // Base execution object with shared properties
+      const baseExecution = {
+        effectName: name,
+        sourceName: sourceName || 'Unknown',
+        propertyName: propertyName || 'unknown',
+        startTime: new Date(new Date(event.timestamp).getTime() - duration),
+        endTime: new Date(event.timestamp),
+        duration,
+        executionId,
+      };
+
+      // Lifecycle-specific properties
+      const lifecycleProps = {
+        emitted: { status: 'completed' as const, emittedAction: event.action, dispatch: true },
+        executed: { status: 'executed' as const, dispatch: false },
+        error: { status: 'error' as const },
+      };
+
+      completedExecutions.push({
+        ...baseExecution,
+        ...lifecycleProps[lifecycle],
+      });
     }
+
+    // Reverse once to get most recent first
+    const reversed = completedExecutions.reverse();
 
     return {
       running: [],
-      completed: completedExecutions.reverse(), // Most recent first
-      all: completedExecutions.reverse(),
+      completed: reversed,
+      all: reversed,
     };
   });
 
-  // Statistics - effect counts by name
+  // Statistics effect counts by name
   stats = computed(() => {
     const executions = this.effectExecutions();
 

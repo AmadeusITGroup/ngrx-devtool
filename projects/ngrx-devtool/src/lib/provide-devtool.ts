@@ -5,7 +5,6 @@ import { DevToolsEffectSources } from './devtools-effect-sources';
 
 export interface DevToolConfig {
   readonly wsUrl?: string;
-  readonly effectActionTypes?: readonly string[];
   readonly trackEffects?: boolean;
 }
 
@@ -15,10 +14,6 @@ export function provideNgrxDevTool(config: DevToolConfig = {}): Provider[] {
       provide: APP_INITIALIZER,
       useFactory: (interceptor: ActionsInterceptorService) => () => {
         interceptor.initialize(config.wsUrl ?? 'ws://localhost:4000');
-
-        if (config.effectActionTypes?.length) {
-          interceptor.registerEffectActions(config.effectActionTypes);
-        }
       },
       deps: [ActionsInterceptorService],
       multi: true,
