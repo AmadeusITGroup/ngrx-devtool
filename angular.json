@@ -30,6 +30,15 @@
             "tsConfig": "projects/ngrx-devtool/tsconfig.spec.json",
             "polyfills": ["zone.js", "zone.js/testing"]
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/ngrx-devtool/**/*.ts",
+              "projects/ngrx-devtool/**/*.html"
+            ]
+          }
         }
       }
     },
@@ -109,6 +118,15 @@
             ],
             "styles": ["projects/ngrx-devtool-demo/src/styles.css"],
             "scripts": []
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/ngrx-devtool-demo/**/*.ts",
+              "projects/ngrx-devtool-demo/**/*.html"
+            ]
           }
         }
       }
@@ -204,6 +222,15 @@
               "projects/ngrx-devtool-ui/src/styles.css"
             ],
             "scripts": []
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/ngrx-devtool-ui/**/*.ts",
+              "projects/ngrx-devtool-ui/**/*.html"
+            ]
           }
         }
       }

@@ -165,6 +165,7 @@ export class EffectTrackerService implements OnDestroy {
     return correlationId;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private findCorrelation(_actionType: string): string | undefined {
     const entries = Array.from(this.pendingCorrelations.entries());
     return entries.length > 0 ? entries[entries.length - 1][0] : undefined;

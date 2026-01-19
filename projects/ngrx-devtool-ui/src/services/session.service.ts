@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, Subject, fromEvent, take, race, map, switchMap, of, throwError } from 'rxjs';
+import { Observable, Subject, fromEvent, take, race, map, switchMap, of } from 'rxjs';
 import { StateChangeMessage } from '../components/performance-panel/performance-panel.component';
 import { EffectEventMessage } from '../components/effects-panel/effects-panel.component';
 
@@ -23,7 +23,7 @@ export interface SessionData {
   readonly appName?: string;
   readonly messages: readonly StateChangeMessage[];
   readonly effectEvents: readonly EffectEventMessage[];
-  readonly renderTimings: ReadonlyArray<readonly [string, RenderTimingMessage]>;
+  readonly renderTimings: readonly (readonly [string, RenderTimingMessage])[];
 }
 
 /** Result type for session import operations */

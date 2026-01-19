@@ -126,7 +126,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subscription?.unsubscribe();
   }
 
-  onTabChange(event: MatTabChangeEvent, message: any) {
+  onTabChange(event: MatTabChangeEvent, message: { diffLoaded?: boolean; diffLoading?: boolean }) {
     if (event.index === 2 && !message.diffLoaded && !message.diffLoading) {
       message.diffLoading = true;
 

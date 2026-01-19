@@ -2,7 +2,6 @@ import { inject, Injectable } from '@angular/core';
 import {
   PerformanceTrackerService,
   AggregatedPerformanceStats,
-  PerformanceWarning,
   ActionTypeStats
 } from './performance-tracker.service';
 import { PerformanceWarningType } from '../types/state.model';

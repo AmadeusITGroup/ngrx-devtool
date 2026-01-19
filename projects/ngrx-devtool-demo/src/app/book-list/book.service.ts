@@ -9,7 +9,7 @@ import { Book } from './book.model';
 export class GoogleBooksService {
   private readonly http = inject(HttpClient);
 
-  getBooks(): Observable<Array<Book>> {
+  getBooks(): Observable<Book[]> {
     return this.http
       .get<{ items: Book[] }>(
         'https://www.googleapis.com/books/v1/volumes?maxResults=5&orderBy=relevance&q=oliver%20sacks'
