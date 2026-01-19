@@ -9,6 +9,6 @@ import { NgFor, NgForOf } from '@angular/common';
   imports: [NgFor, NgForOf]
 })
 export class BookCollectionComponent {
-  @Input() books: ReadonlyArray<Book> = [];
+  @Input() books: readonly Book[] = [];
   @Output() remove = new EventEmitter<string>();
 }

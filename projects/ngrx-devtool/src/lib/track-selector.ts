@@ -41,10 +41,10 @@ export function trackSelector<State, Result>(
   }) as MemoizedSelector<State, Result>;
 
   // Preserve memoized selector properties
-  (trackedSelector as any).release = selector.release;
-  (trackedSelector as any).projector = selector.projector;
-  (trackedSelector as any).setResult = selector.setResult;
-  (trackedSelector as any).clearResult = selector.clearResult;
+  (trackedSelector as unknown as { release: typeof selector.release }).release = selector.release;
+  (trackedSelector as unknown as { projector: typeof selector.projector }).projector = selector.projector;
+  (trackedSelector as unknown as { setResult: typeof selector.setResult }).setResult = selector.setResult;
+  (trackedSelector as unknown as { clearResult: typeof selector.clearResult }).clearResult = selector.clearResult;
 
   return trackedSelector;
 }
@@ -81,14 +81,14 @@ export function createTrackedSelector<State, S1, S2, S3, S4, Result>(
 
 export function createTrackedSelector(
   name: string,
-  ...args: any[]
-): MemoizedSelector<any, any> {
-  const selector = (createSelector as any)(...args);
+  ...args: unknown[]
+): MemoizedSelector<unknown, unknown> {
+  const selector = (createSelector as (...args: unknown[]) => MemoizedSelector<unknown, unknown>)(...args);
   return trackSelector(name, selector);
 }
 
 export function TrackedSelector(name: string) {
-  return function (target: Record<string, unknown>, propertyKey: string) {
+  return function (target: Record<string, unknown>, propertyKey: string): void {
     const originalSelector = target[propertyKey] as MemoizedSelector<unknown, unknown>;
     if (originalSelector) {
       target[propertyKey] = trackSelector(name, originalSelector);

@@ -5,12 +5,12 @@ export interface JsonTreeNode {
   children?: JsonTreeNode[];
 }
 @Component({
-  selector: 'json-tree',
+  selector: 'app-json-tree',
   imports: [],
   templateUrl: './json-tree.component.html',
   styleUrl: './json-tree.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class JsonTreeComponent{
-  @Input() jsonData: any;
+  @Input() jsonData: unknown;
 }

@@ -15,8 +15,8 @@ import { AsyncPipe } from '@angular/common';
   imports: [BookListComponent, BookCollectionComponent, AsyncPipe]
 })
 export class AppComponent implements OnInit {
-  books$!: Observable<ReadonlyArray<Book>>;
-  bookCollection$!: Observable<ReadonlyArray<Book>>;
+  books$!: Observable<readonly Book[]>;
+  bookCollection$!: Observable<readonly Book[]>;
 
   private readonly booksService = inject(GoogleBooksService);
   private readonly store = inject(Store);

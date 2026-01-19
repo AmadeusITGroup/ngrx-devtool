@@ -37,8 +37,7 @@ export interface LargeObjectChange {
 
 export function estimateRenderImpact(
   prevState: unknown,
-  nextState: unknown,
-  actionType: string
+  nextState: unknown
 ): RenderImpactEstimate {
   const analysis = analyzeStateChange(prevState, nextState);
   const factors: RenderImpactFactor[] = [];
@@ -125,7 +124,7 @@ export function estimateRenderImpact(
   );
 
   // Generate recommendations
-  const recommendations = generateRecommendations(analysis, factors, actionType);
+  const recommendations = generateRecommendations(analysis, factors);
 
   return {
     score: totalScore,
@@ -229,8 +228,7 @@ function formatBytes(bytes: number): string {
 
 function generateRecommendations(
   analysis: StateChangeAnalysis,
-  factors: readonly RenderImpactFactor[],
-  _actionType: string
+  factors: readonly RenderImpactFactor[]
 ): string[] {
   const recommendations: string[] = [];
 

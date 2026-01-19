@@ -1,4 +1,4 @@
-import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { from, map, mergeMap, Observable, of, filter } from 'rxjs';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { readBlobAsText } from '../util/helpers';
@@ -7,10 +7,11 @@ import { isPlatformBrowser } from '@angular/common';
   providedIn: 'root',
 })
 export class WebsocketService {
-  private socket$?: WebSocketSubject<any>;
-  public messages$?: Observable<any>;
+  private socket$?: WebSocketSubject<unknown>;
+  public messages$?: Observable<unknown>;
   private isBrowser: boolean;
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+  private readonly platformId = inject(PLATFORM_ID);
+  constructor() {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
   connect(url: string): void {
@@ -31,7 +32,7 @@ export class WebsocketService {
                 try {
                   const parsed = JSON.parse(text);
                   return parsed;
-                } catch (e) {
+                } catch {
                   return null;
                 }
               })
@@ -42,7 +43,7 @@ export class WebsocketService {
             try {
               const parsed = JSON.parse(data);
               return of(parsed);
-            } catch (e) {
+            } catch {
               return of(null);
             }
           }

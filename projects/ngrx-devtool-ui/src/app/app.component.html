@@ -108,10 +108,10 @@
 
             <mat-tab-group (selectedTabChange)="onTabChange($event, message)">
               <mat-tab label="Action">
-                <json-tree [jsonData]="message.action"></json-tree>
+                <app-json-tree [jsonData]="message.action"></app-json-tree>
               </mat-tab>
               <mat-tab label="State">
-                <json-tree [jsonData]="message.nextState"></json-tree>
+                <app-json-tree [jsonData]="message.nextState"></app-json-tree>
               </mat-tab>
               <mat-tab label="Diff">
                 @if (message.diffLoaded) {

@@ -44,7 +44,7 @@ describe('PerformancePanelComponent', () => {
 
   describe('ngOnChanges', () => {
     it('should process messages when messages input changes', () => {
-      const processMessagesSpy = jest.spyOn(component as any, 'processMessages');
+      const processMessagesSpy = jest.spyOn(component as unknown as { processMessages: () => void }, 'processMessages');
 
       component.messages = mockMessages;
       component.ngOnChanges({
@@ -55,7 +55,7 @@ describe('PerformancePanelComponent', () => {
     });
 
     it('should scroll to action when selectedActionType changes', () => {
-      const scrollToActionSpy = jest.spyOn(component as any, 'scrollToAction');
+      const scrollToActionSpy = jest.spyOn(component as unknown as { scrollToAction: (action: string) => void }, 'scrollToAction');
 
       component.selectedActionType = '[Books] Load Success';
       component.ngOnChanges({
@@ -66,7 +66,7 @@ describe('PerformancePanelComponent', () => {
     });
 
     it('should not scroll when selectedActionType is null', () => {
-      const scrollToActionSpy = jest.spyOn(component as any, 'scrollToAction');
+      const scrollToActionSpy = jest.spyOn(component as unknown as { scrollToAction: (action: string) => void }, 'scrollToAction');
 
       component.selectedActionType = null;
       component.ngOnChanges({

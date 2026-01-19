@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 
 export interface DiffItem {
   path: string;
-  oldValue?: any;
-  newValue?: any;
+  oldValue?: unknown;
+  newValue?: unknown;
   type: 'added' | 'removed' | 'changed';
 }
 
@@ -20,7 +20,7 @@ export class DiffService {
   private readonly MAX_DIFFS = 100;
   private readonly MAX_DEPTH = 10;
 
-  calculateDiff(prevState: any, nextState: any): DiffResult {
+  calculateDiff(prevState: unknown, nextState: unknown): DiffResult {
     const diffs: DiffItem[] = [];
     let totalChanges = 0;
 
@@ -111,14 +111,14 @@ export class DiffService {
     };
   }
 
-  private isEqual(a: any, b: any): boolean {
+  private isEqual(a: unknown, b: unknown): boolean {
     if (a === b) return true;
     if (typeof a !== typeof b) return false;
     if (typeof a !== 'object' || a === null || b === null) return a === b;
     return JSON.stringify(a) === JSON.stringify(b);
   }
 
-  private flattenObject(obj: any, path: string = '', depth: number = 0): { path: string; value: any }[] {
+  private flattenObject(obj: unknown, path = '', depth = 0): { path: string; value: unknown }[] {
     if (depth > this.MAX_DEPTH) {
       return [{ path, value: '[Max depth exceeded]' }];
     }
@@ -141,7 +141,7 @@ export class DiffService {
 
     return keys.reduce((acc, key) => {
       const currentPath = path ? `${path}.${key}` : key;
-      const value = obj[key];
+      const value = (obj as Record<string, unknown>)[key];
 
       if (value === null || value === undefined || typeof value !== 'object') {
         acc.push({ path: currentPath, value });
@@ -150,6 +150,6 @@ export class DiffService {
       }
 
       return acc;
-    }, [] as { path: string; value: any }[]);
+    }, [] as { path: string; value: unknown }[]);
   }
 }

@@ -9,6 +9,6 @@ import { NgFor, NgForOf } from '@angular/common';
   imports: [NgFor, NgForOf]
 })
 export class BookListComponent {
-  @Input() books: ReadonlyArray<Book> = [];
+  @Input() books: readonly Book[] = [];
   @Output() add = new EventEmitter<string>();
 }

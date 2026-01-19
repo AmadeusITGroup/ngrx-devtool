@@ -1,7 +1,7 @@
 import { Component, inject, Input, OnChanges, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ScrollingModule } from '@angular/cdk/scrolling';
-import { DiffService, DiffItem, DiffResult } from '../../services/diff.service';
+import { DiffService, DiffItem } from '../../services/diff.service';
 
 @Component({
   selector: 'app-diff-viewer',
@@ -11,8 +11,8 @@ import { DiffService, DiffItem, DiffResult } from '../../services/diff.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DiffViewerComponent implements OnChanges {
-  @Input() previousState: any;
-  @Input() currentState: any;
+  @Input() previousState: unknown;
+  @Input() currentState: unknown;
 
   diffs: DiffItem[] = [];
   truncated = false;
@@ -29,7 +29,7 @@ export class DiffViewerComponent implements OnChanges {
     }
   }
 
-  formatValue(value: any): string {
+  formatValue(value: unknown): string {
     if (value === null) return 'null';
     if (value === undefined) return 'undefined';
     if (typeof value === 'string') return `"${value}"`;
