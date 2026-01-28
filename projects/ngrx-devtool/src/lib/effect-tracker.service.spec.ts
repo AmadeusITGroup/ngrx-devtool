@@ -2,14 +2,13 @@ import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Store, provideStore } from '@ngrx/store';
 import { provideEffects, EffectSources } from '@ngrx/effects';
 
-import { EffectTrackerService, TrackedAction } from './effect-tracker.service';
+import { EffectTrackerService } from './effect-tracker.service';
 import { DevToolsEffectSources, EffectEvent } from './devtools-effect-sources';
 import { TestEffects, testActions, testReducer } from './testing/test-effects';
 
 describe('EffectTrackerService', () => {
   let store: Store;
   let trackerService: EffectTrackerService;
-  let effectSources: DevToolsEffectSources;
   let collectedEffectEvents: EffectEvent[];
 
   beforeEach(() => {
@@ -26,7 +25,6 @@ describe('EffectTrackerService', () => {
 
     store = TestBed.inject(Store);
     trackerService = TestBed.inject(EffectTrackerService);
-    effectSources = TestBed.inject(EffectSources) as DevToolsEffectSources;
 
     // Collect effect events from tracker
     trackerService.effectEvents$.subscribe((event) => {
@@ -185,7 +183,7 @@ describe('EffectTrackerService', () => {
       tick(100);
 
       // Now track the success action - it should be recognized
-      const tracked = trackerService.trackAction(testActions.loadItemsSuccess({ items: [] }));
+      trackerService.trackAction(testActions.loadItemsSuccess({ items: [] }));
 
       // After effect runs, we should see the effect result being tracked
       expect(trackerService.isEffectAction('[Test] Load Items Success')).toBe(true);

@@ -1,8 +1,7 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { PLATFORM_ID } from '@angular/core';
-import { Store, provideStore, Action } from '@ngrx/store';
-import { provideEffects, EffectSources, Actions, ofType } from '@ngrx/effects';
-import { Subject } from 'rxjs';
+import { provideStore } from '@ngrx/store';
+import { provideEffects, EffectSources } from '@ngrx/effects';
 
 import { ActionsInterceptorService, DevToolMessage } from './actions-interceptor.service';
 import { EffectTrackerService } from './effect-tracker.service';
@@ -13,7 +12,6 @@ import { MockWebSocket, WebSocketConstants } from './testing/mock-websocket';
 describe('ActionsInterceptorService', () => {
   let interceptorService: ActionsInterceptorService;
   let effectTracker: EffectTrackerService;
-  let mockWebSocket: MockWebSocket;
   let originalWebSocket: typeof WebSocket | undefined;
   let createdWebSockets: MockWebSocket[];
 

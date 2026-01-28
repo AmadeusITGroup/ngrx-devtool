@@ -1,9 +1,8 @@
-import { TestBed, fakeAsync, tick, flush } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Store, provideStore } from '@ngrx/store';
 import { provideEffects, EffectSources } from '@ngrx/effects';
-import { firstValueFrom, take, toArray, timeout } from 'rxjs';
 
-import { DevToolsEffectSources, EffectEvent, EffectLifecycle } from './devtools-effect-sources';
+import { DevToolsEffectSources, EffectEvent } from './devtools-effect-sources';
 import { TestEffects, testActions, testReducer } from './testing/test-effects';
 
 describe('DevToolsEffectSources', () => {
