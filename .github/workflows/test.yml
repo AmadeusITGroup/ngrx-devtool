@@ -8,7 +8,7 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: gmsshr-core-amadeus-altea-offer
 
     steps:
       - name: Checkout repository
@@ -27,7 +27,7 @@ jobs:
         run: npm run lint
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: gmsshr-core-amadeus-altea-offer
 
     strategy:
       matrix:
