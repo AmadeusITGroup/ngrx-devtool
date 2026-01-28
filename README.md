@@ -1,6 +1,16 @@
-# NgRx DevTool - Architecture Visualization Tool
+<p align="center">
+  <img src="assets/logo.png" alt="NgRx DevTool Logo" width="300">
+</p>
 
-A powerful development tool for visualizing and debugging NgRx state management in Angular applications. Features real-time effect lifecycle tracking and performance monitoring.
+<h1 align="center">NgRx DevTool</h1>
+
+<p align="center">
+  <strong>Architecture Visualization Tool</strong><br>
+  A powerful development tool for visualizing and debugging NgRx state management in Angular applications.
+  <br>Features real-time effect lifecycle tracking and performance monitoring.
+</p>
+
+---
 
 ## Overview
 
@@ -18,10 +28,6 @@ This tool provides real-time monitoring and visualization of NgRx actions, state
 - **Visual Indicators** - Blue for user actions, orange for effect results
 - **Performance Tracking** - Monitor reducer execution time, render timing, and state size changes
 - **Effects Panel** - Dedicated panel showing all effect executions with duration and status
-
-## Performance Monitoring
-
-The DevTool includes built-in performance tracking that measures reducer execution time, actual render time (including Angular change detection and browser paint), and state size metrics. This helps identify performance bottlenecks and understand the full cost of state changes beyond just reducer execution.
 
 ## Project Structure
 
@@ -91,81 +97,6 @@ node dist/index.js
 Open http://localhost:3000 and start your Angular app. All actions will appear:
 - Blue border = User action
 - Orange border = Effect result (shows which effect emitted the action)
-
----
-
-## How Effect Tracking Works
-
-The DevTool uses `DevToolsEffectSources` to intercept the NgRx effect lifecycle. When `trackEffects: true` is set, it:
-
-1. Wraps each effect observable to track when it starts processing an action
-2. Monitors when effects emit new actions
-3. Tracks completion and error states
-4. Measures effect execution duration
-
-This provides accurate effect tracking without relying on action naming conventions.
-
-### Effect Events
-
-The Effects Panel shows:
-- **Started** - When an effect begins processing a triggering action
-- **Emitted** - When an effect dispatches a new action
-- **Completed** - When an effect observable completes
-- **Error** - When an effect encounters an error
-
-### Custom Effect Names
-
-For readable effect names in production builds, implement `OnIdentifyEffects`:
-
-```typescript
-@Injectable()
-export class BooksEffects implements OnIdentifyEffects {
-  loadBooks$ = createEffect(() => ...);
-
-  ngrxOnIdentifyEffects(): string {
-    return 'BooksEffects';  // This name appears in the DevTool
-  }
-}
-```
-
----
-
-## Advanced Configuration
-
-### Custom WebSocket URL
-
-```typescript
-import { createDevToolMetaReducer, provideNgrxDevTool } from 'ngrx-devtool';
-
-provideStore(
-  { /* reducers */ },
-  { metaReducers: [createDevToolMetaReducer({ wsUrl: 'ws://custom-host:4000' })] }
-),
-provideNgrxDevTool({
-  wsUrl: 'ws://custom-host:4000',
-  trackEffects: true,
-})
-```
-
-### Conditional Enable (Production Safety)
-
-```typescript
-import { createDevToolMetaReducer, provideNgrxDevTool } from 'ngrx-devtool';
-
-const devToolProviders = !environment.production ? [
-  provideNgrxDevTool({ trackEffects: true }),
-] : [];
-
-const metaReducers = !environment.production ? [createDevToolMetaReducer()] : [];
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideStore({ /* reducers */ }, { metaReducers }),
-    provideEffects([...]),
-    ...devToolProviders,
-  ]
-};
-```
 
 ---
 

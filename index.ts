@@ -4,7 +4,7 @@
 import { spawn } from 'child_process';
 import { WebSocket, WebSocketServer } from 'ws';
 import * as path from 'path';
-import * as chalk from 'chalk';
+const chalk = require('chalk');
 
 // IMP: Allow users to specify ports via command line arguments.
 const PORT_WS = 4000;
@@ -13,9 +13,54 @@ const wss = new WebSocketServer({ port: PORT_WS });
 
 let clients = [];
 
-console.log(chalk.bold.blue('\n========================================'));
-console.log(chalk.bold.blue('       NGRX DEVTOOLS SERVER'));
-console.log(chalk.bold.blue('========================================\n'));
+const logo = `
+                                    ***@  +**
+                                  **         ******%
+                               @**   .......-::       ++%
+                         #****%    ...................    *+
+                       **          . .....................   +
+                      #*....         .............:--=- :.     =
+                      # .          ...............:-%*%% %.      =
+                     **           ..................*. *-+@.      =
+                  %***           .......... ** ......    .......   +
+                *#              ....:::#********# ....  .. ....    =:
+               * ..           ...:::****+=@@@@@@@@@@@  .......    #=
+              %* ..:.       ...:: +*+.@@@@@@@@@@@@@@@@@@@@%###%%###*+
+               # ...      ...:::++=@@@@@@@@%%%%%%%%@@@@@@@@@#%%-## **     =
+               *# .      ..:::*++@@@@@@%%%%%%##%%%%%%%%@@@@@@@+###+:** ..
+               **       ..:::=+-@@@@@%%%           ##%%%%@@@@@@*.#@%+# ##..
+              %*       ..:::*=%@@@@%%%%%             ##%%%%%%@@@@+%%%%%*# #. *
+             *#       ..:::.=@@@@@%%%%%%########*     ####%%%%@@@@%*%## ##  .
+             *        .::::+.@@@@%%%%%%%%%%%#####*    @*###%%%%@%@#%%#%-@% #.
+             *  .     :::::=@@%%%%%%%%%%#####%@=       *####%%%%%%*### .%##%.
+             * ..     .::::=@@%%%%%%####               *####%%%%%%%##   %-# .
+             :*       ..:::-@@%%%%####*     @###*#     *####%%%%%%#*    ## -:
+             ..*#*     .:::-%@%%%%####     ######*     *#####%%*##@    @# .:=*
+              =+ +    =..:::%@%%%%####     ######*     *#####%%#*  ..    ..:@+
+              %+ -=    +..-: %%%%%####.                ####%%%% =..    ... @#*
+               *+ =   . + .--%%%%%%####*         %     ##%%%#-....    ... # *-
+               @*:++   : += -:%%%#######******#########%%%%%%%%%%%# =.    #*:*
+                ** **   : ++ =:%%%%##*********####%%%%%%%%%%%%%%@ :::...** :**
+                 ** ** . . .== . ### ++++++***####%%%%%%%%%%+  --:::: #* ::@#-
+                . ** ##       === %**   .::-++*###%% :.+-:::::::::@*% =---##%
+                 . ** *#@        =--==       :=**#%%%%%  :..:....::.====-%**:.
+                     +#@##           *-:        %*###%%%###-  :::==++==@%#%..
+                     +**:*##           .         .......:::::+===++==%%##.:.
+                    .  **#=####             ....:::--------==.-===+%%%#%::.
+                    . .  **#++####      .....:.::::::::-:::-====%%%*#%-:-:
+                      ...  *##-+#####@ .. .::::::.   .:::---%%%%#*#%---::
+                        ..:. **###*######%%@  .. ... @#%%%%%%#*#%.--=::
+                          ....  **##%=*####%%%%%%%%%%%#%****## ---:::
+                             ..... .*****%#%#=+***--####%=-:-:-:::
+                                        ::::====---- ===--=::::
+                                      . .:.:::-:::--:::::::
+                                         .........:
+`;
+
+console.log(chalk.magenta(logo));
+console.log(chalk.dim('─'.repeat(60)));
+console.log(chalk.bold.white('  NgRx DevTools Server'));
+console.log(chalk.dim('─'.repeat(60)));
 
 wss.on('connection', (socket) => {
   clients.push(socket);
@@ -37,24 +82,33 @@ const ui = spawn(
 );
 
 ui.stdout?.on('data', (data) => {
-  console.log(chalk.gray(`[UI] ${data.toString().trim()}`));
+  // Suppress http-server verbose output
 });
 
 ui.stderr?.on('data', (data) => {
-  console.error(chalk.red(`[UI Error] ${data.toString().trim()}`));
+  const msg = data.toString().trim();
+  // Only show actual errors, not deprecation warnings
+  if (msg && !msg.includes('DeprecationWarning')) {
+    console.error(chalk.red(`  ✗ UI Error: ${msg}`));
+  }
 });
 
 ui.on('error', (error) => {
-  console.error('Failed to start UI server: ', error);
+  console.error(chalk.red('  ✗ Failed to start UI server:', error.message));
 });
 process.on('SIGINT', () => {
+  console.log(chalk.dim('\n\n  Shutting down servers...'));
   ui.kill();
   wss.close();
+  console.log(chalk.green('  ✓ Servers stopped. Goodbye!\n'));
   process.exit(0);
 });
 
-console.log(
-  chalk.green(`\n✓ WebSocket server running on ws://localhost:${PORT_WS}`)
-);
-console.log(chalk.green(`✓ UI server running on http://localhost:${PORT_UI}`));
-console.log(chalk.blue('\nPress Ctrl+C to stop all servers'));
+console.log('');
+console.log(chalk.green(`  ✓ WebSocket`), chalk.dim(`ws://localhost:${PORT_WS}`));
+console.log(chalk.green(`  ✓ UI Server`), chalk.dim(`http://localhost:${PORT_UI}`));
+console.log('');
+console.log(chalk.dim('─'.repeat(60)));
+console.log(chalk.dim('  Press'), chalk.white('Ctrl+C'), chalk.dim('to stop all servers'));
+console.log(chalk.dim('─'.repeat(60)));
+console.log('');
