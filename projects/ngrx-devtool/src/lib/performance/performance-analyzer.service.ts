@@ -2,9 +2,8 @@ import { inject, Injectable } from '@angular/core';
 import {
   PerformanceTrackerService,
   AggregatedPerformanceStats,
-  ActionTypeStats
 } from './performance-tracker.service';
-import { PerformanceWarningType } from '../types/state.model';
+import { PerformanceWarningType, ActionTypeStats } from '../../types/state.model';
 
 export interface PerformanceRecommendation {
   readonly category: 'reducer' | 'state' | 'actions' | 'memory' | 'general';
@@ -301,7 +300,7 @@ this.store.dispatch(loadPage({ page: 1, pageSize: 50 }));`,
     return 'F';
   }
 
-  private getWarningDescription(type: string): string {
+  private getWarningDescription(type: PerformanceWarningType): string {
     const descriptions: Record<string, string> = {
       SLOW_REDUCER: 'Slow reducer execution',
       LARGE_STATE: 'Large state size',

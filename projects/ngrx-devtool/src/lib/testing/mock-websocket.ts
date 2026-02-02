@@ -1,7 +1,3 @@
-/**
- * Mock WebSocket for testing the devtool without a real server.
- * Captures all messages sent and allows simulating server responses.
- */
 export class MockWebSocket {
   static readonly CONNECTING = 0;
   static readonly OPEN = 1;
@@ -28,7 +24,6 @@ export class MockWebSocket {
   constructor(url: string, autoOpen = true) {
     this.url = url;
     this.autoOpen = autoOpen;
-    // Simulate async connection - uses Promise.resolve for zone.js compatibility
     if (autoOpen) {
       Promise.resolve().then(() => this.simulateOpen());
     }
@@ -54,12 +49,9 @@ export class MockWebSocket {
   }
 
   send(data: string): void {
-    // Allow send even if not fully open - the service handles buffering
-    // Real WebSocket would throw, but we want to capture attempts
     if (this.readyState === MockWebSocket.OPEN) {
       this.sentMessages.push(data);
     }
-    // If not open, silently drop (matches behavior when service buffers)
   }
 
   close(): void {
@@ -76,7 +68,6 @@ export class MockWebSocket {
   }
 }
 
-// Define WebSocket constants for global mock
 export const WebSocketConstants = {
   CONNECTING: 0,
   OPEN: 1,
@@ -84,14 +75,9 @@ export const WebSocketConstants = {
   CLOSED: 3,
 };
 
-/**
- * Install MockWebSocket globally for tests.
- * Call in beforeEach and restore in afterEach.
- */
 export function installMockWebSocket(autoOpen = true): MockWebSocket {
   const mockWs = new MockWebSocket('ws://localhost:4000', autoOpen);
   const MockWebSocketConstructor = jest.fn(() => mockWs) as unknown as typeof WebSocket;
-  // Add static constants
   Object.assign(MockWebSocketConstructor, WebSocketConstants);
   (global as unknown as { WebSocket: unknown }).WebSocket = MockWebSocketConstructor;
   return mockWs;

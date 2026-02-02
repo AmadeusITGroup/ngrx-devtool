@@ -3,10 +3,8 @@ import { Observable, Subject, fromEvent, take, race, map, switchMap, of } from '
 import { StateChangeMessage } from '../components/performance-panel/performance-panel.component';
 import { EffectEventMessage } from '../components/effects-panel/effects-panel.component';
 
-/** Session file format version for compatibility checking */
 const SESSION_FILE_VERSION = 1 as const;
 
-/** Render timing message structure from devtools */
 export interface RenderTimingMessage {
   readonly type: 'RENDER_TIMING';
   readonly actionType: string;
@@ -16,7 +14,6 @@ export interface RenderTimingMessage {
   readonly timestamp: string;
 }
 
-/** Represents a saved devtools session with strongly typed data */
 export interface SessionData {
   readonly version: number;
   readonly exportedAt: string;
@@ -26,12 +23,10 @@ export interface SessionData {
   readonly renderTimings: readonly (readonly [string, RenderTimingMessage])[];
 }
 
-/** Result type for session import operations */
 export type SessionImportResult =
   | { readonly success: true; readonly data: SessionData }
   | { readonly success: false; readonly error: SessionImportError };
 
-/** Typed error categories for session imports */
 export type SessionImportError =
   | { readonly type: 'NO_FILE_SELECTED' }
   | { readonly type: 'FILE_READ_ERROR'; readonly message: string }
@@ -43,13 +38,8 @@ export type SessionImportError =
   providedIn: 'root',
 })
 export class SessionService {
-  /** Maximum items to stringify at once to avoid memory issues */
   private readonly CHUNK_SIZE = 1000;
 
-  /**
-   * Exports session data to a JSON file and triggers download.
-   * Uses chunked serialization to handle large datasets without hitting string length limits.
-   */
   exportSession(
     messages: readonly StateChangeMessage[],
     effectEvents: readonly EffectEventMessage[],
@@ -69,10 +59,6 @@ export class SessionService {
     }
   }
 
-  /**
-   * Builds a Blob by streaming JSON parts to avoid creating one massive string.
-   * This prevents RangeError on very large sessions.
-   */
   private buildSessionBlob(
     messages: readonly StateChangeMessage[],
     effectEvents: readonly EffectEventMessage[],
@@ -81,7 +67,6 @@ export class SessionService {
   ): Blob {
     const parts: BlobPart[] = [];
 
-    // Write header
     parts.push('{\n');
     parts.push(`  "version": ${SESSION_FILE_VERSION},\n`);
     parts.push(`  "exportedAt": ${JSON.stringify(new Date().toISOString())},\n`);
@@ -89,17 +74,14 @@ export class SessionService {
       parts.push(`  "appName": ${JSON.stringify(appName)},\n`);
     }
 
-    // Write messages array in chunks
     parts.push('  "messages": [\n');
     this.writeArrayChunked(parts, messages, '    ');
     parts.push('  ],\n');
 
-    // Write effectEvents array in chunks
     parts.push('  "effectEvents": [\n');
     this.writeArrayChunked(parts, effectEvents, '    ');
     parts.push('  ],\n');
 
-    // Write renderTimings array in chunks
     const renderTimingsArray = Array.from(renderTimings.entries());
     parts.push('  "renderTimings": [\n');
     this.writeArrayChunked(parts, renderTimingsArray, '    ');
@@ -110,9 +92,6 @@ export class SessionService {
     return new Blob(parts, { type: 'application/json' });
   }
 
-  /**
-   * Writes array items to blob parts in chunks to prevent memory issues.
-   */
   private writeArrayChunked<T>(parts: BlobPart[], items: readonly T[], indent: string): void {
     for (let i = 0; i < items.length; i += this.CHUNK_SIZE) {
       const chunk = items.slice(i, Math.min(i + this.CHUNK_SIZE, items.length));
@@ -125,10 +104,6 @@ export class SessionService {
     }
   }
 
-  /**
-   * Imports session data from a JSON file using reactive patterns.
-   * Returns an Observable that emits the parsed session data or an error result.
-   */
   importSession$(): Observable<SessionImportResult> {
     const input = this.createFileInput();
     const cancelled$ = new Subject<void>();
@@ -163,10 +138,6 @@ export class SessionService {
     return race(fileSelected$, cancelledResult$).pipe(take(1));
   }
 
-  /**
-   * Legacy Promise-based import for backwards compatibility.
-   * Prefer importSession$() for new code.
-   */
   importSession(): Promise<SessionData> {
     return new Promise((resolve, reject) => {
       this.importSession$().subscribe((result) => {
@@ -179,7 +150,6 @@ export class SessionService {
     });
   }
 
-  /** Reads file content and parses as SessionData */
   private readAndParseFile$(file: File): Observable<SessionImportResult> {
     return new Observable<SessionImportResult>((subscriber) => {
       const reader = new FileReader();
@@ -213,7 +183,6 @@ export class SessionService {
     });
   }
 
-  /** Parses JSON content and validates structure */
   private parseSessionContent(content: string): SessionImportResult {
     let parsed: unknown;
 
@@ -233,7 +202,6 @@ export class SessionService {
     return { success: true, data: parsed as SessionData };
   }
 
-  /** Type-safe validation with detailed error reporting */
   private validateSessionData(data: unknown): { valid: true } | { valid: false; reason: string } {
     if (data === null || typeof data !== 'object') {
       return { valid: false, reason: 'Data is not an object' };
@@ -264,7 +232,6 @@ export class SessionService {
     return { valid: true };
   }
 
-  /** Creates a hidden file input element configured for JSON files */
   private createFileInput(): HTMLInputElement {
     const input = document.createElement('input');
     input.type = 'file';
@@ -273,7 +240,6 @@ export class SessionService {
     return input;
   }
 
-  /** Generates a timestamped filename for session export */
   private generateFilename(appName?: string): string {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     return appName
@@ -281,7 +247,6 @@ export class SessionService {
       : `ngrx-session-${timestamp}.json`;
   }
 
-  /** Triggers file download via temporary anchor element */
   private triggerDownload(url: string, filename: string): void {
     const link = document.createElement('a');
     link.href = url;
@@ -291,7 +256,6 @@ export class SessionService {
     document.body.removeChild(link);
   }
 
-  /** Formats import error for user display */
   private formatImportError(error: SessionImportError): string {
     switch (error.type) {
       case 'NO_FILE_SELECTED':

@@ -19,7 +19,6 @@ import { DiffViewerComponent } from '../components/diff-viewer/diff-viewer.compo
 import { PerformancePanelComponent, StateChangeMessage } from '../components/performance-panel/performance-panel.component';
 import { EffectsPanelComponent, EffectEventMessage } from '../components/effects-panel/effects-panel.component';
 
-/** Enriched message with computed fields for display */
 interface EnrichedMessage extends StateChangeMessage {
   prevState: unknown;
   diffLoaded?: boolean;
@@ -198,14 +197,24 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   clearSession(): void {
+    // Unsubscribe from existing subscription first
+    this.subscription?.unsubscribe();
+
+    // Send clear request to connected apps before clearing UI
+    this._webSocketService.send({ type: 'CLEAR_REQUEST', timestamp: new Date().toISOString() });
+
     this.messages.set([]);
     this.effectEvents.set([]);
     this.renderTimings.set(new Map());
     this.isImportedSession.set(false);
     this.importedSessionName.set(null);
 
-    // Reconnect WebSocket for live data
-    this._webSocketService.connect('ws://localhost:4000');
+    // Only reconnect if the websocket was closed (e.g., after importing a session)
+    // If already connected, just resubscribe
+    if (!this._webSocketService.messages$) {
+      this._webSocketService.connect('ws://localhost:4000');
+    }
+
     this.subscription = this._webSocketService.messages$?.subscribe((msg) => {
       if (!msg) return;
       this.handleWebSocketMessage(msg);
@@ -238,8 +247,11 @@ export class AppComponent implements OnInit, OnDestroy {
       });
     } else if (message.type === 'EFFECT_EVENT') {
       this.effectEvents.update((arr) => [...arr, msg as EffectEventMessage]);
-    } else {
+    } else if (message.type === 'STATE_CHANGE') {
+      // Only process STATE_CHANGE messages which contain the actual state data
+      // Ignore ACTION_TRACKED messages to avoid duplicates
       this.messages.update((arr) => [...arr, message]);
     }
+    // Ignore ACTION_TRACKED and other message types to prevent duplicates
   }
 }

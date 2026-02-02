@@ -14,7 +14,6 @@ export function trackSelector<State, Result>(
   let lastResult: Result | undefined;
   let lastInput: State | undefined;
 
-  // Create a wrapper that tracks invocations
   const trackedSelector = ((state: State) => {
     const startTime = performance.now();
     const result = selector(state);
@@ -27,7 +26,6 @@ export function trackSelector<State, Result>(
     lastResult = result;
     lastInput = state;
 
-    // Record metrics if tracker is available
     if (globalSelectorTracker) {
       globalSelectorTracker.recordSelectorInvocation(
         name,
@@ -40,7 +38,6 @@ export function trackSelector<State, Result>(
     return result;
   }) as MemoizedSelector<State, Result>;
 
-  // Preserve memoized selector properties
   (trackedSelector as unknown as { release: typeof selector.release }).release = selector.release;
   (trackedSelector as unknown as { projector: typeof selector.projector }).projector = selector.projector;
   (trackedSelector as unknown as { setResult: typeof selector.setResult }).setResult = selector.setResult;

@@ -3,7 +3,6 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { createAction, props } from '@ngrx/store';
 import { of, throwError, delay, map, switchMap, catchError } from 'rxjs';
 
-// Test Actions
 export const testActions = {
   loadItems: createAction('[Test] Load Items'),
   loadItemsSuccess: createAction('[Test] Load Items Success', props<{ items: string[] }>()),
@@ -15,16 +14,10 @@ export const testActions = {
   asyncComplete: createAction('[Test] Async Complete'),
 };
 
-/**
- * Test effects for verifying effect tracking functionality.
- */
 @Injectable()
 export class TestEffects {
   private readonly actions$ = inject(Actions);
 
-  /**
-   * Simple synchronous effect - maps one action to another.
-   */
   loadItems$ = createEffect(() =>
     this.actions$.pipe(
       ofType(testActions.loadItems),
@@ -32,9 +25,6 @@ export class TestEffects {
     )
   );
 
-  /**
-   * Effect with async delay - useful for testing duration tracking.
-   */
   asyncEffect$ = createEffect(() =>
     this.actions$.pipe(
       ofType(testActions.triggerAsync),
@@ -43,9 +33,6 @@ export class TestEffects {
     )
   );
 
-  /**
-   * Effect that can fail - useful for testing error tracking.
-   */
   failingEffect$ = createEffect(() =>
     this.actions$.pipe(
       ofType(testActions.addItem),
@@ -59,15 +46,11 @@ export class TestEffects {
     )
   );
 
-  /**
-   * Non-dispatching effect - useful for verifying dispatch:false tracking.
-   */
   logEffect$ = createEffect(
     () =>
       this.actions$.pipe(
         ofType(testActions.noopAction),
         map(() => {
-          // Side effect only, no action dispatched
           return;
         })
       ),
@@ -75,7 +58,6 @@ export class TestEffects {
   );
 }
 
-// Test Reducer
 export interface TestState {
   items: string[];
   loading: boolean;

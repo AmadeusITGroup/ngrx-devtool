@@ -2,8 +2,8 @@ import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Store, provideStore } from '@ngrx/store';
 import { provideEffects, EffectSources } from '@ngrx/effects';
 
-import { DevToolsEffectSources, EffectEvent } from './devtools-effect-sources';
-import { TestEffects, testActions, testReducer } from './testing/test-effects';
+import { DevToolsEffectSources, EffectEvent } from '../core/devtools-effect-sources';
+import { TestEffects, testActions, testReducer } from './test-effects';
 
 describe('DevToolsEffectSources', () => {
   let store: Store;
@@ -17,7 +17,6 @@ describe('DevToolsEffectSources', () => {
       providers: [
         provideStore({ test: testReducer }),
         provideEffects([TestEffects]),
-        // Replace EffectSources with our DevToolsEffectSources
         { provide: EffectSources, useClass: DevToolsEffectSources },
       ],
     });
@@ -25,7 +24,6 @@ describe('DevToolsEffectSources', () => {
     store = TestBed.inject(Store);
     effectSources = TestBed.inject(EffectSources) as DevToolsEffectSources;
 
-    // Collect all effect events
     effectSources.effectEvents$.subscribe((event) => {
       collectedEvents.push(event);
     });
@@ -49,15 +47,13 @@ describe('DevToolsEffectSources', () => {
 
     it('should identify effect properties with correct dispatch flag', () => {
       const registered = effectSources.getRegisteredEffects();
-      const testEffectsMeta = registered.get('TestEffects')!;
+      const getProp = registered.get('TestEffects')!;
 
-      // Find the logEffect$ which has dispatch: false
-      const logEffect = testEffectsMeta.find((m) => m.propertyName === 'logEffect$');
+      const logEffect = getProp.find((m) => m.propertyName === 'logEffect$');
       expect(logEffect).toBeDefined();
       expect(logEffect!.dispatch).toBe(false);
 
-      // Find loadItems$ which should have dispatch: true (default)
-      const loadItemsEffect = testEffectsMeta.find((m) => m.propertyName === 'loadItems$');
+      const loadItemsEffect = getProp.find((m) => m.propertyName === 'loadItems$');
       expect(loadItemsEffect).toBeDefined();
       expect(loadItemsEffect!.dispatch).toBe(true);
     });
@@ -89,13 +85,12 @@ describe('DevToolsEffectSources', () => {
       const logEvent = executedEvents.find((e) => e.effectName.includes('logEffect$'));
       expect(logEvent).toBeDefined();
       expect(logEvent!.dispatch).toBe(false);
-      // Non-dispatching effects should not have an action
       expect(logEvent!.action).toBeUndefined();
     }));
 
     it('should track duration for async effects', fakeAsync(() => {
       store.dispatch(testActions.triggerAsync());
-      tick(100); // Wait for the 50ms delay + processing
+      tick(100);
 
       const emittedEvents = collectedEvents.filter((e) => e.lifecycle === 'emitted');
       const asyncEvent = emittedEvents.find((e) =>
@@ -104,7 +99,7 @@ describe('DevToolsEffectSources', () => {
 
       expect(asyncEvent).toBeDefined();
       expect(asyncEvent!.duration).toBeDefined();
-      expect(asyncEvent!.duration).toBeGreaterThanOrEqual(40); // Allow some tolerance
+      expect(asyncEvent!.duration).toBeGreaterThanOrEqual(40);
     }));
 
     it('should include executionId for tracking', fakeAsync(() => {

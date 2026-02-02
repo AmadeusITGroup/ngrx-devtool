@@ -13,7 +13,6 @@ import { BooksEffects } from './state/book.effect';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideHttpClient(),
-    // DevTool with effect tracking MUST come before provideEffects
     provideNgrxDevTool({
       wsUrl: 'ws://localhost:4000',
       trackEffects: true,
