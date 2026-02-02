@@ -34,8 +34,13 @@ export class ActionsInterceptorService implements OnDestroy {
   private socket: WebSocket | null = null;
   private messageBuffer: string[] = [];
   private isConnected = false;
+  private initialized = false;
 
   initialize(wsUrl = 'ws://localhost:4000'): void {
+    if (this.initialized) {
+      return;
+    }
+    this.initialized = true;
     this.setupWebSocket(wsUrl);
     this.setupActionInterception();
     this.setupEffectEventForwarding();
@@ -77,6 +82,18 @@ export class ActionsInterceptorService implements OnDestroy {
 
     this.socket.onerror = (error) => {
       console.warn('[NgRx DevTool] WebSocket error:', error);
+    };
+
+    this.socket.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        if (message.type === 'CLEAR_REQUEST') {
+          this.effectTracker.clearTimeline();
+          this.messageBuffer = [];
+        }
+      } catch {
+        // Ignore non-JSON messages
+      }
     };
   }
 

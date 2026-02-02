@@ -1,7 +1,7 @@
 import { APP_INITIALIZER, Provider } from '@angular/core';
 import { EffectSources } from '@ngrx/effects';
-import { ActionsInterceptorService } from './actions-interceptor.service';
-import { DevToolsEffectSources } from './devtools-effect-sources';
+import { ActionsInterceptorService } from '../core/actions-interceptor.service';
+import { DevToolsEffectSources } from '../core/devtools-effect-sources';
 
 export interface DevToolConfig {
   readonly wsUrl?: string;
@@ -20,7 +20,6 @@ export function provideNgrxDevTool(config: DevToolConfig = {}): Provider[] {
     },
   ];
 
-  // Add effect tracking if enabled (default: true)
   if (config.trackEffects !== false) {
     providers.push({
       provide: EffectSources,

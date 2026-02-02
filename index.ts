@@ -1,12 +1,9 @@
 #!/usr/bin/env node
-// This is a script which runs a local websocket server, and spawn the ngrx-devtool ui.
-// thus allowing the library to communicate with the UI via the websocket server.
 import { spawn } from 'child_process';
 import { WebSocket, WebSocketServer } from 'ws';
 import * as path from 'path';
 const chalk = require('chalk');
 
-// IMP: Allow users to specify ports via command line arguments.
 const PORT_WS = 4000;
 const PORT_UI = '3000';
 const wss = new WebSocketServer({ port: PORT_WS });
@@ -82,12 +79,10 @@ const ui = spawn(
 );
 
 ui.stdout?.on('data', (data) => {
-  // Suppress http-server verbose output
 });
 
 ui.stderr?.on('data', (data) => {
   const msg = data.toString().trim();
-  // Only show actual errors, not deprecation warnings
   if (msg && !msg.includes('DeprecationWarning')) {
     console.error(chalk.red(`  ✗ UI Error: ${msg}`));
   }

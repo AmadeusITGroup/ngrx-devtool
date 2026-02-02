@@ -15,7 +15,6 @@ export class WebsocketService {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
   connect(url: string): void {
-    // Create a websocket if the platform is a browser
     if (!this.isBrowser) {
       console.warn('WebSocket is only available in the browser');
       this.messages$ = of([]);
@@ -26,7 +25,6 @@ export class WebsocketService {
       this.messages$ = this.socket$.pipe(
         mergeMap(data => {
           if (data instanceof Blob) {
-            // Handle Blob data asynchronously
             return from(readBlobAsText(data)).pipe(
               map(text => {
                 try {
@@ -54,6 +52,13 @@ export class WebsocketService {
       );
     }
   }
+
+  send(message: unknown): void {
+    if (this.socket$ && !this.socket$.closed) {
+      this.socket$.next(message);
+    }
+  }
+
   close(): void {
     this.socket$?.complete();
     this.socket$ = undefined;

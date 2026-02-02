@@ -71,7 +71,6 @@ export class SelectorTrackerService {
 
     this.recentInvocations.push(invocation);
 
-    // Update metrics
     const existing = this.selectorMetrics.get(selectorName);
     if (existing) {
       existing.invocationCount++;
@@ -86,7 +85,6 @@ export class SelectorTrackerService {
       existing.lastInvoked = Date.now();
       if (this.pendingAction?.type && !existing.triggeringActions.includes(this.pendingAction.type)) {
         existing.triggeringActions.push(this.pendingAction.type);
-        // Keep only last 10 actions
         if (existing.triggeringActions.length > 10) {
           existing.triggeringActions.shift();
         }
@@ -106,7 +104,6 @@ export class SelectorTrackerService {
       });
     }
 
-    // Keep invocations bounded
     if (this.recentInvocations.length > 500) {
       this.recentInvocations = this.recentInvocations.slice(-250);
     }

@@ -22,10 +22,6 @@ export class BooksEffects implements OnIdentifyEffects {
     )
   );
 
-  /**
-   * Provides a unique identifier for this effects class.
-   * Used by DevTools to track effects with a readable name even in minified builds.
-   */
   ngrxOnIdentifyEffects(): string {
     return 'BooksEffects';
   }

@@ -43,7 +43,6 @@ export function estimateRenderImpact(
   const factors: RenderImpactFactor[] = [];
   let totalScore = 0;
 
-  // Factor 1: Number of root properties changed
   if (analysis.rootPropertiesChanged > 0) {
     const impact = Math.min(analysis.rootPropertiesChanged * 15, 40);
     totalScore += impact;
@@ -55,7 +54,6 @@ export function estimateRenderImpact(
     });
   }
 
-  // Factor 2: Array changes (common cause of heavy re-renders)
   if (analysis.arrayChanges.length > 0) {
     const largestArrayChange = Math.max(...analysis.arrayChanges.map(a => Math.abs(a.newLength - a.previousLength)));
     const impact = Math.min(largestArrayChange * 2 + analysis.arrayChanges.length * 5, 50);
@@ -70,10 +68,9 @@ export function estimateRenderImpact(
     });
   }
 
-  // Factor 3: Large object changes
   if (analysis.largeObjectChanges.length > 0) {
     const totalSize = analysis.largeObjectChanges.reduce((sum, o) => sum + o.size, 0);
-    const impact = Math.min(totalSize / 10000 * 20, 30); // 10KB = 20 impact
+    const impact = Math.min(totalSize / 10000 * 20, 30);
     totalScore += impact;
     factors.push({
       name: 'Large Object Changes',
@@ -83,7 +80,6 @@ export function estimateRenderImpact(
     });
   }
 
-  // Factor 4: Deep changes
   if (analysis.maxChangeDepth > 3) {
     const impact = Math.min((analysis.maxChangeDepth - 3) * 5, 15);
     totalScore += impact;
@@ -95,7 +91,6 @@ export function estimateRenderImpact(
     });
   }
 
-  // Factor 5: Total properties changed
   if (analysis.totalPropertiesChanged > 10) {
     const impact = Math.min(analysis.totalPropertiesChanged / 5, 20);
     totalScore += impact;
@@ -106,24 +101,20 @@ export function estimateRenderImpact(
     });
   }
 
-  // Cap the score at 100
   totalScore = Math.min(Math.round(totalScore), 100);
 
-  // Determine level
   let level: 'low' | 'medium' | 'high' | 'critical';
   if (totalScore < 25) level = 'low';
   else if (totalScore < 50) level = 'medium';
   else if (totalScore < 75) level = 'high';
   else level = 'critical';
 
-  // Estimate affected components
   const estimatedComponentsAffected = Math.ceil(
     analysis.rootPropertiesChanged * 2 +
     analysis.arrayChanges.length * 3 +
     analysis.largeObjectChanges.length
   );
 
-  // Generate recommendations
   const recommendations = generateRecommendations(analysis, factors);
 
   return {
@@ -232,7 +223,6 @@ function generateRecommendations(
 ): string[] {
   const recommendations: string[] = [];
 
-  // Array recommendations
   const largeArrayChanges = analysis.arrayChanges.filter(a => a.newLength > 100);
   if (largeArrayChanges.length > 0) {
     recommendations.push(
@@ -243,7 +233,6 @@ function generateRecommendations(
     );
   }
 
-  // Large object recommendations
   if (analysis.largeObjectChanges.length > 0) {
     recommendations.push(
       'Break down large state objects into smaller, normalized entities'
@@ -253,21 +242,18 @@ function generateRecommendations(
     );
   }
 
-  // Deep nesting recommendations
   if (analysis.maxChangeDepth > 4) {
     recommendations.push(
       'Normalize deeply nested state using @ngrx/entity for better performance'
     );
   }
 
-  // Multiple root changes
   if (analysis.rootPropertiesChanged > 2) {
     recommendations.push(
       'Consider batching related state updates into a single action'
     );
   }
 
-  // General high impact recommendations
   const totalImpact = factors.reduce((sum, f) => sum + f.impact, 0);
   if (totalImpact > 50) {
     recommendations.push(

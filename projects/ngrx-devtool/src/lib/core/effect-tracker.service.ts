@@ -119,7 +119,7 @@ export class EffectTrackerService implements OnDestroy {
     }
 
     const correlationId = isEffect
-      ? this.findCorrelation(action.type)
+      ? this.findCorrelation()
       : this.createCorrelation(action);
 
     const effectName = this.findEffectNameForAction(action.type);
@@ -165,14 +165,12 @@ export class EffectTrackerService implements OnDestroy {
     return correlationId;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private findCorrelation(_actionType: string): string | undefined {
+  private findCorrelation(): string | undefined {
     const entries = Array.from(this.pendingCorrelations.entries());
     return entries.length > 0 ? entries[entries.length - 1][0] : undefined;
   }
 
   private findEffectNameForAction(actionType: string): string | undefined {
-    // Check recent completed effects
     for (let i = this.effectTimeline.length - 1; i >= Math.max(0, this.effectTimeline.length - 10); i--) {
       const effect = this.effectTimeline[i];
       if (effect.resultAction === actionType) {

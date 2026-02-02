@@ -1,6 +1,6 @@
 import { ActionReducer, Action } from '@ngrx/store';
 import { inject } from '@angular/core';
-import { PerformanceTrackerService } from './performance-tracker.service';
+import { PerformanceTrackerService } from '../performance/performance-tracker.service';
 
 export interface RenderPerformanceData {
   readonly renderTime: number;
@@ -103,7 +103,6 @@ export function createDevToolMetaReducer(
   };
 }
 
-/** @deprecated Use createDevToolMetaReducer() for configurable setup. */
 export function loggerMetaReducer<State>(
   reducer: ActionReducer<State>
 ): ActionReducer<State> {

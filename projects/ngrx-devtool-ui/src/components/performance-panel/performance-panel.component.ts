@@ -63,7 +63,6 @@ const OPTIMIZATION_TIPS = [
   { threshold: 150, text: 'Use signals for fine-grained reactivity', docUrl: 'https://angular.dev/guide/signals' },
 ];
 
-/** Tooltip definitions for metrics */
 export const METRIC_TOOLTIPS = {
   avgRenderTime: `Average Render Time
 

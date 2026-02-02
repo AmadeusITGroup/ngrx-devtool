@@ -46,10 +46,6 @@ type EffectObservable = Observable<Action> & {
   [CREATE_EFFECT_METADATA_KEY]?: EffectConfig;
 };
 
-/**
- * Intercepts NgRx effects to track lifecycle events without modifying application code.
- * Wraps effect observables during registration to emit triggered/emitted/error events.
- */
 @Injectable()
 export class DevToolsEffectSources extends EffectSources implements OnDestroy {
   readonly effectEvents$ = new ReplaySubject<EffectEvent>(REPLAY_BUFFER_SIZE);
@@ -186,7 +182,7 @@ export class DevToolsEffectSources extends EffectSources implements OnDestroy {
           });
         }
       } catch {
-        // Skip inaccessible properties
+        // Ignore reflection errors for non-effect properties
       }
     }
 

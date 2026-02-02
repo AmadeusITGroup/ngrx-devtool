@@ -24,7 +24,6 @@ export class DiffService {
     const diffs: DiffItem[] = [];
     let totalChanges = 0;
 
-    // Handle null states
     if (!prevState && nextState) {
       const items = this.flattenObject(nextState);
       totalChanges = items.length;
@@ -57,14 +56,12 @@ export class DiffService {
       return { diffs: [], truncated: false, totalChanges: 0 };
     }
 
-    // Use Map for O(1) lookups instead of O(n) .find()
     const prevFlat = this.flattenObject(prevState);
     const nextFlat = this.flattenObject(nextState);
 
     const prevMap = new Map(prevFlat.map(item => [item.path, item.value]));
     const nextMap = new Map(nextFlat.map(item => [item.path, item.value]));
 
-    // Find removed and changed items
     for (const [path, prevValue] of prevMap) {
       if (diffs.length >= this.MAX_DIFFS) break;
 
@@ -80,7 +77,6 @@ export class DiffService {
       }
     }
 
-    // Find added items
     for (const [path, nextValue] of nextMap) {
       if (diffs.length >= this.MAX_DIFFS) break;
 
@@ -90,7 +86,6 @@ export class DiffService {
       }
     }
 
-    // Count remaining changes if truncated
     if (diffs.length >= this.MAX_DIFFS) {
       for (const [path] of prevMap) {
         if (!nextMap.has(path)) totalChanges++;
@@ -127,14 +122,12 @@ export class DiffService {
       return [{ path, value: obj }];
     }
 
-    // For arrays with many items, summarize instead of expanding
     if (Array.isArray(obj) && obj.length > 50) {
       return [{ path, value: `[Array with ${obj.length} items]` }];
     }
 
     const keys = Object.keys(obj);
 
-    // For objects with many keys, summarize
     if (keys.length > 50) {
       return [{ path, value: `{Object with ${keys.length} keys}` }];
     }
