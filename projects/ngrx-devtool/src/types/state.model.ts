@@ -19,6 +19,7 @@ export interface MemoryInfo {
   readonly jsHeapSizeLimit: number;
 }
 
+
 export interface PerformanceWarning {
   readonly type: PerformanceWarningType;
   readonly message: string;

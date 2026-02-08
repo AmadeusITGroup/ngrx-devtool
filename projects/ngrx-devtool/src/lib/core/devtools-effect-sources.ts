@@ -4,31 +4,14 @@ import { EffectSources, EFFECTS_ERROR_HANDLER } from '@ngrx/effects';
 import { Observable, ReplaySubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
+import { EffectEvent, EffectMetadataInfo } from './core.models';
+
+
+/** NgRx internal metadata key for createEffect() */
 const CREATE_EFFECT_METADATA_KEY = '__@ngrx/effects_create__';
+
 const REPLAY_BUFFER_SIZE = 100;
 
-export type EffectLifecycle = 'triggered' | 'emitted' | 'executed' | 'error';
-
-export interface EffectEvent {
-  readonly effectName: string;
-  readonly sourceName: string;
-  readonly propertyName: string;
-  readonly lifecycle: EffectLifecycle;
-  readonly timestamp: number;
-  readonly triggerAction?: Action;
-  readonly action?: Action;
-  readonly error?: unknown;
-  readonly duration?: number;
-  readonly executionId?: string;
-  readonly dispatch?: boolean;
-}
-
-interface EffectMetadataInfo {
-  readonly propertyName: string;
-  readonly dispatch: boolean;
-  readonly functional: boolean;
-  readonly useEffectsErrorHandler: boolean;
-}
 
 interface EffectConfig {
   readonly dispatch?: boolean;

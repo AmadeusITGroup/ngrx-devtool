@@ -8,36 +8,42 @@
     </mat-card-header>
     <mat-card-content>
       <div class="stats-grid">
-        <div class="stat-card" [matTooltip]="tooltips.avgRenderTime" matTooltipClass="metric-tooltip">
-          <div class="stat-label">
-            Avg Render Time
-            <mat-icon class="info-icon">info_outline</mat-icon>
-          </div>
-          <div class="stat-value" [style.color]="getStatusColor(getRenderStatus(renderStats().avgRenderTime))">
-            {{ formatMs(renderStats().avgRenderTime) }}
-          </div>
-          <div class="stat-subtitle">Per Action</div>
-        </div>
+        <mat-card appearance="outlined" class="stat-card" [matTooltip]="tooltips.avgRenderTime" matTooltipClass="metric-tooltip">
+          <mat-card-content>
+            <div class="stat-label">
+              Avg Render Time
+              <mat-icon class="info-icon">info_outline</mat-icon>
+            </div>
+            <div class="stat-value mat-headline-4" [style.color]="getStatusColor(getRenderStatus(renderStats().avgRenderTime))">
+              {{ formatMs(renderStats().avgRenderTime) }}
+            </div>
+            <div class="stat-subtitle mat-body-small">Per Action</div>
+          </mat-card-content>
+        </mat-card>
 
-        <div class="stat-card" [matTooltip]="tooltips.maxRenderTime" matTooltipClass="metric-tooltip">
-          <div class="stat-label">
-            Max Render Time
-            <mat-icon class="info-icon">info_outline</mat-icon>
-          </div>
-          <div class="stat-value" [style.color]="getStatusColor(getRenderStatus(renderStats().maxRenderTime))">
-            {{ formatMs(renderStats().maxRenderTime) }}
-          </div>
-          <div class="stat-subtitle">Worst Case</div>
-        </div>
+        <mat-card appearance="outlined" class="stat-card" [matTooltip]="tooltips.maxRenderTime" matTooltipClass="metric-tooltip">
+          <mat-card-content>
+            <div class="stat-label">
+              Max Render Time
+              <mat-icon class="info-icon">info_outline</mat-icon>
+            </div>
+            <div class="stat-value mat-headline-4" [style.color]="getStatusColor(getRenderStatus(renderStats().maxRenderTime))">
+              {{ formatMs(renderStats().maxRenderTime) }}
+            </div>
+            <div class="stat-subtitle mat-body-small">Worst Case</div>
+          </mat-card-content>
+        </mat-card>
 
-        <div class="stat-card" [matTooltip]="tooltips.totalActions" matTooltipClass="metric-tooltip">
-          <div class="stat-label">
-            Total Actions
-            <mat-icon class="info-icon">info_outline</mat-icon>
-          </div>
-          <div class="stat-value">{{ renderStats().totalActions }}</div>
-          <div class="stat-subtitle">Tracked</div>
-        </div>
+        <mat-card appearance="outlined" class="stat-card" [matTooltip]="tooltips.totalActions" matTooltipClass="metric-tooltip">
+          <mat-card-content>
+            <div class="stat-label">
+              Total Actions
+              <mat-icon class="info-icon">info_outline</mat-icon>
+            </div>
+            <div class="stat-value mat-headline-4">{{ renderStats().totalActions }}</div>
+            <div class="stat-subtitle mat-body-small">Tracked</div>
+          </mat-card-content>
+        </mat-card>
       </div>
     </mat-card-content>
   </mat-card>
@@ -58,9 +64,9 @@
         </ng-container>
 
         <ng-container matColumnDef="renderTime">
-          <th mat-header-cell *matHeaderCellDef [matTooltip]="tooltips.renderTime" matTooltipClass="metric-tooltip">
+          <th mat-header-cell *matHeaderCellDef>
             Render Time
-            <mat-icon class="header-info-icon">info_outline</mat-icon>
+            <mat-icon class="header-info-icon" [matTooltip]="tooltips.renderTime" matTooltipClass="metric-tooltip" matTooltipPosition="above">info_outline</mat-icon>
           </th>
           <td mat-cell *matCellDef="let element">
             <span [style.color]="getStatusColor(getRenderStatus(element.renderTime))">
@@ -70,14 +76,14 @@
         </ng-container>
 
         <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef [matTooltip]="tooltips.status" matTooltipClass="metric-tooltip">
+          <th mat-header-cell *matHeaderCellDef>
             Status
-            <mat-icon class="header-info-icon">info_outline</mat-icon>
+            <mat-icon class="header-info-icon" [matTooltip]="tooltips.status" matTooltipClass="metric-tooltip" matTooltipPosition="above">info_outline</mat-icon>
           </th>
           <td mat-cell *matCellDef="let element">
-            <span class="status-badge" [attr.data-status]="getRenderStatus(element.renderTime)">
+            <mat-chip [class]="'status-chip status-' + getRenderStatus(element.renderTime)">
               {{ getRenderStatus(element.renderTime).toUpperCase() }}
-            </span>
+            </mat-chip>
           </td>
         </ng-container>
 
@@ -98,20 +104,21 @@
       <mat-card-subtitle>Tips to improve render performance</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
-      <div class="tips-list">
+      <mat-list class="tips-list">
         @for (tip of getOptimizationTips(); track tip.text) {
-          <div class="tip-item">
-            <mat-icon class="tip-icon">arrow_right</mat-icon>
-            <span>{{ tip.text }}</span>
+          <mat-list-item class="tip-item">
+            <mat-icon matListItemIcon class="tip-icon">arrow_right</mat-icon>
+            <span matListItemTitle>{{ tip.text }}</span>
             @if (tip.docUrl) {
-              <a [href]="tip.docUrl" target="_blank" class="doc-link">
+              <a mat-stroked-button [href]="tip.docUrl" target="_blank" matListItemMeta class="doc-link">
                 <mat-icon>open_in_new</mat-icon>
                 Fix Guide
               </a>
             }
-          </div>
+          </mat-list-item>
         }
-      </div>
+      </mat-list>
+      <mat-divider></mat-divider>
       <div class="action-buttons">
         <button mat-raised-button color="primary" (click)="openAngularProfiler()">
           <mat-icon>developer_mode</mat-icon>
@@ -128,18 +135,12 @@
       <div class="threshold-info">
         <mat-icon>info</mat-icon>
         <div>
-          <strong>Performance Target:</strong> < 16ms render time (60 FPS)
-          <div class="status-legend">
-            <span class="legend-item">
-              <span class="dot" [style.background-color]="getStatusColor('good')"></span> Good (≤ 16ms)
-            </span>
-            <span class="legend-item">
-              <span class="dot" [style.background-color]="getStatusColor('warning')"></span> Warning (16-32ms)
-            </span>
-            <span class="legend-item">
-              <span class="dot" [style.background-color]="getStatusColor('critical')"></span> Critical (> 32ms)
-            </span>
-          </div>
+          <strong>Performance Target:</strong> &lt; 16ms render time (60 FPS)
+          <mat-chip-set class="status-legend">
+            <mat-chip class="legend-chip status-good">Good (≤ 16ms)</mat-chip>
+            <mat-chip class="legend-chip status-warning">Warning (16-32ms)</mat-chip>
+            <mat-chip class="legend-chip status-critical">Critical (&gt; 32ms)</mat-chip>
+          </mat-chip-set>
         </div>
       </div>
     </mat-card-content>

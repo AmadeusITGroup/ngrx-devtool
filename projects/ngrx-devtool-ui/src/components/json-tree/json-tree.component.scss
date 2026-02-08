@@ -1,7 +1,9 @@
+@use '../../styles/theme' as *;
+
 json-viewer {
-    --background-color: var(--mat-sys-background-color);
-    --property-color: var(--mat-sys-primary);
-    --number-color: var(--mat-sys-secondary);
-    --string-color: var(--mat-sys-secondary);
-    --preview-color: var(--mat-sys-primary);
+    --background-color: #{$color-background};
+    --property-color: #{$color-primary};
+    --number-color: #{$color-secondary};
+    --string-color: #{$color-secondary};
+    --preview-color: #{$color-primary};
 }

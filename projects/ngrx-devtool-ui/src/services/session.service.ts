@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject, fromEvent, take, race, map, switchMap, of } from 'rxjs';
-import { StateChangeMessage } from '../components/performance-panel/performance-panel.component';
-import { EffectEventMessage } from '../components/effects-panel/effects-panel.component';
+import { StateChangeMessage } from '../components/performance-panel';
+import { EffectEventMessage } from '../components/effects-panel';
 
 const SESSION_FILE_VERSION = 1 as const;
 
@@ -209,27 +209,16 @@ export class SessionService {
 
     const record = data as Record<string, unknown>;
 
-    if (typeof record['version'] !== 'number') {
-      return { valid: false, reason: 'Missing or invalid version field' };
-    }
+    const validations: [boolean, string][] = [
+      [typeof record['version'] === 'number', 'Missing or invalid version field'],
+      [typeof record['exportedAt'] === 'string', 'Missing or invalid exportedAt field'],
+      [Array.isArray(record['messages']), 'Missing or invalid messages array'],
+      [Array.isArray(record['effectEvents']), 'Missing or invalid effectEvents array'],
+      [Array.isArray(record['renderTimings']), 'Missing or invalid renderTimings array'],
+    ];
 
-    if (typeof record['exportedAt'] !== 'string') {
-      return { valid: false, reason: 'Missing or invalid exportedAt field' };
-    }
-
-    if (!Array.isArray(record['messages'])) {
-      return { valid: false, reason: 'Missing or invalid messages array' };
-    }
-
-    if (!Array.isArray(record['effectEvents'])) {
-      return { valid: false, reason: 'Missing or invalid effectEvents array' };
-    }
-
-    if (!Array.isArray(record['renderTimings'])) {
-      return { valid: false, reason: 'Missing or invalid renderTimings array' };
-    }
-
-    return { valid: true };
+    const failed = validations.find(([isValid]) => !isValid);
+    return failed ? { valid: false, reason: failed[1] } : { valid: true };
   }
 
   private createFileInput(): HTMLInputElement {
