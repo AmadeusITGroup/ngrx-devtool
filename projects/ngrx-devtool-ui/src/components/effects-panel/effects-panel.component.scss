@@ -1,4 +1,4 @@
-@use "@angular/material" as mat;
+@use '../../styles/theme' as *;
 
 // Container matching app.component
 .container {
@@ -8,59 +8,59 @@
   height: 100%;
   justify-content: center;
   align-items: flex-start;
-  padding: 10px;
+  padding: $spacing-md;
 }
 
 .actions-container {
-  padding: 10px;
-  width: 90%;
-  margin-top: 20px;
+  padding: $spacing-md;
+  width: $layout-content-width;
+  margin-top: $spacing-xl;
 }
 
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: $spacing-xl;
 }
 
 // Effects Summary
 .effects-summary {
-  margin-bottom: 24px;
+  margin-bottom: $spacing-2xl;
 
   h3 {
     display: flex;
     align-items: center;
-    gap: 8px;
-    color: var(--mat-sys-on-surface);
-    margin-bottom: 12px;
+    gap: $spacing-sm;
+    color: $color-on-surface;
+    margin-bottom: $spacing-md;
     font-size: 1rem;
     font-weight: 500;
 
     mat-icon {
-      color: #ff9800;
+      color: $color-warning;
     }
   }
 
   .effect-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: $spacing-sm;
 
     .effect-chip {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      background: rgba(255, 152, 0, 0.15);
-      color: #ff9800;
-      padding: 4px 12px;
-      border-radius: 16px;
-      font-size: 12px;
-      font-family: monospace;
+      gap: $spacing-xs;
+      background: $color-warning-container-strong;
+      color: $color-warning;
+      padding: $spacing-xs $spacing-md;
+      border-radius: $corner-large;
+      font-size: $typography-body-small;
+      @include mono-text;
 
       mat-icon {
-        font-size: 14px;
-        width: 14px;
-        height: 14px;
+        font-size: $icon-size-xs;
+        width: $icon-size-xs;
+        height: $icon-size-xs;
       }
 
       .chip-count {
@@ -72,89 +72,56 @@
 
 // Empty state
 .empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 48px;
-  background: var(--mat-sys-surface-container);
-  border-radius: 8px;
-  color: var(--mat-sys-on-surface-variant);
-
-  mat-icon {
-    font-size: 48px;
-    width: 48px;
-    height: 48px;
-    color: var(--mat-sys-on-surface-variant);
-    margin-bottom: 16px;
-    opacity: 0.5;
-  }
-
-  p {
-    font-size: 1.1rem;
-    color: var(--mat-sys-on-surface);
-    margin: 0 0 8px 0;
-  }
-
-  span {
-    font-size: 0.85rem;
-  }
+  @include empty-state;
 }
 
 // Effect expansion panels - matching action panels
 .effect-action {
-  border-left: 4px solid #ff9800 !important;
+  @include colored-border-left($color-warning);
 }
 
 .error-effect {
-  border-left: 4px solid #f44336 !important;
+  @include colored-border-left($color-error);
 }
 
 .side-effect-action {
-  border-left: 4px solid #9c27b0 !important;
+  @include colored-border-left($effect-side-effect);
 }
 
 // Action icons - matching app.component
 .action-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-  margin-right: 8px;
+  @include action-icon;
 
   &.effect-icon {
-    color: #81c784;
+    color: $effect-emitted;
   }
 
   &.error-icon {
-    color: #f44336;
+    color: $color-error;
   }
 
   &.side-effect-icon {
-    color: #9c27b0;
+    color: $effect-side-effect;
   }
 }
 
 // No dispatch badge
 .no-dispatch-badge {
-  font-size: 11px;
-  color: #9c27b0;
-  margin-left: 8px;
+  font-size: $chip-font-size;
+  color: $effect-side-effect;
+  margin-left: $spacing-sm;
   opacity: 0.8;
 }
 
 .spinning {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  @include spin-animation;
 }
 
 // Panel title - matching app.component
 mat-panel-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: $spacing-sm;
   overflow: visible !important;
 
   .action-type {
@@ -164,76 +131,63 @@ mat-panel-title {
 
 // Emitted action text - compact inline display
 .emitted-action-text {
-  color: #81c784;
-  font-size: 12px;
-  font-family: monospace;
-  margin-left: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: $effect-emitted;
+  font-size: $typography-body-small;
+  @include mono-text;
+  margin-left: $spacing-xs;
+  @include text-truncate;
   max-width: 250px;
 }
 
 // Status badge
 .status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 11px;
-  margin-right: 12px;
+  @include inline-badge;
+  margin-right: $spacing-md;
 
   mat-icon {
-    font-size: 14px;
-    width: 14px;
-    height: 14px;
+    font-size: $icon-size-xs;
+    width: $icon-size-xs;
+    height: $icon-size-xs;
   }
 
   &.running {
-    background-color: rgba(100, 181, 246, 0.15);
-    color: #64b5f6;
+    background-color: $color-info-container-strong;
+    color: $effect-running;
 
     mat-icon {
-      animation: spin 1s linear infinite;
+      @include spin-animation;
     }
   }
 }
 
 .timestamp {
-  color: var(--mat-sys-on-surface-variant);
-  font-size: 12px;
+  color: $color-on-surface-variant;
+  font-size: $typography-body-small;
 }
 
 // Execution details
 .execution-details {
-  padding: 16px;
+  padding: $spacing-lg;
 
   .detail-row {
-    display: flex;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--mat-sys-outline-variant);
-
-    &:last-of-type {
-      border-bottom: none;
-    }
+    @include detail-row;
 
     .detail-label {
       width: 140px;
-      color: var(--mat-sys-on-surface-variant);
+      color: $color-on-surface-variant;
       font-size: 0.85rem;
     }
 
     .detail-value {
-      color: var(--mat-sys-on-surface);
-      font-family: monospace;
+      color: $color-on-surface;
+      @include mono-text;
 
       &.trigger-action {
-        color: #2196f3;
+        color: $effect-trigger;
       }
 
       &.emitted-action {
-        color: #81c784;
+        color: $effect-emitted;
       }
 
       &.status-value {
@@ -241,15 +195,15 @@ mat-panel-title {
         font-weight: 500;
 
         &.completed {
-          color: #81c784;
+          color: $effect-emitted;
         }
 
         &.error {
-          color: #f44336;
+          color: $effect-error;
         }
 
         &.running {
-          color: #64b5f6;
+          color: $effect-running;
         }
       }
     }
@@ -258,41 +212,41 @@ mat-panel-title {
 
 // Lifecycle events
 .lifecycle-events {
-  padding: 16px;
+  padding: $spacing-lg;
 
   .event-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    background: var(--mat-sys-surface-container);
-    border-radius: 4px;
-    margin-bottom: 4px;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    background: $color-surface-container;
+    border-radius: $corner-extra-small;
+    margin-bottom: $spacing-xs;
 
     mat-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
+      font-size: $icon-size-sm;
+      width: $icon-size-sm;
+      height: $icon-size-sm;
     }
 
     &.lifecycle-started {
-      mat-icon { color: #64b5f6; }
-      .event-lifecycle { color: #64b5f6; }
+      mat-icon { color: $effect-started; }
+      .event-lifecycle { color: $effect-started; }
     }
 
     &.lifecycle-emitted {
-      mat-icon { color: #81c784; }
-      .event-lifecycle { color: #81c784; }
+      mat-icon { color: $effect-emitted; }
+      .event-lifecycle { color: $effect-emitted; }
     }
 
     &.lifecycle-error {
-      mat-icon { color: #f44336; }
-      .event-lifecycle { color: #f44336; }
+      mat-icon { color: $effect-error; }
+      .event-lifecycle { color: $effect-error; }
     }
 
     &.lifecycle-complete {
-      mat-icon { color: var(--mat-sys-on-surface-variant); }
-      .event-lifecycle { color: var(--mat-sys-on-surface-variant); }
+      mat-icon { color: $effect-complete; }
+      .event-lifecycle { color: $effect-complete; }
     }
 
     .event-lifecycle {
@@ -302,14 +256,14 @@ mat-panel-title {
     }
 
     .event-action {
-      color: #81c784;
-      font-family: monospace;
+      color: $effect-emitted;
+      @include mono-text;
       font-size: 0.85rem;
     }
 
     .event-time {
       margin-left: auto;
-      color: var(--mat-sys-on-surface-variant);
+      color: $color-on-surface-variant;
       font-size: 0.8rem;
     }
   }

@@ -10,33 +10,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTabsModule } from '@angular/material/tabs';
 
-export interface EffectEventMessage { //received
-  readonly type: 'EFFECT_EVENT';
-  readonly action?: string;
-  readonly effectName?: string;
-  readonly effectEvent?: {
-    readonly name: string;
-    readonly lifecycle: 'triggered' | 'emitted' | 'executed' | 'error';
-    readonly duration?: number;
-    readonly executionId?: string;
-    readonly dispatch?: boolean;
-  };
-  readonly timestamp: string;
-}
-
-export interface EffectExecution { //computed
-  readonly effectName: string;
-  readonly sourceName: string;
-  readonly propertyName: string;
-  readonly startTime: Date;
-  readonly endTime?: Date;
-  readonly duration?: number;
-  readonly status: 'completed' | 'executed' | 'error';
-  readonly triggeredAction?: string;
-  readonly emittedAction?: string;
-  readonly executionId?: string;
-  readonly dispatch?: boolean;
-}
+import { EffectEventMessage, EffectExecution } from './effects-panel.models';
 
 @Component({
   selector: 'app-effects-panel',

@@ -1,111 +1,80 @@
+@use '../../styles/theme' as *;
+
 .performance-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 10px;
-  width: 90%;
-  margin: 20px auto 0;
+  @include panel-container;
 
   mat-card {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.3s ease;
+    box-shadow: $elevation-1;
+    transition: box-shadow $transition-slow;
+    background: $color-surface;
 
     &:hover {
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      box-shadow: $elevation-2;
     }
   }
 
   mat-card-header {
-    margin-bottom: 16px;
+    margin-bottom: $spacing-lg;
 
     mat-icon[mat-card-avatar] {
-      font-size: 40px;
-      width: 40px;
-      height: 40px;
+      font-size: $icon-size-2xl;
+      width: $icon-size-2xl;
+      height: $icon-size-2xl;
     }
   }
 
   mat-card-title {
-    font-size: 18px;
-    font-weight: 500;
+    font: $typography-title-medium;
   }
 
   mat-card-subtitle {
-    font-size: 14px;
-    opacity: 0.7;
-    margin-top: 4px;
+    font: $typography-body-medium;
+    color: $color-on-surface-variant;
+    margin-top: $spacing-xs;
   }
 }
 
 // Suggestions Card
 .suggestions-card {
-  border-left: 4px solid #ff9800 !important;
-  background: rgba(255, 152, 0, 0.05);
+  @include colored-border-left($color-warning);
+  background: $color-warning-container;
 
   .warning-icon {
-    color: #ff9800;
+    color: $color-warning;
   }
 
   .tips-list {
-    margin: 0 0 16px 0;
+    padding-top: 0;
 
     .tip-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 0;
-      border-bottom: 1px solid #ffe0b2;
-
-      &:last-child {
-        border-bottom: none;
-      }
-
       .tip-icon {
-        color: #ff9800;
-        font-size: 20px;
-      }
-
-      span {
-        flex: 1;
-        color: #555;
+        color: $color-warning;
       }
 
       .doc-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        color: #2196f3;
-        text-decoration: none;
-        font-size: 12px;
-        font-weight: 500;
-        padding: 4px 8px;
-        border-radius: 12px;
-        background: rgba(33, 150, 243, 0.1);
-        transition: all 0.2s ease;
-
-        &:hover {
-          background: rgba(33, 150, 243, 0.2);
-          transform: translateX(2px);
-        }
-
         mat-icon {
-          font-size: 16px;
-          width: 16px;
-          height: 16px;
+          font-size: $icon-size-sm;
+          width: $icon-size-sm;
+          height: $icon-size-sm;
+          margin-right: $spacing-xs;
         }
       }
     }
   }
 
+  mat-divider {
+    margin: $spacing-lg 0;
+  }
+
   .action-buttons {
     display: flex;
-    gap: 12px;
+    gap: $spacing-md;
     flex-wrap: wrap;
-    margin-top: 16px;
+    padding-top: $spacing-lg;
 
     button {
       mat-icon {
-        margin-right: 8px;
+        margin-right: $spacing-sm;
       }
     }
   }
@@ -113,44 +82,29 @@
 
 // Stats Grid
 .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  padding: 8px 0;
+  @include stats-grid;
 }
 
 .stat-card {
-  padding: 16px;
-  background: rgba(33, 150, 243, 0.05);
-  border-radius: 8px;
-  border-left: 4px solid #2196f3;
-  text-align: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor: help;
+  @include stat-card-base;
+  border-left: $border-width-thick solid $color-primary;
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --mat-card-content-padding: #{$spacing-lg};
+
+  mat-card-content {
+    padding: $spacing-lg;
   }
 
   .stat-label {
-    font-size: 12px;
-    opacity: 0.7;
-    margin-bottom: 8px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    @include label-text;
+    margin-bottom: $spacing-sm;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: $spacing-xs;
 
     .info-icon {
-      font-size: 14px;
-      width: 14px;
-      height: 14px;
-      opacity: 0.5;
-      transition: opacity 0.2s;
+      @include info-icon;
     }
   }
 
@@ -159,51 +113,37 @@
   }
 
   .stat-value {
-    font-size: 32px;
-    font-weight: 700;
-    font-family: 'Roboto Mono', monospace;
+    font-family: $font-mono;
+    font-weight: 600;
+    font-size: 1.25rem;
     line-height: 1;
-    margin-bottom: 4px;
+    margin-bottom: $spacing-xs;
   }
 
   .stat-value-text {
-    font-size: 14px;
     font-weight: 600;
-    margin-bottom: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin-bottom: $spacing-xs;
+    @include text-truncate;
   }
 
   .stat-subtitle {
-    font-size: 12px;
-    opacity: 0.7;
-    margin-top: 4px;
+    color: $color-on-surface-variant;
+    margin-top: $spacing-xs;
   }
 }
 
 // Tables
 .renders-table,
 .components-table {
-  width: 100%;
-  background: transparent;
+  @include data-table;
 
   th {
-    font-weight: 600;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    opacity: 0.7;
     cursor: help;
 
     .header-info-icon {
-      font-size: 14px;
-      width: 14px;
-      height: 14px;
+      @include info-icon;
       vertical-align: middle;
-      margin-left: 4px;
-      opacity: 0.5;
-      transition: opacity 0.2s;
+      margin-left: $spacing-xs;
     }
 
     &:hover .header-info-icon {
@@ -212,35 +152,29 @@
   }
 
   td {
-    font-size: 13px;
-    font-family: 'Roboto Mono', monospace;
-    padding: 12px 16px;
-  }
-
-  tr:hover {
-    background: rgba(0, 0, 0, 0.02);
+    font-weight: 600;
   }
 
   .highlighted-row {
     animation: highlightFade 3s ease-out forwards;
-    border-left: 4px solid #673ab7;
+    border-left: $border-width-thick solid $color-tertiary;
 
     &:hover {
-      background: rgba(103, 58, 183, 0.1) !important;
+      background: color-mix(in srgb, #{$color-tertiary} 10%, transparent) !important;
     }
   }
 }
 
 @keyframes highlightFade {
   0% {
-    background: rgba(103, 58, 183, 0.4);
+    background: color-mix(in srgb, #{$color-tertiary} 40%, transparent);
     transform: scale(1.02);
   }
   15% {
-    background: rgba(103, 58, 183, 0.35);
+    background: color-mix(in srgb, #{$color-tertiary} 35%, transparent);
   }
   30% {
-    background: rgba(103, 58, 183, 0.25);
+    background: color-mix(in srgb, #{$color-tertiary} 25%, transparent);
     transform: scale(1);
   }
   100% {
@@ -249,65 +183,59 @@
   }
 }
 
-// Status Badge
-.status-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+// Status Chip (using mat-chip)
+.status-chip {
+  font-weight: 700 !important;
+  letter-spacing: $letter-spacing-normal;
 
-  &[data-status="good"] {
-    background: #4caf50;
-    color: white;
+  &.status-good {
+    @include status-chip($color-success);
   }
 
-  &[data-status="warning"] {
-    background: #ff9800;
-    color: white;
+  &.status-warning {
+    @include status-chip($color-warning);
   }
 
-  &[data-status="critical"] {
-    background: #f44336;
-    color: white;
+  &.status-critical {
+    @include status-chip($color-error);
   }
 }
 
 // Info Card
 .info-card {
-  border-left: 4px solid #2196f3 !important;
-  background: rgba(33, 150, 243, 0.03);
+  background: $color-info-container;
 }
 
 // Threshold Info
 .threshold-info {
   display: flex;
-  gap: 12px;
+  gap: $spacing-md;
   align-items: flex-start;
 
   mat-icon {
-    color: #2196f3;
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+    color: $color-primary;
+    font-size: $icon-size-md;
+    width: $icon-size-md;
+    height: $icon-size-md;
   }
 
   .status-legend {
-    display: flex;
-    gap: 16px;
-    margin-top: 8px;
-    font-size: 12px;
+    margin-top: $spacing-sm;
 
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
+    .legend-chip {
+      font-size: $chip-font-size !important;
+      min-height: $chip-min-height !important;
 
-      .dot {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
+      &.status-good {
+        @include status-chip($color-success);
+      }
+
+      &.status-warning {
+        @include status-chip($color-warning);
+      }
+
+      &.status-critical {
+        @include status-chip($color-error);
       }
     }
   }
@@ -316,39 +244,39 @@
 // Card-specific styles
 .overview-card mat-icon[mat-card-avatar],
 .table-card mat-icon[mat-card-avatar] {
-  color: #2196f3;
+  color: $color-primary;
 }
 
 .suggestions-card mat-icon[mat-card-avatar] {
-  color: #ff9800;
+  color: $color-warning;
 }
 
 .performance-badge {
   display: inline-block;
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 11px;
+  padding: $spacing-xs $spacing-md;
+  border-radius: $corner-full;
+  font: $typography-label-small;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: $letter-spacing-normal;
 
   &[data-score='EXCELLENT'] {
-    background: #4caf50;
+    background: $color-success;
     color: white;
   }
   &[data-score='GOOD'] {
-    background: #8bc34a;
+    background: $color-good;
     color: white;
   }
   &[data-score='FAIR'] {
-    background: #ffc107;
-    color: rgba(0, 0, 0, 0.87);
+    background: $color-fair;
+    color: $color-on-surface;
   }
   &[data-score='POOR'] {
-    background: #ff9800;
+    background: $color-warning;
     color: white;
   }
   &[data-score='CRITICAL'] {
-    background: #f44336;
+    background: $color-error;
     color: white;
   }
 }
@@ -359,43 +287,43 @@
 
   .value-cell,
   .threshold-cell {
-    font-family: 'Roboto Mono', monospace;
-    font-size: 13px;
+    font-family: $font-mono;
+    font: $typography-body-small;
   }
 }
 
 // Impact Card
 .impact-card mat-icon[mat-card-avatar] {
-  color: #ff9800;
+  color: $color-warning;
 }
 
 .action-name {
-  margin-left: 8px;
-  font-family: 'Roboto Mono', monospace;
-  font-size: 13px;
+  margin-left: $spacing-sm;
+  font-family: $font-mono;
+  font: $typography-body-small;
 }
 
 .component-count {
-  margin-left: 8px;
-  font-size: 12px;
-  opacity: 0.7;
+  margin-left: $spacing-sm;
+  font: $typography-label-small;
+  color: $color-on-surface-variant;
 }
 
 .impact-details {
-  padding: 16px 0;
+  padding: $spacing-lg 0;
 }
 
 .factors-section,
 .recommendations-section {
-  margin-bottom: 16px;
+  margin-bottom: $spacing-lg;
 
   h4 {
-    font-size: 12px;
+    font: $typography-label-small;
     font-weight: 600;
-    margin: 0 0 8px 0;
+    margin: 0 0 $spacing-sm 0;
     text-transform: uppercase;
-    opacity: 0.7;
-    letter-spacing: 0.5px;
+    color: $color-on-surface-variant;
+    letter-spacing: $letter-spacing-normal;
   }
 
   mat-list {
@@ -404,62 +332,60 @@
 }
 
 .factor-details {
-  font-family: 'Roboto Mono', monospace;
-  font-size: 11px;
-  opacity: 0.6;
+  font-family: $font-mono;
+  font: $typography-label-small;
+  color: $color-on-surface-variant;
 }
 
 .impact-score {
-  color: #ff9800;
+  color: $color-warning;
   font-weight: 600;
-  font-family: 'Roboto Mono', monospace;
+  font-family: $font-mono;
 }
 
 // Warnings Card
 .warnings-card {
-  border-left: 4px solid #f44336 !important;
+  @include colored-border-left($color-error);
 
   mat-icon[mat-card-avatar] {
-    color: #f44336;
+    color: $color-error;
   }
 
   mat-chip-set {
-    margin-top: 8px;
+    margin-top: $spacing-sm;
   }
 }
 
+// Severity chips (for mat-chip components)
 .severity-high {
-  background-color: #f44336;
-  color: white;
+  @include status-chip($color-error);
 }
 
 .severity-medium {
-  background-color: #ff9800;
-  color: white;
+  @include status-chip($color-warning);
 }
 
 .severity-low {
-  background-color: #ffc107;
-  color: rgba(0, 0, 0, 0.87);
+  @include status-chip($color-fair, $color-on-surface);
 }
 
 .warning-counts {
   display: flex;
-  gap: 8px;
-  margin-top: 8px;
+  gap: $spacing-sm;
+  margin-top: $spacing-sm;
 }
 
 .warning-type {
-  margin-left: 8px;
+  margin-left: $spacing-sm;
   font-weight: 500;
   text-transform: capitalize;
 }
 
 .warning-content {
-  padding: 8px 0;
+  padding: $spacing-sm 0;
 
   p {
-    margin: 0 0 12px 0;
+    margin: 0 0 $spacing-md 0;
     line-height: 1.6;
   }
 }
@@ -467,50 +393,50 @@
 .suggestion-box {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 12px;
-  background: rgba(76, 175, 80, 0.1);
-  border-radius: 4px;
-  border-left: 3px solid #4caf50;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  background: $color-success-container;
+  border-radius: $corner-extra-small;
+  border-left: $border-width-medium solid $color-success;
 
   mat-icon {
-    color: #4caf50;
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+    color: $color-success;
+    font-size: $icon-size-md;
+    width: $icon-size-md;
+    height: $icon-size-md;
   }
 
   span {
     flex: 1;
-    font-size: 13px;
+    font: $typography-body-small;
     line-height: 1.5;
   }
 }
 
 // Slowest Actions Card
 .slowest-card mat-icon[mat-card-avatar] {
-  color: #2196f3;
+  color: $color-primary;
 }
 
 .rank-badge {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #2196f3;
-  color: white;
+  width: $icon-size-xl;
+  height: $icon-size-xl;
+  border-radius: $corner-full;
+  background: $color-primary;
+  color: $color-on-primary;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 14px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  font: $typography-body-medium;
+  box-shadow: $elevation-1;
 }
 
 .execution-time {
-  font-family: 'Roboto Mono', monospace;
+  font-family: $font-mono;
   font-weight: 600;
-  font-size: 14px;
-  color: #ff9800;
+  font: $typography-body-medium;
+  color: $color-warning;
 }
 
 // No Data Card
@@ -520,27 +446,26 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 64px !important;
+    padding: $spacing-5xl !important;
     text-align: center;
 
     mat-icon {
-      font-size: 80px;
-      width: 80px;
-      height: 80px;
+      font-size: $icon-size-3xl;
+      width: $icon-size-3xl;
+      height: $icon-size-3xl;
       opacity: 0.3;
-      margin-bottom: 16px;
+      margin-bottom: $spacing-lg;
     }
 
     h3 {
-      margin: 0 0 8px 0;
-      font-size: 18px;
-      font-weight: 500;
+      margin: 0 0 $spacing-sm 0;
+      font: $typography-title-medium;
     }
 
     p {
       margin: 0;
-      opacity: 0.7;
-      font-size: 14px;
+      font: $typography-body-medium;
+      color: $color-on-surface-variant;
     }
   }
 }

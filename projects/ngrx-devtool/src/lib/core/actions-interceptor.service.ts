@@ -3,26 +3,9 @@ import { isPlatformBrowser } from '@angular/common';
 import { Actions } from '@ngrx/effects';
 import { Action } from '@ngrx/store';
 import { Subject, takeUntil, tap } from 'rxjs';
-import { EffectTrackerService, TrackedAction } from './effect-tracker.service';
-import { EffectEvent } from './devtools-effect-sources';
 
-export interface DevToolMessage {
-  readonly type: 'ACTION_TRACKED' | 'EFFECT_EVENT' | 'TIMELINE_CLEARED';
-  readonly action?: string;
-  readonly payload?: unknown;
-  readonly isEffectResult?: boolean;
-  readonly effectName?: string;
-  readonly correlationId?: string;
-  readonly effectEvent?: {
-    readonly name: string;
-    readonly lifecycle: string;
-    readonly duration?: number;
-    readonly executionId?: string;
-    readonly dispatch?: boolean;
-  };
-  readonly timestamp: string;
-}
-
+import { DevToolMessage, EffectEvent, TrackedAction } from './core.models';
+import { EffectTrackerService } from './effect-tracker.service';
 @Injectable({ providedIn: 'root' })
 export class ActionsInterceptorService implements OnDestroy {
   private readonly actions$ = inject(Actions);

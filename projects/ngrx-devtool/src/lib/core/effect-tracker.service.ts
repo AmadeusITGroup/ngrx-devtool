@@ -1,38 +1,16 @@
 import { inject, Injectable, OnDestroy } from '@angular/core';
 import { Action } from '@ngrx/store';
 import { EffectSources } from '@ngrx/effects';
-import { DevToolsEffectSources, EffectEvent } from './devtools-effect-sources';
 import { ReplaySubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-
-export interface TrackedAction {
-  readonly action: string;
-  readonly payload: unknown;
-  readonly timestamp: number;
-  readonly source: 'user' | 'effect';
-  readonly correlationId?: string;
-  readonly effectName?: string;
-}
-
-export interface TrackedEffect {
-  readonly effectName: string;
-  readonly sourceName: string | null;
-  readonly propertyName: string;
-  readonly triggerAction?: string;
-  readonly resultAction?: string;
-  readonly startTime: number;
-  readonly endTime?: number;
-  readonly duration?: number;
-  readonly status: 'completed' | 'error';
-  readonly error?: unknown;
-}
+import { EffectEvent, TrackedAction, TrackedEffect } from './core.models';
+import { DevToolsEffectSources } from './devtools-effect-sources';
 
 const REPLAY_BUFFER_SIZE = 100;
 const TIMELINE_MAX_SIZE = 1000;
 const TIMELINE_TRIM_SIZE = 500;
 const EFFECT_TIMELINE_MAX_SIZE = 500;
 const CORRELATION_TIMEOUT_MS = 30000;
-
 @Injectable({ providedIn: 'root' })
 export class EffectTrackerService implements OnDestroy {
   private readonly effectSources = inject(EffectSources, { optional: true });

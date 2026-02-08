@@ -16,8 +16,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { JsonTreeComponent } from '../components/json-tree/json-tree.component';
 import { DatePipe } from '@angular/common';
 import { DiffViewerComponent } from '../components/diff-viewer/diff-viewer.component';
-import { PerformancePanelComponent, StateChangeMessage } from '../components/performance-panel/performance-panel.component';
-import { EffectsPanelComponent, EffectEventMessage } from '../components/effects-panel/effects-panel.component';
+import { PerformancePanelComponent, StateChangeMessage } from '../components/performance-panel';
+import { EffectsPanelComponent, EffectEventMessage } from '../components/effects-panel';
 
 interface EnrichedMessage extends StateChangeMessage {
   prevState: unknown;
@@ -83,7 +83,7 @@ export class AppComponent implements OnInit, OnDestroy {
     return msgs.map((msg, index) => {
       const prevState = index > 0 ? msgs[index - 1].nextState : undefined;
       // Find matching render timing by timestamp proximity (within 100ms)
-      const timing = timings.get(msg.timestamp);
+      const timing = msg.timestamp ? timings.get(msg.timestamp) : undefined;
 
       // Enrich with effect source if this action was emitted by an effect
       const actionType = msg.action?.type;
@@ -233,7 +233,7 @@ export class AppComponent implements OnInit, OnDestroy {
         const msgs = this.messages();
         for (let i = msgs.length - 1; i >= 0; i--) {
           const m = msgs[i];
-          if (m.action?.type === renderMsg.actionType && !m.renderTiming) {
+          if (m.action?.type === renderMsg.actionType && !m.renderTiming && m.timestamp) {
             newMap.set(m.timestamp, renderMsg);
             this.messages.update(arr => {
               const updated = [...arr];

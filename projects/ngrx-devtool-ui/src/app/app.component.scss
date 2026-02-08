@@ -1,4 +1,4 @@
-@use "@angular/material" as mat;
+@use '../styles/theme' as *;
 
 :host {
   display: block;
@@ -16,8 +16,8 @@
   ::ng-deep .mat-mdc-tab-header {
     position: sticky;
     top: 0;
-    z-index: 100;
-    background: var(--mat-sys-surface);
+    z-index: $z-sticky;
+    background: $color-surface;
   }
 
   ::ng-deep .mat-mdc-tab-body-wrapper {
@@ -26,30 +26,30 @@
   }
 
   .mat-mdc-tab-labels {
-    background: var(--mat-sys-surface);
+    background: $color-surface;
   }
 
   .mat-mdc-tab {
     mat-icon {
-      margin-right: 8px;
+      margin-right: $spacing-sm;
     }
 
     span {
-      margin-right: 8px;
+      margin-right: $spacing-sm;
     }
   }
 }
 
 .tab-badge {
-  background: #673ab7;
+  background: $color-accent;
   color: white;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 11px;
-  margin-left: 4px;
+  padding: 2px $spacing-sm;
+  border-radius: $corner-medium;
+  font-size: $chip-font-size;
+  margin-left: $spacing-xs;
 
   &.running {
-    background: #64b5f6;
+    background: $effect-running;
     animation: pulse 1.5s infinite;
   }
 }
@@ -60,11 +60,11 @@
 }
 
 .tab-warning-icon {
-  color: #ff9800;
+  color: $color-warning;
   font-size: 18px;
   width: 18px;
   height: 18px;
-  margin-left: 4px;
+  margin-left: $spacing-xs;
 }
 
 .container {
@@ -74,30 +74,30 @@
   height: 100%;
   justify-content: center;
   align-items: flex-start;
-  padding: 10px;
+  padding: $spacing-md;
 }
 .actions-container{
-    padding: 10px;
-    width: 90%;
-    margin-top: 20px;
+    padding: $spacing-md;
+    width: $layout-content-width;
+    margin-top: $spacing-xl;
 }
 .actions {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: $spacing-xl;
 }
 mat-toolbar {
-  background-color: var(--mat-sys-primary-container);
-  color: var(--mat-sys-on-primary-container);
+  background-color: $color-primary-container;
+  color: $color-on-primary-container;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
-  gap: 8px;
+  z-index: $z-toolbar;
+  gap: $spacing-sm;
 
   button[mat-icon-button] {
-    color: var(--mat-sys-on-primary-container);
+    color: $color-on-primary-container;
 
     &:hover {
       background: rgba(255, 255, 255, 0.1);
@@ -108,28 +108,28 @@ mat-toolbar {
 .imported-badge {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  background: rgba(255, 152, 0, 0.2);
-  border-radius: 16px;
-  font-size: 12px;
+  gap: $spacing-xs;
+  padding: 2px $spacing-sm;
+  background: $color-warning-container;
+  border-radius: $corner-medium;
+  font-size: $chip-font-size;
   font-weight: 500;
-  color: #ff9800;
-  margin-left: 16px;
+  color: $color-warning;
+  margin-left: $spacing-md;
 
   mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
+    font-size: $icon-size-sm;
+    width: $icon-size-sm;
+    height: $icon-size-sm;
   }
 
   .session-name {
-    color: var(--mat-sys-on-primary-container);
+    color: $color-on-primary-container;
     opacity: 0.8;
   }
 }
 .cls-1 {
-  color: var(--mat-sys-on-primary-container);
+  color: $color-on-primary-container;
 }
 
 // Empty state
@@ -137,24 +137,24 @@ mat-toolbar {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 48px;
-  background: var(--mat-sys-surface-container);
-  border-radius: 8px;
-  color: var(--mat-sys-on-surface-variant);
+  padding: $spacing-4xl;
+  background: $color-surface-container;
+  border-radius: $corner-small;
+  color: $color-on-surface-variant;
 
   mat-icon {
-    font-size: 48px;
-    width: 48px;
-    height: 48px;
-    color: var(--mat-sys-on-surface-variant);
-    margin-bottom: 16px;
+    font-size: $spacing-4xl;
+    width: $spacing-4xl;
+    height: $spacing-4xl;
+    color: $color-on-surface-variant;
+    margin-bottom: $spacing-lg;
     opacity: 0.5;
   }
 
   p {
     font-size: 1.1rem;
-    color: var(--mat-sys-on-surface);
-    margin: 0 0 8px 0;
+    color: $color-on-surface;
+    margin: 0 0 $spacing-sm 0;
   }
 
   span {
@@ -163,9 +163,9 @@ mat-toolbar {
 }
 
 .timestamp {
-  color: var(--mat-sys-on-surface-variant);
-  font-size: 12px;
-  margin-right: 16px;
+  color: $color-on-surface-variant;
+  font-size: $typography-body-small;
+  margin-right: $spacing-lg;
 }
 .toolbar-spacer {
   flex: 1 1 auto;
@@ -173,11 +173,11 @@ mat-toolbar {
 
 // Effect tracking styles
 .effect-action {
-  border-left: 4px solid #ff9800 !important;
+  @include colored-border-left($color-warning);
 }
 
 .user-action {
-  border-left: 4px solid #2196f3 !important;
+  @include colored-border-left($color-info);
 }
 
 // Fix expansion panel overflow for button
@@ -190,7 +190,7 @@ mat-expansion-panel-header {
     overflow: visible !important;
     flex-basis: auto;
     flex-grow: 1;
-    margin-right: 16px;
+    margin-right: $spacing-lg;
   }
 
   ::ng-deep .mat-expansion-panel-header-description {
@@ -209,50 +209,50 @@ mat-expansion-panel-header {
   font-size: 18px;
   width: 18px;
   height: 18px;
-  margin-right: 8px;
+  margin-right: $spacing-sm;
 
   &.effect-icon {
-    color: #ff9800;
+    color: $color-warning;
   }
 
   &.user-icon {
-    color: #2196f3;
+    color: $color-info;
   }
 }
 
 .correlation-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  background-color: rgba(156, 39, 176, 0.1);
-  color: #9c27b0;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  margin-right: 12px;
+  gap: $spacing-xs;
+  background-color: $color-accent-container;
+  color: $color-accent-secondary;
+  padding: 2px $spacing-sm;
+  border-radius: $corner-medium;
+  font-size: $typography-body-small;
+  margin-right: $spacing-md;
 
   mat-icon {
-    font-size: 14px;
-    width: 14px;
-    height: 14px;
+    font-size: $icon-size-xs;
+    width: $icon-size-xs;
+    height: $icon-size-xs;
   }
 }
 
 .correlation-info {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
+  gap: $spacing-sm;
+  padding: $spacing-md $spacing-lg;
   background-color: rgba(156, 39, 176, 0.05);
-  border-radius: 4px;
-  margin-bottom: 16px;
+  border-radius: $corner-extra-small;
+  margin-bottom: $spacing-lg;
 
   mat-icon {
-    color: #9c27b0;
+    color: $color-accent-secondary;
   }
 
   strong {
-    color: #9c27b0;
+    color: $color-accent-secondary;
   }
 }
 
@@ -260,16 +260,14 @@ mat-expansion-panel-header {
 mat-panel-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: $spacing-sm;
   overflow: visible !important;
   flex-wrap: nowrap;
   min-width: 0;
 
   .action-type {
     font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    @include text-truncate;
     max-width: 400px;
   }
 }
@@ -277,64 +275,64 @@ mat-panel-title {
 .effect-source-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  background-color: rgba(255, 152, 0, 0.15);
-  color: #ff9800;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-family: monospace;
-  margin-left: 8px;
+  gap: $spacing-xs;
+  background-color: $color-warning-container-strong;
+  color: $color-warning;
+  padding: 2px $spacing-sm;
+  border-radius: $corner-medium;
+  font-size: $chip-font-size;
+  font-family: $font-mono;
+  margin-left: $spacing-sm;
   white-space: nowrap;
   flex-shrink: 0;
 
   mat-icon {
-    font-size: 12px;
-    width: 12px;
-    height: 12px;
+    font-size: $typography-body-small;
+    width: $typography-body-small;
+    height: $typography-body-small;
   }
 }
 
 .perf-link-btn {
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
+  width: $icon-size-xl;
+  height: $icon-size-xl;
+  min-width: $icon-size-xl;
   padding: 0 !important;
   margin: 0;
-  color: #673ab7;
-  transition: all 0.2s ease;
+  color: $color-accent;
+  transition: all $transition-normal;
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50% !important;
+  border-radius: $corner-full !important;
   overflow: visible !important;
   position: relative;
 
   ::ng-deep .mat-mdc-button-touch-target {
     width: 100%;
     height: 100%;
-    border-radius: 50%;
+    border-radius: $corner-full;
   }
 
   ::ng-deep .mat-mdc-button-persistent-ripple {
-    border-radius: 50% !important;
+    border-radius: $corner-full !important;
   }
 
   ::ng-deep .mdc-button__ripple {
-    border-radius: 50% !important;
+    border-radius: $corner-full !important;
   }
 
   mat-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-    line-height: 20px;
+    font-size: $icon-size-md;
+    width: $icon-size-md;
+    height: $icon-size-md;
+    line-height: $icon-size-md;
   }
 
   &:hover {
-    background: rgba(103, 58, 183, 0.15) !important;
-    color: #512da8;
+    background: $color-accent-container !important;
+    color: $color-accent-dark;
     transform: scale(1.1);
   }
 
@@ -344,50 +342,50 @@ mat-panel-title {
 }
 
 .perf-warning-icon {
-  color: #ff9800;
+  color: $color-warning;
   font-size: 18px;
   width: 18px;
   height: 18px;
-  margin-right: 8px;
+  margin-right: $spacing-sm;
 }
 
 .perf-time {
-  font-family: monospace;
-  font-size: 12px;
+  font-family: $font-mono;
+  font-size: $typography-body-small;
   padding: 2px 6px;
-  border-radius: 4px;
-  background: rgba(76, 175, 80, 0.1);
-  color: #4caf50;
-  margin-right: 12px;
+  border-radius: $corner-extra-small;
+  background: $color-success-container;
+  color: $color-success;
+  margin-right: $spacing-md;
 
   &.slow {
-    background: rgba(244, 67, 54, 0.1);
-    color: #f44336;
+    background: $color-error-container;
+    color: $color-error;
   }
 }
 
 // Action performance tab content
 .action-performance {
-  padding: 16px;
+  padding: $spacing-lg;
 }
 
 .perf-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fit, minmax($grid-min-column, 1fr));
+  gap: $spacing-lg;
+  margin-bottom: $spacing-2xl;
 }
 
 .perf-stat {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  gap: $spacing-md;
+  padding: $spacing-md;
   background: rgba(255, 255, 255, 0.03);
-  border-radius: 8px;
+  border-radius: $corner-small;
 
   mat-icon {
-    color: #673ab7;
+    color: $color-accent;
   }
 }
 
@@ -397,26 +395,26 @@ mat-panel-title {
 }
 
 .perf-stat-label {
-  font-size: 12px;
+  font-size: $typography-body-small;
   opacity: 0.7;
   text-transform: uppercase;
 }
 
 .perf-stat-value {
-  font-size: 16px;
+  font-size: $typography-body-medium;
   font-weight: 500;
-  font-family: monospace;
+  font-family: $font-mono;
 
   &.warning {
-    color: #f44336;
+    color: $color-error;
   }
 
   &.positive {
-    color: #4caf50;
+    color: $color-success;
   }
 
   &.negative {
-    color: #2196f3;
+    color: $color-info;
   }
 }
 
@@ -424,42 +422,42 @@ mat-panel-title {
   h4 {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin: 0 0 12px 0;
-    color: #ff9800;
+    gap: $spacing-sm;
+    margin: 0 0 $spacing-md 0;
+    color: $color-warning;
 
     mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
+      font-size: $icon-size-md;
+      width: $icon-size-md;
+      height: $icon-size-md;
     }
   }
 }
 
 .perf-warning {
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  padding: $spacing-md;
+  border-radius: $corner-small;
+  margin-bottom: $spacing-sm;
 
   &.severity-high {
-    background: rgba(244, 67, 54, 0.1);
-    border-left: 3px solid #f44336;
+    background: $color-error-container;
+    border-left: $border-width-medium solid $color-error;
   }
 
   &.severity-medium {
-    background: rgba(255, 152, 0, 0.1);
-    border-left: 3px solid #ff9800;
+    background: $color-warning-container;
+    border-left: $border-width-medium solid $color-warning;
   }
 
   &.severity-low {
     background: rgba(255, 193, 7, 0.1);
-    border-left: 3px solid #ffc107;
+    border-left: $border-width-medium solid $color-fair;
   }
 }
 
 .warning-message {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: $spacing-sm;
 }
 
 .warning-suggestion {
@@ -470,29 +468,29 @@ mat-panel-title {
 
 // Render timing styles
 .render-time {
-  color: #9c27b0 !important;
+  color: $color-accent-secondary !important;
 }
 
 .total-time {
-  color: #2196f3 !important;
+  color: $color-info !important;
 }
 
 .perf-time.slow {
-  color: #f44336 !important;
+  color: $color-error !important;
 }
 
 // Timing breakdown visualization
 .timing-breakdown {
-  margin-top: 24px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: $spacing-2xl;
+  padding-top: $spacing-lg;
+  border-top: $border-width-thin solid rgba(255, 255, 255, 0.1);
 
   h4 {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin: 0 0 16px 0;
-    font-size: 14px;
+    gap: $spacing-sm;
+    margin: 0 0 $spacing-lg 0;
+    font-size: $icon-size-xs;
 
     mat-icon {
       font-size: 18px;
@@ -505,31 +503,31 @@ mat-panel-title {
 
 .timing-bar {
   display: flex;
-  height: 24px;
-  border-radius: 4px;
+  height: $chip-min-height;
+  border-radius: $corner-extra-small;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.05);
-  margin-bottom: 12px;
+  margin-bottom: $spacing-md;
 }
 
 .timing-segment {
   height: 100%;
-  min-width: 4px;
-  transition: width 0.3s ease;
+  min-width: $spacing-xs;
+  transition: width $transition-slow;
 
   &.reducer-segment {
-    background: linear-gradient(135deg, #4caf50, #8bc34a);
+    background: linear-gradient(135deg, $color-success, $color-good);
   }
 
   &.render-segment {
-    background: linear-gradient(135deg, #9c27b0, #e91e63);
+    background: linear-gradient(135deg, $color-accent-secondary, #e91e63);
   }
 }
 
 .timing-legend {
   display: flex;
-  gap: 24px;
-  font-size: 12px;
+  gap: $spacing-2xl;
+  font-size: $typography-body-small;
 }
 
 .legend-item {
@@ -539,15 +537,15 @@ mat-panel-title {
 }
 
 .legend-color {
-  width: 12px;
-  height: 12px;
+  width: $spacing-md;
+  height: $spacing-md;
   border-radius: 2px;
 
   &.reducer {
-    background: linear-gradient(135deg, #4caf50, #8bc34a);
+    background: linear-gradient(135deg, $color-success, $color-good);
   }
 
   &.render {
-    background: linear-gradient(135deg, #9c27b0, #e91e63);
+    background: linear-gradient(135deg, $color-accent-secondary, #e91e63);
   }
 }

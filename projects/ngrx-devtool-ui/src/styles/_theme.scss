@@ -1,0 +1,342 @@
+@use '@angular/material' as mat;
+
+$color-primary: var(--mat-sys-primary);
+$color-on-primary: var(--mat-sys-on-primary);
+$color-primary-container: var(--mat-sys-primary-container);
+$color-on-primary-container: var(--mat-sys-on-primary-container);
+
+$color-secondary: var(--mat-sys-secondary);
+$color-on-secondary: var(--mat-sys-on-secondary);
+$color-secondary-container: var(--mat-sys-secondary-container);
+$color-on-secondary-container: var(--mat-sys-on-secondary-container);
+
+$color-tertiary: var(--mat-sys-tertiary);
+$color-on-tertiary: var(--mat-sys-on-tertiary);
+$color-tertiary-container: var(--mat-sys-tertiary-container);
+$color-on-tertiary-container: var(--mat-sys-on-tertiary-container);
+
+$color-surface: var(--mat-sys-surface);
+$color-on-surface: var(--mat-sys-on-surface);
+$color-surface-variant: var(--mat-sys-surface-variant);
+$color-on-surface-variant: var(--mat-sys-on-surface-variant);
+$color-surface-container: var(--mat-sys-surface-container);
+$color-surface-container-low: var(--mat-sys-surface-container-low);
+
+$color-outline: var(--mat-sys-outline);
+$color-outline-variant: var(--mat-sys-outline-variant);
+
+$color-background: var(--mat-sys-background);
+$color-on-background: var(--mat-sys-on-background);
+
+$color-success: #4caf50;
+$color-success-light: #81c784;
+$color-success-dark: #388e3c;
+$color-success-container: rgba(76, 175, 80, 0.1);
+$color-success-container-strong: rgba(76, 175, 80, 0.15);
+
+// Warning - for caution states, attention needed
+$color-warning: #ff9800;
+$color-warning-light: #ffb74d;
+$color-warning-dark: #f57c00;
+$color-warning-muted: #b38600;
+$color-warning-container: rgba(255, 152, 0, 0.1);
+$color-warning-container-strong: rgba(255, 152, 0, 0.15);
+$color-warning-border: rgba(255, 152, 0, 0.3);
+$color-warning-border-strong: rgba(255, 152, 0, 0.5);
+
+// Error - for failures, critical states
+$color-error: #f44336;
+$color-error-light: #e57373;
+$color-error-dark: #d32f2f;
+$color-error-container: rgba(244, 67, 54, 0.1);
+$color-error-container-strong: rgba(244, 67, 54, 0.15);
+
+// Info - for informational states, user actions
+$color-info: #2196f3;
+$color-info-light: #64b5f6;
+$color-info-dark: #1976d2;
+$color-info-container: rgba(33, 150, 243, 0.1);
+$color-info-container-strong: rgba(33, 150, 243, 0.15);
+
+// Accent/Tertiary - for effects, special states
+$color-accent: #673ab7;
+$color-accent-light: #9575cd;
+$color-accent-dark: #512da8;
+$color-accent-secondary: #9c27b0;
+$color-accent-container: rgba(103, 58, 183, 0.1);
+
+// Additional semantic colors
+$color-good: #8bc34a;
+$color-fair: #ffc107;
+
+$diff-added: #2ea043;
+$diff-added-bg: rgba(46, 160, 67, 0.1);
+$diff-removed: #f85149;
+$diff-removed-bg: rgba(248, 81, 73, 0.1);
+$diff-changed: #1f6feb;
+$diff-changed-bg: rgba(31, 111, 235, 0.1);
+
+$perf-good: $color-success;
+$perf-warning: $color-warning;
+$perf-critical: $color-error;
+
+$effect-started: $color-info-light;
+$effect-emitted: $color-success-light;
+$effect-error: $color-error;
+$effect-complete: $color-on-surface-variant;
+$effect-running: $color-info-light;
+$effect-trigger: $color-info;
+$effect-side-effect: $color-accent-secondary;
+
+$font-mono: 'Roboto Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+$font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+// Material typography tokens
+$typography-display-large: var(--mat-sys-display-large);
+$typography-display-medium: var(--mat-sys-display-medium);
+$typography-display-small: var(--mat-sys-display-small);
+$typography-headline-large: var(--mat-sys-headline-large);
+$typography-headline-medium: var(--mat-sys-headline-medium);
+$typography-headline-small: var(--mat-sys-headline-small);
+$typography-title-large: var(--mat-sys-title-large);
+$typography-title-medium: var(--mat-sys-title-medium);
+$typography-title-small: var(--mat-sys-title-small);
+$typography-body-large: var(--mat-sys-body-large);
+$typography-body-medium: var(--mat-sys-body-medium);
+$typography-body-small: var(--mat-sys-body-small);
+$typography-label-large: var(--mat-sys-label-large);
+$typography-label-medium: var(--mat-sys-label-medium);
+$typography-label-small: var(--mat-sys-label-small);
+
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 12px;
+$spacing-lg: 16px;
+$spacing-xl: 20px;
+$spacing-2xl: 24px;
+$spacing-3xl: 32px;
+$spacing-4xl: 48px;
+$spacing-5xl: 64px;
+
+// Icon sizes
+$icon-size-xs: 14px;
+$icon-size-sm: 16px;
+$icon-size-md: 20px;
+$icon-size-lg: 24px;
+$icon-size-xl: 32px;
+$icon-size-2xl: 40px;
+$icon-size-3xl: 80px;
+
+// Border widths
+$border-width-thin: 1px;
+$border-width-medium: 3px;
+$border-width-thick: 4px;
+
+// Letter spacing
+$letter-spacing-tight: 0.25px;
+$letter-spacing-normal: 0.5px;
+$letter-spacing-wide: 1px;
+
+// Layout
+$layout-content-width: 90%;
+$grid-min-column: 200px;
+$chip-min-height: 24px;
+$chip-font-size: 11px;
+
+$corner-none: var(--mat-sys-corner-none, 0);
+$corner-extra-small: var(--mat-sys-corner-extra-small, 4px);
+$corner-small: var(--mat-sys-corner-small, 8px);
+$corner-medium: var(--mat-sys-corner-medium, 12px);
+$corner-large: var(--mat-sys-corner-large, 16px);
+$corner-extra-large: var(--mat-sys-corner-extra-large, 28px);
+$corner-full: var(--mat-sys-corner-full, 50%);
+
+$elevation-1: var(--mat-sys-level1, 0 2px 4px rgba(0, 0, 0, 0.1));
+$elevation-2: var(--mat-sys-level2, 0 4px 8px rgba(0, 0, 0, 0.15));
+$elevation-3: var(--mat-sys-level3, 0 6px 12px rgba(0, 0, 0, 0.2));
+
+$transition-fast: 0.15s ease;
+$transition-normal: 0.2s ease;
+$transition-slow: 0.3s ease;
+
+$z-dropdown: 100;
+$z-sticky: 200;
+$z-fixed: 300;
+$z-modal-backdrop: 400;
+$z-modal: 500;
+$z-popover: 600;
+$z-tooltip: 700;
+$z-toolbar: 1000;
+
+// Status chip mixin for consistent chip styling
+@mixin status-chip($bg-color, $text-color: white) {
+  --mat-chip-label-text-color: #{$text-color};
+  --mat-chip-elevated-container-color: #{$bg-color};
+}
+
+// Colored left border for cards/panels
+@mixin colored-border-left($color, $width: 4px) {
+  border-left: $width solid $color !important;
+}
+
+// Container with subtle background
+@mixin subtle-container($color, $opacity: 0.1) {
+  background: rgba($color, $opacity);
+}
+
+// Interactive hover effect
+@mixin hover-lift {
+  transition: transform $transition-normal, box-shadow $transition-normal;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $elevation-2;
+  }
+}
+
+// Monospace text styling
+@mixin mono-text {
+  font-family: $font-mono;
+}
+
+// Truncate text with ellipsis
+@mixin text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Info icon (small, subtle, reveals on hover)
+@mixin info-icon($size: $icon-size-xs) {
+  font-size: $size;
+  width: $size;
+  height: $size;
+  opacity: 0.5;
+  transition: opacity $transition-normal;
+}
+
+// Stats grid layout
+@mixin stats-grid($min-column: $grid-min-column) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax($min-column, 1fr));
+  gap: $spacing-lg;
+  padding: $spacing-sm 0;
+}
+
+// Stat card base styling
+@mixin stat-card-base {
+  text-align: center;
+  cursor: help;
+  @include hover-lift;
+}
+
+// Label styling (uppercase, muted)
+@mixin label-text {
+  color: $color-on-surface-variant;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: $letter-spacing-normal;
+}
+
+// Data table styling
+@mixin data-table {
+  width: 100%;
+  background: transparent;
+
+  th {
+    font: $typography-label-small;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: $letter-spacing-normal;
+    color: $color-on-surface-variant;
+  }
+
+  td {
+    font: $typography-body-small;
+    font-family: $font-mono;
+    padding: $spacing-md $spacing-lg;
+  }
+
+  tr:hover {
+    background: $color-surface-container-low;
+  }
+}
+
+// Panel container styling
+@mixin panel-container($width: $layout-content-width) {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl;
+  padding: $spacing-md;
+  width: $width;
+  margin: $spacing-xl auto 0;
+}
+
+// Empty state styling
+@mixin empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-4xl;
+  background: $color-surface-container;
+  border-radius: $corner-small;
+  color: $color-on-surface-variant;
+
+  mat-icon {
+    font-size: $spacing-4xl;
+    width: $spacing-4xl;
+    height: $spacing-4xl;
+    color: $color-on-surface-variant;
+    margin-bottom: $spacing-lg;
+    opacity: 0.5;
+  }
+
+  p {
+    font-size: 1.1rem;
+    color: $color-on-surface;
+    margin: 0 0 $spacing-sm 0;
+  }
+
+  span {
+    font-size: 0.85rem;
+  }
+}
+
+// Action icon sizing
+@mixin action-icon($size: 18px) {
+  font-size: $size;
+  width: $size;
+  height: $size;
+  margin-right: $spacing-sm;
+}
+
+// Badge/chip inline styling
+@mixin inline-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: 2px $spacing-sm;
+  border-radius: $corner-medium;
+  font-size: $chip-font-size;
+}
+
+// Detail row (label + value pair)
+@mixin detail-row {
+  display: flex;
+  padding: $spacing-sm 0;
+  border-bottom: $border-width-thin solid $color-outline-variant;
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+}
+
+// Spin animation
+@mixin spin-animation {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
