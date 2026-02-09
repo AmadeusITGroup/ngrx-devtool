@@ -1,22 +1,19 @@
-import { inject, Injectable, OnDestroy, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { inject, Injectable, OnDestroy } from '@angular/core';
 import { Actions } from '@ngrx/effects';
 import { Action } from '@ngrx/store';
-import { Subject, takeUntil, tap } from 'rxjs';
+import { filter, Subject, takeUntil, tap } from 'rxjs';
 
 import { DevToolMessage, EffectEvent, TrackedAction } from './core.models';
 import { EffectTrackerService } from './effect-tracker.service';
+import { WebSocketService, WebSocketMessage } from './websocket.service';
+
 @Injectable({ providedIn: 'root' })
 export class ActionsInterceptorService implements OnDestroy {
   private readonly actions$ = inject(Actions);
   private readonly effectTracker = inject(EffectTrackerService);
-  private readonly platformId = inject(PLATFORM_ID);
-  private readonly isBrowser = isPlatformBrowser(this.platformId);
+  private readonly webSocketService = inject(WebSocketService);
 
   private readonly destroy$ = new Subject<void>();
-  private socket: WebSocket | null = null;
-  private messageBuffer: string[] = [];
-  private isConnected = false;
   private initialized = false;
 
   initialize(wsUrl = 'ws://localhost:4000'): void {
@@ -24,7 +21,8 @@ export class ActionsInterceptorService implements OnDestroy {
       return;
     }
     this.initialized = true;
-    this.setupWebSocket(wsUrl);
+    this.webSocketService.initialize(wsUrl);
+    this.setupMessageListener();
     this.setupActionInterception();
     this.setupEffectEventForwarding();
   }
@@ -44,40 +42,18 @@ export class ActionsInterceptorService implements OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-    this.socket?.close();
   }
 
-  private setupWebSocket(wsUrl: string): void {
-    if (!this.isBrowser) {
-      return;
-    }
-
-    this.socket = new WebSocket(wsUrl);
-
-    this.socket.onopen = () => {
-      this.isConnected = true;
-      this.flushBuffer();
-    };
-
-    this.socket.onclose = () => {
-      this.isConnected = false;
-    };
-
-    this.socket.onerror = (error) => {
-      console.warn('[NgRx DevTool] WebSocket error:', error);
-    };
-
-    this.socket.onmessage = (event) => {
-      try {
-        const message = JSON.parse(event.data);
-        if (message.type === 'CLEAR_REQUEST') {
+  private setupMessageListener(): void {
+    this.webSocketService.messages$.pipe(
+      takeUntil(this.destroy$),
+      filter((message): message is WebSocketMessage => message !== null),
+      tap((message) => {
+        if (message['type'] === 'CLEAR_REQUEST') {
           this.effectTracker.clearTimeline();
-          this.messageBuffer = [];
         }
-      } catch {
-        // Ignore non-JSON messages
-      }
-    };
+      })
+    ).subscribe();
   }
 
   private setupActionInterception(): void {
@@ -127,22 +103,7 @@ export class ActionsInterceptorService implements OnDestroy {
   }
 
   private sendMessage(message: DevToolMessage): void {
-    const payload = JSON.stringify(message);
-
-    if (this.isConnected && this.socket?.readyState === WebSocket.OPEN) {
-      this.socket.send(payload);
-    } else {
-      this.messageBuffer.push(payload);
-    }
-  }
-
-  private flushBuffer(): void {
-    while (this.messageBuffer.length > 0 && this.isConnected) {
-      const message = this.messageBuffer.shift();
-      if (message && this.socket?.readyState === WebSocket.OPEN) {
-        this.socket.send(message);
-      }
-    }
+    this.webSocketService.send(message);
   }
 
   private sanitizePayload(action: Action): unknown {

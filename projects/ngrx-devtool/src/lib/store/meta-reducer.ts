@@ -1,6 +1,7 @@
 import { ActionReducer, Action } from '@ngrx/store';
 import { inject } from '@angular/core';
 import { PerformanceTrackerService } from '../performance/performance-tracker.service';
+import { WebSocketService } from '../core/websocket.service';
 
 export interface RenderPerformanceData {
   readonly renderTime: number;
@@ -29,27 +30,15 @@ export function createDevToolMetaReducer(
 
   const wsUrl = config.wsUrl ?? 'ws://localhost:4000';
   const enablePerf = config.enablePerformanceTracking ?? true;
-  const isBrowser = typeof window !== 'undefined' && typeof WebSocket !== 'undefined';
-  const socket = isBrowser ? new WebSocket(wsUrl) : null;
-  const messageBuffer: string[] = [];
-
-  function flushBuffer() {
-    while (messageBuffer.length > 0 && socket?.readyState === WebSocket.OPEN) {
-      const message = messageBuffer.shift();
-      if (message && socket) {
-        socket.send(message);
-      }
-    }
-  }
-
-  if (socket) {
-    socket.onopen = flushBuffer;
-  }
 
   return function devToolMetaReducer<State>(
     reducer: ActionReducer<State>
   ): ActionReducer<State> {
     const performanceTracker = inject(PerformanceTrackerService);
+    const webSocketService = inject(WebSocketService);
+
+    // Initialize WebSocket connection (no-op if already initialized)
+    webSocketService.initialize(wsUrl);
 
     return function (state, action) {
       const prevState = state;
@@ -71,12 +60,7 @@ export function createDevToolMetaReducer(
               renderPerformance: { renderTime }
             };
 
-            const payload = JSON.stringify(message);
-            if (socket?.readyState === WebSocket.OPEN) {
-              socket.send(payload);
-            } else if (isBrowser) {
-              messageBuffer.push(payload);
-            }
+            webSocketService.send(message);
           }
         );
       } else {
@@ -90,12 +74,7 @@ export function createDevToolMetaReducer(
           timestamp,
         };
 
-        const payload = JSON.stringify(message);
-        if (socket?.readyState === WebSocket.OPEN) {
-          socket.send(payload);
-        } else if (isBrowser) {
-          messageBuffer.push(payload);
-        }
+        webSocketService.send(message);
       }
 
       return nextState;

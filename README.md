@@ -117,7 +117,7 @@ export const appConfig: ApplicationConfig = {
 ```
 
 > [!WARNING]
-> The `createDevToolMetaReducer()` must be added to the same `provideStore()` or `StoreModule.forRoot()` that initializes your store. If you're only seeing effects in the DevTool (no actions), you likely have a separate store module—see Option B above.
+> The `createDevToolMetaReducer()` must be added to the same `provideStore()` or `StoreModule.forRoot()` that initializes your store. If you're only seeing effects in the DevTool (no actions), you likely have a separate store module see Option B above.
 
 Note: If your app fails to compile or run after this step, see the npm Link Issues section in Troubleshooting to configure `preserveSymlinks`.
 

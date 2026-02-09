@@ -6,12 +6,14 @@ import { provideEffects, EffectSources } from '@ngrx/effects';
 import { ActionsInterceptorService, DevToolMessage } from '../core/actions-interceptor.service';
 import { EffectTrackerService } from '../core/effect-tracker.service';
 import { DevToolsEffectSources } from '../core/devtools-effect-sources';
+import { WebSocketService } from '../core/websocket.service';
 import { TestEffects, testActions, testReducer } from './test-effects';
 import { MockWebSocket, WebSocketConstants } from './mock-websocket';
 
 describe('ActionsInterceptorService', () => {
   let interceptorService: ActionsInterceptorService;
   let effectTracker: EffectTrackerService;
+  let webSocketService: WebSocketService;
   let originalWebSocket: typeof WebSocket | undefined;
   let createdWebSockets: MockWebSocket[];
 
@@ -35,16 +37,19 @@ describe('ActionsInterceptorService', () => {
         { provide: EffectSources, useClass: DevToolsEffectSources },
         { provide: PLATFORM_ID, useValue: 'browser' },
         EffectTrackerService,
+        WebSocketService,
         ActionsInterceptorService,
       ],
     });
 
     interceptorService = TestBed.inject(ActionsInterceptorService);
     effectTracker = TestBed.inject(EffectTrackerService);
+    webSocketService = TestBed.inject(WebSocketService);
   });
 
   afterEach(() => {
     interceptorService.ngOnDestroy();
+    webSocketService.ngOnDestroy();
     if (originalWebSocket) {
       (global as unknown as { WebSocket: unknown }).WebSocket = originalWebSocket;
     }
@@ -77,12 +82,12 @@ describe('ActionsInterceptorService', () => {
       expect(ws.readyState).toBe(MockWebSocket.OPEN);
     });
 
-    it('should close WebSocket on destroy', () => {
+    it('should close WebSocket on WebSocketService destroy', () => {
       interceptorService.initialize();
       const ws = getCreatedWebSocket();
       ws.simulateOpen();
 
-      interceptorService.ngOnDestroy();
+      webSocketService.ngOnDestroy();
 
       expect(ws.readyState).toBe(MockWebSocket.CLOSED);
     });

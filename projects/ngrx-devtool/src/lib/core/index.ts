@@ -5,3 +5,4 @@ export * from './core.models';
 export * from './actions-interceptor.service';
 export * from './effect-tracker.service';
 export * from './devtools-effect-sources';
+export * from './websocket.service';
