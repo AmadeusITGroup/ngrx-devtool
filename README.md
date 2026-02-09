@@ -64,6 +64,8 @@ Note: If you encounter module resolution issues, see the npm Link Issues section
 
 ### Step 3: Configure your app
 
+**Option A: Standalone (recommended)**
+
 ```typescript
 // app.config.ts
 import { provideNgrxDevTool, createDevToolMetaReducer } from 'ngrx-devtool';
@@ -77,11 +79,45 @@ export const appConfig: ApplicationConfig = {
     provideEffects([...]),
     provideNgrxDevTool({
       wsUrl: 'ws://localhost:4000',
-      trackEffects: true,  // Enable effect lifecycle tracking
+      trackEffects: true,
     }),
   ]
 };
 ```
+
+**Option B: NgModule with separate store module** (common in large enterprise apps)
+
+```typescript
+// store.module.ts
+import { createDevToolMetaReducer } from 'ngrx-devtool';
+
+@NgModule({
+  imports: [
+    StoreModule.forRoot(
+      { /* your reducers */ },
+      { metaReducers: [createDevToolMetaReducer()] }
+    ),
+    EffectsModule.forRoot([...])
+  ]
+})
+export class RootStoreModule {}
+
+// app.config.ts
+import { provideNgrxDevTool } from 'ngrx-devtool';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    // Don't add provideStore() here - RootStoreModule already has it
+    provideNgrxDevTool({
+      wsUrl: 'ws://localhost:4000',
+      trackEffects: true,
+    }),
+  ]
+};
+```
+
+> [!WARNING]
+> The `createDevToolMetaReducer()` must be added to the same `provideStore()` or `StoreModule.forRoot()` that initializes your store. If you're only seeing effects in the DevTool (no actions), you likely have a separate store module—see Option B above.
 
 Note: If your app fails to compile or run after this step, see the npm Link Issues section in Troubleshooting to configure `preserveSymlinks`.
 
@@ -161,6 +197,10 @@ npm uninstall @types/jasmine
 # If using Jasmine
 npm uninstall @types/jest
 ```
+
+### Only effects showing, no actions
+
+Your meta reducer is likely being overridden. Make sure `createDevToolMetaReducer()` is added to the `StoreModule.forRoot()` or `provideStore()` that actually initializes your store (not a duplicate).
 
 ### Effects not being tracked
 
