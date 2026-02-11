@@ -1,0 +1,38 @@
+<div class="d-flex flex-column">
+  <header class="fw-bold w-100 d-flex align-items-center justify-content-start">
+    <div class="header-title d-flex align-items-center px-3">
+      <div class="d-flex align-items-center me-2 header-icon">
+        <img src="assets/logo.png" width="64" height="64" alt="NgRx DevTool Logo" />
+      </div>
+      <div class="header-text">NgRx DevTool</div>
+    </div>
+  </header>
+  <div class="main-container flex-fill">
+    <div class="row">
+      <aside class="left-nav">
+        <app-sidenav
+          [linksGroups]="linksGroups"
+          [activeUrl]="(activeUrl$ | async) ?? ''"
+        ></app-sidenav>
+      </aside>
+      <main class="page-content">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
+  </div>
+</div>
+<footer class="footer d-flex align-items-center w-100">
+  <div class="footer-content">
+    <div class="footer-links">
+      <h4>Links</h4>
+      <ul>
+        <li>
+          <a href="https://github.com/amadeusitgroup" target="_blank" rel="noopener">GitHub</a>
+        </li>
+        <li>
+          <a href="https://ngrx.io" target="_blank" rel="noopener">NgRx Documentation</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,63 @@
+<h1>Effect Tracking</h1>
+<p>Monitor effect execution with start, emit, complete, and error events.</p>
+
+<h2>How It Works</h2>
+<p>Effect tracking is powered by <code>DevToolsEffectSources</code>, which extends NgRx's <code>EffectSources</code> class to instrument effects at registration time.</p>
+
+<div class="diagram-container">
+  <img src="assets/effecta-tracking-uml.png" alt="Effect Tracking Flow Diagram" />
+</div>
+
+<div class="explanation">
+  <h3>Implementation Details:</h3>
+  <ol>
+    <li><strong>Effect Registration Override</strong> - <code>DevToolsEffectSources</code> overrides <code>addEffects()</code> to intercept effect classes when registered</li>
+    <li><strong>Metadata Extraction</strong> - Effect properties are identified by the <code>__&#64;ngrx/effects_create__</code> metadata key from <code>createEffect()</code></li>
+    <li><strong>Observable Instrumentation</strong> - Each effect's observable is wrapped with <code>tap()</code> to capture emissions and errors</li>
+    <li><strong>Lifecycle Events</strong> - Events are emitted for: <code>emitted</code> (action dispatched), <code>executed</code> (non-dispatch effect), <code>error</code></li>
+    <li><strong>Duration Calculation</strong> - Time is tracked between emissions to calculate effect duration</li>
+    <li><strong>ReplaySubject Buffer</strong> - Events are buffered in a ReplaySubject (100 items) for late subscribers</li>
+  </ol>
+</div>
+
+<h2>Effect States</h2>
+<div class="states-grid">
+  <div class="state-card">
+    <span class="state-badge started">Started</span>
+    <p>Effect has begun execution</p>
+  </div>
+  <div class="state-card">
+    <span class="state-badge emitted">Emitted</span>
+    <p>Effect has dispatched an action</p>
+  </div>
+  <div class="state-card">
+    <span class="state-badge completed">Completed</span>
+    <p>Effect has finished successfully</p>
+  </div>
+  <div class="state-card">
+    <span class="state-badge error">Error</span>
+    <p>Effect encountered an error</p>
+  </div>
+</div>
+
+<h2>Effects Panel</h2>
+<p>The dedicated Effects Panel shows all effect executions with:</p>
+<ul>
+  <li>Effect name and class</li>
+  <li>Duration of execution</li>
+  <li>Current status</li>
+  <li>Actions emitted</li>
+  <li>Error details (if any)</li>
+</ul>
+
+<div class="warning-box">
+  <strong>Important:</strong> <code>provideEffects()</code> must be called <strong>before</strong> <code>provideNgrxDevTool()</code> so effects are registered before the DevTool instruments them.
+</div>
+
+<h2>Configuration</h2>
+<p>Ensure effect tracking is enabled in your configuration:</p>
+<div class="code-block">
+  <pre><code>provideNgrxDevTool(&#123;
+  trackEffects: true
+&#125;)</code></pre>
+</div>

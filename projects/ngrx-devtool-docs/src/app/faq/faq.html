@@ -1,0 +1,75 @@
+<h1>Frequently Asked Questions</h1>
+
+<div class="faq-item">
+  <h3>Is NgRx DevTool compatible with the Redux DevTools extension?</h3>
+  <p>No, NgRx DevTool is a standalone solution that doesn't require any browser extensions. It provides a native Angular experience with a dedicated UI at <code>http://localhost:3000</code>.</p>
+</div>
+
+<div class="faq-item">
+  <h3>Can I use this in production?</h3>
+  <p>Yes, but we recommend conditionally including the DevTools based on your environment:</p>
+  <div class="code-block">
+    <pre><code>providers: [
+  ...(!environment.production ? [
+    provideNgrxDevTool(&#123; wsUrl: 'ws://localhost:4000' &#125;)
+  ] : [])
+]</code></pre>
+  </div>
+</div>
+
+<div class="faq-item">
+  <h3>What do the color indicators mean?</h3>
+  <p>When viewing actions in the DevTool UI:</p>
+  <ul>
+    <li><strong>Blue border</strong> = User action (dispatched directly)</li>
+    <li><strong>Orange border</strong> = Effect result (shows which effect emitted the action)</li>
+  </ul>
+</div>
+
+<div class="faq-item">
+  <h3>Does it support NgModule-based apps?</h3>
+  <p>Yes! If you have a separate store module (common in enterprise apps), configure it like this:</p>
+  <div class="code-block">
+    <pre><code>// store.module.ts
+&#64;NgModule(&#123;
+  imports: [
+    StoreModule.forRoot(
+      &#123; /* reducers */ &#125;,
+      &#123; metaReducers: [createDevToolMetaReducer()] &#125;
+    ),
+    EffectsModule.forRoot([...])
+  ]
+&#125;)
+export class RootStoreModule &#123;&#125;
+
+// app.config.ts
+providers: [
+  provideNgrxDevTool(&#123; wsUrl: 'ws://localhost:4000' &#125;),
+]</code></pre>
+  </div>
+</div>
+
+<div class="faq-item">
+  <h3>How much overhead does it add?</h3>
+  <p>The DevTool is designed to be lightweight. When the panel is closed, overhead is minimal. Disable features like <code>trackEffects: false</code> to further reduce overhead.</p>
+</div>
+
+<div class="faq-item">
+  <h3>What ports does the DevTool use?</h3>
+  <p>By default:</p>
+  <ul>
+    <li><code>:3000</code> - DevTool UI</li>
+    <li><code>:4000</code> - WebSocket server for communication</li>
+  </ul>
+</div>
+
+<div class="faq-item">
+  <h3>Can I contribute?</h3>
+  <p>Yes! The project is open source:</p>
+  <ol>
+    <li>Fork the repository</li>
+    <li>Make your changes</li>
+    <li>Test with the demo app: <code>ng serve ngrx-devtool-demo</code></li>
+    <li>Submit a pull request</li>
+  </ol>
+</div>

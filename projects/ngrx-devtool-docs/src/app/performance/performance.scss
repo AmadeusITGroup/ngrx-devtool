@@ -1,0 +1,112 @@
+@import '../shared-styles';
+
+app-performance {
+  @include page-container;
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    margin: var(--spacing-lg) 0;
+  }
+
+  .metric-card {
+    background: var(--color-neutral-50);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    text-align: center;
+    border: var(--border-width) solid var(--color-neutral-200);
+    transition: var(--transition-fast);
+
+    &:hover {
+      border-color: var(--df-primary);
+      box-shadow: var(--shadow-md);
+    }
+
+    .metric-icon {
+      color: var(--df-primary);
+      margin-bottom: var(--spacing-sm);
+      display: flex;
+      justify-content: center;
+
+      svg {
+        display: block;
+      }
+    }
+
+    h4 {
+      margin: 0 0 var(--spacing-xs);
+      color: var(--color-neutral-800);
+    }
+
+    p {
+      font-size: var(--font-size-sm);
+      color: var(--color-neutral-600);
+      margin: 0 0 var(--spacing-sm);
+    }
+
+    .formula {
+      display: block;
+      background: var(--color-code-bg);
+      color: var(--color-code-text);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-xs);
+    }
+  }
+
+  .options-table {
+    .fast {
+      color: var(--color-accent-green);
+      font-weight: 600;
+    }
+
+    .medium {
+      color: var(--color-accent-orange);
+      font-weight: 600;
+    }
+
+    .slow {
+      color: var(--color-accent-red);
+      font-weight: 600;
+    }
+  }
+
+  .render-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin: var(--spacing-md) 0;
+  }
+
+  .metric-example {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .metric-badge {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    min-width: 50px;
+    text-align: center;
+
+    &.fast {
+      background: var(--color-accent-green-bg);
+      color: var(--color-accent-green);
+    }
+
+    &.medium {
+      background: var(--color-accent-orange-bg);
+      color: var(--color-accent-orange);
+    }
+
+    &.slow {
+      background: var(--color-accent-red-bg);
+      color: var(--color-accent-red);
+    }
+  }
+}

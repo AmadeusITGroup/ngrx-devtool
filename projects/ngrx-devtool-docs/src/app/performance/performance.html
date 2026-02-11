@@ -1,0 +1,53 @@
+<h1>Performance Metrics</h1>
+<p>Track render time for every state change in your Angular application.</p>
+
+<h2>How It Works</h2>
+<p>The <code>PerformanceTrackerService</code> measures the actual time it takes for Angular to render after each state change using Angular's <code>afterNextRender()</code> hook.</p>
+
+<div class="explanation">
+  <h3>Implementation:</h3>
+  <ol>
+    <li><strong>Start Timer</strong> - When a reducer executes, we record <code>performance.now()</code></li>
+    <li><strong>Execute Reducer</strong> - The state update happens normally</li>
+    <li><strong>Wait for Render</strong> - <code>afterNextRender()</code> schedules a callback after Angular's change detection completes</li>
+    <li><strong>Calculate Duration</strong> - The difference gives us the actual render time</li>
+  </ol>
+</div>
+
+<div class="code-block">
+  <pre><code>measureRenderTime(actionType, reducer, callback) &#123;
+  const startTime = performance.now();
+  const nextState = reducer();
+
+  afterNextRender(() =&gt; &#123;
+    const renderTime = performance.now() - startTime;
+    callback(renderTime);
+  &#125;);
+
+  return nextState;
+&#125;</code></pre>
+</div>
+
+<h2>Render Time Indicators</h2>
+<p>Each action in the DevTool UI shows its render time with color-coded badges:</p>
+<div class="render-metrics">
+  <div class="metric-example">
+    <span class="metric-badge fast">2ms</span>
+    <span>Fast render (&lt; 16ms) - Smooth 60fps performance</span>
+  </div>
+  <div class="metric-example">
+    <span class="metric-badge medium">45ms</span>
+    <span>Moderate render (16-50ms) - May cause slight jank</span>
+  </div>
+  <div class="metric-example">
+    <span class="metric-badge slow">120ms</span>
+    <span>Slow render (&gt; 50ms) - Noticeable frame drops</span>
+  </div>
+</div>
+
+<h2>Why 16ms?</h2>
+<p>For smooth 60fps animations, each frame must complete in ~16.67ms. Renders exceeding this threshold cause dropped frames and visible stuttering.</p>
+
+<div class="info-box">
+  <strong>Tip:</strong> If you see consistent slow renders, consider using <code>OnPush</code> change detection, breaking up large components, or virtualizing long lists.
+</div>

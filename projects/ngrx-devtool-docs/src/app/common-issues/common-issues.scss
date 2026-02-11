@@ -1,0 +1,74 @@
+@import '../shared-styles';
+
+app-common-issues {
+  @include page-container;
+
+  .issue-block {
+    background: var(--color-neutral-50);
+    border-left: var(--border-width-accent) solid var(--df-primary);
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin: var(--spacing-lg) 0;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+
+    h3 {
+      margin-top: 0;
+      color: var(--df-primary);
+    }
+
+    p {
+      margin-bottom: var(--spacing-sm);
+    }
+
+    code {
+      background: var(--color-code-inline-bg);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+    }
+
+    ul, ol {
+      margin-bottom: var(--spacing-sm);
+      padding-left: var(--spacing-lg);
+    }
+
+    .code-block {
+      background: var(--color-code-bg);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-md);
+      margin: var(--spacing-md) 0;
+      overflow-x: auto;
+
+      pre {
+        margin: 0;
+      }
+
+      code {
+        background: none;
+        padding: 0;
+        color: var(--color-code-text);
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-sm);
+        line-height: var(--line-height-base);
+      }
+
+      &.error {
+        background: var(--color-accent-red-bg);
+        border-left: var(--border-width-thick) solid var(--color-accent-red);
+
+        code {
+          color: var(--color-accent-red);
+        }
+      }
+    }
+
+    .info-note {
+      background: var(--color-primary-50);
+      border-left: var(--border-width-thick) solid var(--df-primary);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin: var(--spacing-sm) 0;
+      font-size: var(--font-size-sm);
+      color: var(--df-primary);
+    }
+  }
+}

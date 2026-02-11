@@ -1,0 +1,60 @@
+<h1>How It Works</h1>
+<p>Understand the internals of NgRx DevTool and how it captures your application's state flow.</p>
+
+<div class="overview-cards">
+  <a routerLink="/action-monitoring" class="overview-card">
+    <div class="card-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    </div>
+    <h3>Action Tracking</h3>
+    <p>Learn how the meta-reducer and Actions stream interception capture every dispatched action.</p>
+    <span class="card-link">View details →</span>
+  </a>
+
+  <a routerLink="/effect-tracking" class="overview-card">
+    <div class="card-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </div>
+    <h3>Effect Tracking</h3>
+    <p>Discover how DevToolsEffectSources instruments effects to monitor their lifecycle.</p>
+    <span class="card-link">View details →</span>
+  </a>
+
+  <a routerLink="/performance" class="overview-card">
+    <div class="card-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    </div>
+    <h3>Performance Calculation</h3>
+    <p>Understand how render time and impact scores are measured using Angular's APIs.</p>
+    <span class="card-link">View details →</span>
+  </a>
+</div>
+
+<h2>Architecture Overview</h2>
+<p>The DevTool consists of three main components working together:</p>
+
+<div class="architecture-flow">
+  <div class="flow-item">
+    <div class="flow-number">1</div>
+    <div class="flow-content">
+      <h4>Meta-Reducer</h4>
+      <p>Wraps your reducers to capture state changes and broadcast them via WebSocket</p>
+    </div>
+  </div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">
+    <div class="flow-number">2</div>
+    <div class="flow-content">
+      <h4>Effect Sources</h4>
+      <p>Extends NgRx to instrument effects and track their execution lifecycle</p>
+    </div>
+  </div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">
+    <div class="flow-number">3</div>
+    <div class="flow-content">
+      <h4>DevTool UI</h4>
+      <p>Receives data on port 4000 and visualizes it at localhost:3000</p>
+    </div>
+  </div>
+</div>

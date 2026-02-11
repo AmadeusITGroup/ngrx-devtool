@@ -1,0 +1,39 @@
+app-sidenav {
+  .nav {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .nav-link {
+    display: block;
+    padding: var(--spacing-sm) 0;
+    color: var(--df-body-color);
+    font-size: var(--font-size-sm);
+    transition: color var(--transition-fast);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--df-primary);
+      text-decoration: none;
+    }
+
+    &.active {
+      color: var(--df-primary);
+      font-weight: 500;
+    }
+  }
+
+  .sub-group {
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .nav-group {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--color-neutral-500);
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-xs);
+  }
+}

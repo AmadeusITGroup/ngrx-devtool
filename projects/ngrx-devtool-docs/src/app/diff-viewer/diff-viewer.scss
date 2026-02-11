@@ -1,0 +1,26 @@
+@import '../shared-styles';
+
+app-diff-viewer {
+  @include page-container;
+
+  .diff-added {
+    background: var(--color-accent-green-bg);
+    color: var(--color-accent-green);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+  }
+
+  .diff-removed {
+    background: var(--color-accent-red-bg);
+    color: var(--color-accent-red);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+  }
+
+  .diff-modified {
+    background: var(--color-accent-orange-bg);
+    color: var(--color-accent-orange);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+  }
+}
