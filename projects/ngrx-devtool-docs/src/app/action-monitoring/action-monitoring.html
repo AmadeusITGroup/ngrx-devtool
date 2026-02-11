@@ -1,0 +1,45 @@
+<h1>Action Monitoring</h1>
+<p>Track all dispatched actions as they happen in your application.</p>
+
+<h2>How It Works</h2>
+<p>The DevTool uses a <strong>meta-reducer</strong> and <strong>Actions stream interception</strong> to capture every action dispatched to your store.</p>
+
+<div class="diagram-container">
+  <img src="assets/actions-tracking-uml.png" alt="Action Tracking Flow Diagram" />
+</div>
+
+<div class="explanation">
+  <h3>Implementation Details:</h3>
+  <ol>
+    <li><strong>Meta-Reducer Wrapping</strong> - <code>createDevToolMetaReducer()</code> wraps your reducers and captures the previous and next state for every action</li>
+    <li><strong>Actions Stream Subscription</strong> - <code>ActionsInterceptorService</code> subscribes to NgRx's <code>Actions</code> observable to intercept all dispatched actions</li>
+    <li><strong>Effect Correlation</strong> - The <code>EffectTrackerService</code> determines if an action was user-dispatched or emitted by an effect using pattern matching</li>
+    <li><strong>WebSocket Broadcast</strong> - Action data (type, payload, timestamp, effect correlation) is sent to the DevTool UI via WebSocket on port 4000</li>
+    <li><strong>Message Buffering</strong> - If the WebSocket isn't connected yet, messages are buffered and flushed when connection opens</li>
+  </ol>
+</div>
+
+<h2>Visual Indicators</h2>
+<div class="indicator-card">
+  <div class="indicator-badge blue"></div>
+  <div>
+    <h4>User Actions</h4>
+    <p>Actions dispatched directly from components or services (blue border)</p>
+  </div>
+</div>
+<div class="indicator-card">
+  <div class="indicator-badge orange"></div>
+  <div>
+    <h4>Effect Results</h4>
+    <p>Actions emitted by effects in response to other actions (orange border)</p>
+  </div>
+</div>
+
+<h2>Action Details</h2>
+<p>Click on any action to view:</p>
+<ul>
+  <li>Action type and payload</li>
+  <li>Timestamp of dispatch</li>
+  <li>Source effect (if applicable)</li>
+  <li>State before and after</li>
+</ul>

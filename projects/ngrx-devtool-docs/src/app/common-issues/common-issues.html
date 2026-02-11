@@ -1,0 +1,109 @@
+<h1>Troubleshooting</h1>
+<p>Solutions to common issues you may encounter when setting up NgRx DevTool.</p>
+
+<div class="issue-block">
+  <h3>npm Link Issues</h3>
+  <p>If you get module resolution errors after <code>npm link</code>, you need to enable symlink preservation.</p>
+  <p class="info-note">This is required for Nx/Angular monorepo projects.</p>
+
+  <p><strong>Step 1:</strong> Build and link the library first:</p>
+  <div class="code-block">
+    <pre><code># In the ngrx-devtool directory
+ng build ngrx-devtool
+cd dist/ngrx-devtool
+npm link
+
+# Then in YOUR project directory
+npm link ngrx-devtool</code></pre>
+  </div>
+
+  <p><strong>Step 2:</strong> Configure symlink preservation:</p>
+  <p>In <code>tsconfig.json</code>:</p>
+  <div class="code-block">
+    <pre><code>&#123;
+  "compilerOptions": &#123;
+    "preserveSymlinks": true
+  &#125;
+&#125;</code></pre>
+  </div>
+
+  <p>In <code>angular.json</code> (build options):</p>
+  <div class="code-block">
+    <pre><code>&#123;
+  "architect": &#123;
+    "build": &#123;
+      "options": &#123;
+        "preserveSymlinks": true
+      &#125;
+    &#125;
+  &#125;
+&#125;</code></pre>
+  </div>
+  <p class="info-note">After running <code>npm install</code>, you may need to re-run <code>npm link ngrx-devtool</code>.</p>
+</div>
+
+<div class="issue-block">
+  <h3>Build Errors with &#64;types/jest and &#64;types/jasmine</h3>
+  <p>If you see TypeScript errors like:</p>
+  <div class="code-block error">
+    <pre><code>error TS2428: All declarations of 'ArrayContaining' must have identical type parameters</code></pre>
+  </div>
+  <p>This is caused by having both <code>&#64;types/jest</code> and <code>&#64;types/jasmine</code> installed. Remove the one you're not using:</p>
+  <div class="code-block">
+    <pre><code># If using Jest (recommended)
+npm uninstall &#64;types/jasmine
+
+# If using Jasmine
+npm uninstall &#64;types/jest</code></pre>
+  </div>
+</div>
+
+<div class="issue-block">
+  <h3>Only effects showing, no actions</h3>
+  <p>Your meta reducer is likely being overridden.</p>
+  <p><strong>Solution:</strong> Make sure <code>createDevToolMetaReducer()</code> is added to the <code>StoreModule.forRoot()</code> or <code>provideStore()</code> that actually initializes your store (not a duplicate).</p>
+  <div class="code-block">
+    <pre><code>// Correct - add to the actual store initialization
+provideStore(
+  &#123; /* your reducers */ &#125;,
+  &#123; metaReducers: [createDevToolMetaReducer()] &#125;
+)</code></pre>
+  </div>
+</div>
+
+<div class="issue-block">
+  <h3>Effects not being tracked</h3>
+  <p>Ensure you have:</p>
+  <ol>
+    <li>Added <code>provideNgrxDevTool(&#123; trackEffects: true &#125;)</code> to your providers</li>
+    <li>Called <code>provideEffects([...])</code> <strong>before</strong> <code>provideNgrxDevTool()</code></li>
+  </ol>
+  <div class="code-block">
+    <pre><code>providers: [
+  provideStore(...),
+  provideEffects([YourEffects]),  // Must come first
+  provideNgrxDevTool(&#123; trackEffects: true &#125;),
+]</code></pre>
+  </div>
+</div>
+
+<div class="issue-block">
+  <h3>WebSocket connection issues</h3>
+  <p><strong>Checklist:</strong></p>
+  <ul>
+    <li>Ensure the DevTool server is running (<code>node dist/index.js</code>) before starting your Angular app</li>
+    <li>Check that ports 3000 and 4000 are not in use by other processes</li>
+  </ul>
+</div>
+
+<div class="issue-block">
+  <h3>Port already in use</h3>
+  <p>If you get <code>EADDRINUSE: address already in use</code>, kill the existing process:</p>
+  <div class="code-block">
+    <pre><code># Kill process on port 4000
+lsof -ti :4000 | xargs kill -9
+
+# Kill process on port 3000
+lsof -ti :3000 | xargs kill -9</code></pre>
+  </div>
+</div>

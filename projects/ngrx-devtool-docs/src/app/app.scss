@@ -1,0 +1,115 @@
+header {
+  position: sticky;
+  top: 0;
+  height: var(--header-height);
+  width: 100%;
+  background: var(--df-primary-800);
+  box-shadow: var(--shadow-header);
+  z-index: var(--header-zindex);
+  color: var(--color-primary-a100, #ffffff);
+  font-weight: bold;
+  font-size: var(--font-size-2xl);
+
+  .header-title {
+    display: flex;
+    align-items: center;
+    height: 100%;
+  }
+
+  .header-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--spacing-sm);
+
+    img {
+      display: block;
+      transition: transform var(--transition-fast);
+      vertical-align: middle;
+    }
+
+    &:hover img {
+      transform: rotate(15deg) scale(1.1);
+    }
+  }
+
+  .header-text {
+    font-weight: 900;
+    font-size: var(--font-size-2xl);
+    color: #ffffff;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 2px rgba(255, 255, 255, 0.3);
+    -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.2);
+  }
+}
+
+.main-container {
+  display: flex;
+}
+
+.row {
+  display: flex;
+  width: 100%;
+}
+
+.left-nav {
+  position: sticky;
+  top: var(--header-height);
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  padding: var(--spacing-lg);
+  padding-top: var(--spacing-xl);
+  max-height: calc(100vh - var(--header-height));
+  overflow-y: auto;
+  border-inline-end: var(--border-width) solid var(--df-gray-300);
+  background: var(--color-neutral-50);
+}
+
+.page-content {
+  flex: 1;
+  min-height: calc(100vh - var(--header-height));
+  padding: var(--spacing-xl) var(--spacing-2xl);
+  display: flex;
+  flex-direction: column;
+}
+
+.footer {
+  height: 10rem;
+  width: 100%;
+  background: var(--df-bg-tertiary);
+  margin-top: var(--spacing-xl);
+  padding: var(--spacing-xl) var(--spacing-2xl);
+}
+
+.footer-content {
+  margin-left: var(--sidebar-width);
+}
+
+.footer-links {
+  h4 {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-neutral-800);
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    margin-bottom: var(--spacing-xs);
+  }
+
+  a {
+    color: var(--df-body-color);
+    font-size: var(--font-size-sm);
+
+    &:hover {
+      color: var(--df-primary);
+    }
+  }
+}

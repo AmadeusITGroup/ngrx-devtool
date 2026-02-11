@@ -1,0 +1,96 @@
+<h1>Configuration</h1>
+<p>Configure NgRx DevTool in your Angular application.</p>
+
+<h2>Option A: Standalone (recommended)</h2>
+<div class="code-block">
+  <pre><code>// app.config.ts
+import {{ '{' }} provideNgrxDevTool, createDevToolMetaReducer {{ '}' }} from 'ngrx-devtool';
+
+export const appConfig: ApplicationConfig = {{ '{' }}
+  providers: [
+    provideStore(
+      {{ '{' }} /* your reducers */ {{ '}' }},
+      {{ '{' }} metaReducers: [createDevToolMetaReducer()] {{ '}' }}
+    ),
+    provideEffects([...]),
+    provideNgrxDevTool({{ '{' }}
+      wsUrl: 'ws://localhost:4000',
+      trackEffects: true,
+    {{ '}' }}),
+  ]
+{{ '}' }};</code></pre>
+</div>
+
+<h2>Option B: NgModule with separate store module</h2>
+<p>Common in large enterprise apps</p>
+<div class="code-block">
+  <pre><code>// store.module.ts
+import {{ '{' }} createDevToolMetaReducer {{ '}' }} from 'ngrx-devtool';
+
+&#64;NgModule({{ '{' }}
+  imports: [
+    StoreModule.forRoot(
+      {{ '{' }} /* your reducers */ {{ '}' }},
+      {{ '{' }} metaReducers: [createDevToolMetaReducer()] {{ '}' }}
+    ),
+    EffectsModule.forRoot([...])
+  ]
+{{ '}' }})
+export class RootStoreModule {{ '{' }}{{ '}' }}</code></pre>
+</div>
+
+<div class="warning-box">
+  <strong>Warning:</strong> The <code>createDevToolMetaReducer()</code> must be added to the same
+  <code>provideStore()</code> or <code>StoreModule.forRoot()</code> that initializes your store.
+</div>
+
+<h2>Configuration Options</h2>
+<table class="options-table">
+  <thead>
+    <tr>
+      <th>Option</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>wsUrl</code></td>
+      <td>string</td>
+      <td>'ws://localhost:4000'</td>
+      <td>WebSocket server URL</td>
+    </tr>
+    <tr>
+      <td><code>trackEffects</code></td>
+      <td>boolean</td>
+      <td>true</td>
+      <td>Enable effect lifecycle tracking</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>AI Assistant Configuration</h2>
+<p>Let GitHub Copilot or another AI assistant configure NgRx DevTool for you automatically.</p>
+
+<div class="info-box">
+  <strong>agent.md</strong> - A markdown file with complete setup instructions that AI assistants can follow.
+</div>
+
+<p>Clone the agent repository to get the configuration file:</p>
+<div class="code-block">
+  <pre><code>git clone https://github.com/adxdits/ngrx-devtool-agent.git</code></pre>
+</div>
+
+<p>Then ask your AI assistant:</p>
+<ul>
+  <li><em>"Configure NgRx DevTool using agent.md"</em></li>
+  <li><em>"Set up NgRx DevTool with standalone configuration"</em></li>
+  <li><em>"Set up NgRx DevTool with NgModule configuration"</em></li>
+</ul>
+
+<p>The agent.md file includes both configuration options:</p>
+<ul>
+  <li><strong>Option A:</strong> Standalone (for modern Angular apps)</li>
+  <li><strong>Option B:</strong> NgModule (for enterprise apps with separate store modules)</li>
+</ul>
