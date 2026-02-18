@@ -16,6 +16,7 @@ app-home {
     padding: var(--spacing-xl);
   }
 
+  /* 3D model styles commented out for now
   .hero-model {
     width: clamp(220px, 25vw, 520px);
     height: clamp(220px, 25vw, 520px);
@@ -27,6 +28,7 @@ app-home {
       --poster-color: transparent;
     }
   }
+  */
 
   .hero-content {
     max-width: 90%;
@@ -135,6 +137,7 @@ app-home {
   }
 
   // Switch to side-by-side on wide viewports
+  /* Side-by-side layout commented out (was for 3D model)
   @media (min-width: 1024px) {
     .hero {
       flex-direction: row-reverse;
@@ -155,4 +158,5 @@ app-home {
       justify-content: flex-start;
     }
   }
+  */
 }

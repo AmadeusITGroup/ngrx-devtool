@@ -24,6 +24,10 @@ header {
 
     img {
       display: block;
+      width: 36px;
+      height: 36px;
+      max-height: 100%;
+      object-fit: contain;
       transition: transform var(--transition-fast);
       vertical-align: middle;
     }
