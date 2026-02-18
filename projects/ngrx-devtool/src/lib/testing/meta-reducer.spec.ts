@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { PLATFORM_ID, Injector } from '@angular/core';
+import { PLATFORM_ID } from '@angular/core';
 import { Action } from '@ngrx/store';
 import { PerformanceTrackerService } from '../performance/performance-tracker.service';
 import { WebSocketService } from '../core/websocket.service';

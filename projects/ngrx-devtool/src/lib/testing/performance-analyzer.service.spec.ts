@@ -2,12 +2,10 @@ import { TestBed } from '@angular/core/testing';
 import { PLATFORM_ID } from '@angular/core';
 import {
   PerformanceAnalyzerService,
-  PerformanceReport,
 } from '../performance/performance-analyzer.service';
 import {
   PerformanceTrackerService,
   RenderPerformanceEntry,
-  AggregatedPerformanceStats,
 } from '../performance/performance-tracker.service';
 import { PerformanceWarningType } from '../../types/state.model';
 

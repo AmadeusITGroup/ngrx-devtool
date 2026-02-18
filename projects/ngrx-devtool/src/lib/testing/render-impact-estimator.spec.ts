@@ -1,4 +1,4 @@
-import { estimateRenderImpact, RenderImpactEstimate } from '../performance/render-impact-estimator';
+import { estimateRenderImpact } from '../performance/render-impact-estimator';
 
 describe('estimateRenderImpact()', () => {
   describe('with identical or missing states', () => {
