@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.png" alt="NgRx DevTool Logo" width="300">
+  <img src="assets/amadeus.png" alt="Amadeus Logo" width="300">
 </p>
 
 <h1 align="center">NgRx DevTool</h1>

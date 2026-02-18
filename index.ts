@@ -56,7 +56,7 @@ const logo = `
 
 console.log(chalk.magenta(logo));
 console.log(chalk.dim('─'.repeat(60)));
-console.log(chalk.bold.white('  NgRx DevTools Server'));
+console.log(chalk.bold.white('  Amadeus | NgRx DevTools Server'));
 console.log(chalk.dim('─'.repeat(60)));
 
 wss.on('connection', (socket) => {
