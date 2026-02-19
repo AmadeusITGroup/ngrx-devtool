@@ -230,10 +230,7 @@ lsof -ti :3000 | xargs kill -9
 
 ## Contributing
 
-1. Fork the repository
-2. Make your changes
-3. Test with the demo app: `ng serve ngrx-devtool-demo`
-4. Submit a pull request
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to this project.
 
 
 
