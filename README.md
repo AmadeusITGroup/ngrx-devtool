@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/amadeus.png" alt="Amadeus Logo" width="300">
+  <img src="assets/amadeus.png" alt="Amadeus Logo" width="120">
 </p>
 
 <h1 align="center">NgRx DevTool</h1>
@@ -28,6 +28,7 @@ This tool provides real-time monitoring and visualization of NgRx actions, state
 - **Visual Indicators** - Blue for user actions, orange for effect results
 - **Performance Tracking** - Monitor reducer execution time, render timing, and state size changes
 - **Effects Panel** - Dedicated panel showing all effect executions with duration and status
+- **Selector Tracking** *(coming soon)* - Track selector invocations, cache hit rates, and recomputation metrics (APIs already implemented: `trackSelector`, `createTrackedSelector`, `SelectorTrackerService`)
 
 ## Project Structure
 
