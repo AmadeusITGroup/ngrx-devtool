@@ -1,7 +1,7 @@
-@import '../shared-styles';
+@use '../shared-styles';
 
 app-quick-start {
-  @include page-container;
+  @include shared-styles.page-container;
 
   .step {
     display: flex;

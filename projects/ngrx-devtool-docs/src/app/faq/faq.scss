@@ -1,7 +1,7 @@
-@import '../shared-styles';
+@use '../shared-styles';
 
 app-faq {
-  @include page-container;
+  @include shared-styles.page-container;
 
   .faq-item {
     margin-bottom: var(--spacing-xl);

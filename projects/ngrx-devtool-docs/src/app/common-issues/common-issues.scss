@@ -1,7 +1,7 @@
-@import '../shared-styles';
+@use '../shared-styles';
 
 app-common-issues {
-  @include page-container;
+  @include shared-styles.page-container;
 
   .issue-block {
     background: var(--color-neutral-50);

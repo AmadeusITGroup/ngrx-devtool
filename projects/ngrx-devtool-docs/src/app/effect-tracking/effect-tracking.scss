@@ -1,7 +1,7 @@
-@import '../shared-styles';
+@use '../shared-styles';
 
 app-effect-tracking {
-  @include page-container;
+  @include shared-styles.page-container;
 
   .diagram-container {
     background: var(--color-neutral-50);

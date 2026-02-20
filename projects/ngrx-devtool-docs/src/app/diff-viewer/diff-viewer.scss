@@ -1,7 +1,7 @@
-@import '../shared-styles';
+@use '../shared-styles';
 
 app-diff-viewer {
-  @include page-container;
+  @include shared-styles.page-container;
 
   .diff-added {
     background: var(--color-accent-green-bg);

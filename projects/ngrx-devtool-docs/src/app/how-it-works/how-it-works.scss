@@ -1,7 +1,7 @@
-@import '../shared-styles';
+@use '../shared-styles';
 
 app-how-it-works {
-  @include page-container;
+  @include shared-styles.page-container;
 
   .overview-cards {
     display: grid;
