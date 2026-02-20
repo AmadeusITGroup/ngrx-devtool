@@ -12,10 +12,10 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/animations": "^18.2.0",
+    "@angular/animations": "^21.1.5",
     "@angular/common": "^21.1.5",
-    "@angular/compiler": "^18.2.0",
-    "@angular/core": "^18.2.0",
+    "@angular/compiler": "^21.1.5",
+    "@angular/core": "^21.1.5",
     "@angular/forms": "^21.1.5",
     "@angular/platform-browser": "^21.1.5",
     "@angular/platform-browser-dynamic": "^21.1.5",
@@ -23,12 +23,12 @@
     "@google/model-viewer": "^4.1.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
-    "zone.js": "~0.14.10"
+    "zone.js": "~0.16.1"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^21.1.4",
     "@angular/cli": "^21.1.4",
-    "@angular/compiler-cli": "^18.2.0",
+    "@angular/compiler-cli": "^21.1.5",
     "@types/jasmine": "~5.1.0",
     "angular-eslint": "21.0.1",
     "eslint": "^9.39.1",
@@ -38,7 +38,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.5.2",
+    "typescript": "~5.9.3",
     "typescript-eslint": "8.46.4"
   }
 }
