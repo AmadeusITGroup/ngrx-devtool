@@ -160,12 +160,7 @@
               "@angular/material/prebuilt-themes/azure-blue.css",
               "projects/ngrx-devtool-ui/src/styles.scss"
             ],
-            "scripts": [],
-            "server": "projects/ngrx-devtool-ui/src/main.server.ts",
-            "outputMode": "server",
-            "ssr": {
-              "entry": "projects/ngrx-devtool-ui/src/server.ts"
-            }
+            "scripts": []
           },
           "configurations": {
             "production": {
