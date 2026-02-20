@@ -30,7 +30,7 @@
     "@angular/platform-browser-dynamic": "^19.2.6",
     "@angular/platform-server": "^19.2.6",
     "@angular/router": "^19.2.6",
-    "@angular/ssr": "^19.2.7",
+    "@angular/ssr": "^19.2.20",
     "@ngrx/effects": "^19.2.1",
     "@ngrx/store": "^19.1.0",
     "express": "^4.22.1",
