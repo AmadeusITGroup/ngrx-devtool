@@ -220,22 +220,36 @@
   }
 
   .status-legend {
+    display: flex;
+    gap: $spacing-lg;
     margin-top: $spacing-sm;
+    flex-wrap: wrap;
 
-    .legend-chip {
-      font-size: $chip-font-size !important;
-      min-height: $chip-min-height !important;
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: $spacing-xs;
+      font: $typography-body-small;
+      color: $color-on-surface;
 
-      &.status-good {
-        @include status-chip($color-success);
+      .legend-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: $corner-full;
+        display: inline-block;
+        flex-shrink: 0;
       }
 
-      &.status-warning {
-        @include status-chip($color-warning);
+      &.status-good .legend-dot {
+        background: $color-success;
       }
 
-      &.status-critical {
-        @include status-chip($color-error);
+      &.status-warning .legend-dot {
+        background: $color-warning;
+      }
+
+      &.status-critical .legend-dot {
+        background: $color-error;
       }
     }
   }

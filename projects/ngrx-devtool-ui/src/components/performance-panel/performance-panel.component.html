@@ -136,11 +136,11 @@
         <mat-icon>info</mat-icon>
         <div>
           <strong>Performance Target:</strong> &lt; 16ms render time (60 FPS)
-          <mat-chip-set class="status-legend">
-            <mat-chip class="legend-chip status-good">Good (≤ 16ms)</mat-chip>
-            <mat-chip class="legend-chip status-warning">Warning (16-32ms)</mat-chip>
-            <mat-chip class="legend-chip status-critical">Critical (&gt; 32ms)</mat-chip>
-          </mat-chip-set>
+          <div class="status-legend">
+            <span class="legend-item status-good"><span class="legend-dot"></span>Good (≤ 16ms)</span>
+            <span class="legend-item status-warning"><span class="legend-dot"></span>Warning (16-32ms)</span>
+            <span class="legend-item status-critical"><span class="legend-dot"></span>Critical (&gt; 32ms)</span>
+          </div>
         </div>
       </div>
     </mat-card-content>
