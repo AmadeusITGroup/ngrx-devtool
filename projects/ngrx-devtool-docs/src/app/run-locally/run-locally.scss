@@ -1,5 +1,5 @@
-@import '../shared-styles';
+@use '../shared-styles';
 
 app-run-locally {
-  @include page-container;
+  @include shared-styles.page-container;
 }

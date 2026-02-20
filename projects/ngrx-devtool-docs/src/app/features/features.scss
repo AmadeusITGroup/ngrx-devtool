@@ -1,7 +1,7 @@
-@import '../shared-styles';
+@use '../shared-styles';
 
 app-features {
-  @include page-container;
+  @include shared-styles.page-container;
 
   .features-grid {
     display: grid;

@@ -1,7 +1,7 @@
-@import '../shared-styles';
+@use '../shared-styles';
 
 app-performance {
-  @include page-container;
+  @include shared-styles.page-container;
 
   .metrics-grid {
     display: grid;

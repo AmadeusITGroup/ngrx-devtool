@@ -103,3 +103,95 @@ li {
   background: var(--color-neutral-400);
 }
 
+/* Shared component styles */
+.code-block {
+  background: var(--color-primary-800);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  margin: var(--spacing-md) 0;
+  position: relative;
+
+  pre {
+    margin: 0;
+    overflow-x: auto;
+  }
+
+  code {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-relaxed);
+    color: var(--color-neutral-200);
+    background: transparent;
+    padding: 0;
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    background: transparent;
+    border: none;
+    color: var(--color-neutral-400);
+    cursor: pointer;
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast);
+
+    &:hover {
+      color: var(--color-neutral-white);
+    }
+  }
+}
+
+.info-box {
+  background: var(--color-primary-50);
+  border-left: var(--border-width-accent) solid var(--df-primary);
+  padding: var(--spacing-md) var(--spacing-md);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  margin: var(--spacing-lg) 0;
+  color: var(--color-neutral-800);
+
+  a {
+    color: var(--df-primary);
+  }
+}
+
+.warning-box {
+  background: var(--color-accent-orange-bg);
+  border-left: var(--border-width-accent) solid var(--color-accent-orange);
+  padding: var(--spacing-md) var(--spacing-md);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  margin: var(--spacing-lg) 0;
+  color: var(--color-neutral-800);
+
+  code {
+    background: var(--color-code-inline-bg);
+  }
+}
+
+.options-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--spacing-md) 0;
+
+  th,
+  td {
+    padding: var(--spacing-sm);
+    text-align: left;
+    border-bottom: var(--border-width) solid var(--df-gray-300);
+  }
+
+  th {
+    background: var(--color-neutral-50);
+    font-weight: 600;
+    color: var(--color-neutral-800);
+  }
+
+  td code {
+    background: var(--color-neutral-100);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+  }
+}
+
