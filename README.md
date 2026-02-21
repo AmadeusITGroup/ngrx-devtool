@@ -4,11 +4,7 @@
 
 <h1 align="center">NgRx DevTool</h1>
 
-<p align="center">
-  <a href="https://www.npmjs.com/package/ngrx-devtool"><img src="https://img.shields.io/npm/v/ngrx-devtool.svg?style=flat-square" alt="npm version"></a>
-  <a href="https://www.npmjs.com/package/ngrx-devtool"><img src="https://img.shields.io/npm/dm/ngrx-devtool.svg?style=flat-square" alt="npm downloads"></a>
-  <a href="https://www.npmjs.com/package/ngrx-devtool"><img src="https://img.shields.io/npm/l/ngrx-devtool.svg?style=flat-square" alt="license"></a>
-</p>
+
 
 <p align="center">
   <strong>Architecture Visualization Tool</strong><br>
