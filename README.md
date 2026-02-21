@@ -5,6 +5,12 @@
 <h1 align="center">NgRx DevTool</h1>
 
 <p align="center">
+  <a href="https://www.npmjs.com/package/ngrx-devtool"><img src="https://img.shields.io/npm/v/ngrx-devtool.svg?style=flat-square" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/ngrx-devtool"><img src="https://img.shields.io/npm/dm/ngrx-devtool.svg?style=flat-square" alt="npm downloads"></a>
+  <a href="https://www.npmjs.com/package/ngrx-devtool"><img src="https://img.shields.io/npm/l/ngrx-devtool.svg?style=flat-square" alt="license"></a>
+</p>
+
+<p align="center">
   <strong>Architecture Visualization Tool</strong><br>
   A powerful development tool for visualizing and debugging NgRx state management in Angular applications.
   <br>Features real-time effect lifecycle tracking and performance monitoring.
@@ -40,30 +46,18 @@ This tool provides real-time monitoring and visualization of NgRx actions, state
 
 ## Quick Start
 
-### Step 1: Clone and build
-
-Since the package is not yet published to npm, use the development setup:
+### Step 1: Install
 
 ```bash
-git clone <repository-url>
-cd ngrx-devtool
-npm install
-npm run build
+npm install ngrx-devtool
 ```
 
-### Step 2: Link the library to your project
+> If your project uses a private npm registry and you get an E401 error:
+> ```bash
+> npm install ngrx-devtool --registry=https://registry.npmjs.org/
+> ```
 
-```bash
-cd dist/ngrx-devtool
-npm link
-
-# In your Angular project directory
-npm link ngrx-devtool
-```
-
-Note: If you encounter module resolution issues, see the npm Link Issues section in Troubleshooting.
-
-### Step 3: Configure your app
+### Step 2: Configure your app
 
 **Option A: Standalone (recommended)**
 
@@ -122,14 +116,18 @@ export const appConfig: ApplicationConfig = {
 
 Note: If your app fails to compile or run after this step, see the npm Link Issues section in Troubleshooting to configure `preserveSymlinks`.
 
-### Step 4: Run the DevTool server
+### Step 3: Run the DevTool server
 
 ```bash
-# From the ngrx-devtool-proto directory
-node dist/index.js
+npx ngrx-devtool
 ```
 
-### Step 5: Open the DevTool UI
+> If your project uses a private registry:
+> ```bash
+> npm_config_registry=https://registry.npmjs.org/ npx ngrx-devtool
+> ```
+
+### Step 4: Open the DevTool UI
 
 Open http://localhost:3000 and start your Angular app. All actions will appear:
 - Blue border = User action
@@ -211,7 +209,7 @@ Ensure you have:
 
 ### WebSocket connection issues
 
-- Ensure the DevTool server is running (`node dist/index.js`) before starting your Angular app
+- Ensure the DevTool server is running (`npx ngrx-devtool`) before starting your Angular app
 - Check that ports 3000 and 4000 are not in use by other processes
 
 ### Port already in use
@@ -225,6 +223,28 @@ lsof -ti :4000 | xargs kill -9
 # Kill process on port 3000
 lsof -ti :3000 | xargs kill -9
 ```
+
+---
+
+## Development Setup
+
+For contributors or local development, use `npm link` instead of installing from npm:
+
+```bash
+git clone https://github.com/amadeusitgroup/ngrx-devtool
+cd ngrx-devtool
+npm install
+npm run build
+
+# Link the library
+cd dist/ngrx-devtool
+npm link
+
+# In your Angular project directory
+npm link ngrx-devtool
+```
+
+Note: If you encounter module resolution issues after `npm link`, see the npm Link Issues section in Troubleshooting.
 
 ---
 

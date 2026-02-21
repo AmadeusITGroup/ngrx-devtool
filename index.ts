@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import { spawn } from 'child_process';
 import { WebSocket, WebSocketServer } from 'ws';
 import * as path from 'path';
+import * as express from 'express';
+import { createServer } from 'http';
 const chalk = require('chalk');
 
 const PORT_WS = 4000;
@@ -69,31 +70,22 @@ wss.on('connection', (socket) => {
     });
   });
 });
-const ui = spawn(
-  'npx',
-  ['http-server', path.resolve(__dirname, 'ngrx-devtool-ui/browser'), '-p', PORT_UI, '-c-1'],
-  {
-    shell: true,
-    stdio: ['ignore', 'pipe', 'pipe'],
-  }
-);
-
-ui.stdout?.on('data', (data) => {
+const app = express();
+app.use(express.static(path.resolve(__dirname, 'ngrx-devtool-ui/browser')));
+app.get('*', (_req, res) => {
+  res.sendFile(path.resolve(__dirname, 'ngrx-devtool-ui/browser/index.html'));
 });
 
-ui.stderr?.on('data', (data) => {
-  const msg = data.toString().trim();
-  if (msg && !msg.includes('DeprecationWarning')) {
-    console.error(chalk.red(`  ✗ UI Error: ${msg}`));
-  }
+const uiServer = createServer(app);
+uiServer.listen(Number(PORT_UI), () => {});
+
+uiServer.on('error', (error) => {
+  console.error(chalk.red(`  ✗ Failed to start UI server: ${error.message}`));
 });
 
-ui.on('error', (error) => {
-  console.error(chalk.red('  ✗ Failed to start UI server:', error.message));
-});
 process.on('SIGINT', () => {
   console.log(chalk.dim('\n\n  Shutting down servers...'));
-  ui.kill();
+  uiServer.close();
   wss.close();
   console.log(chalk.green('  ✓ Servers stopped. Goodbye!\n'));
   process.exit(0);

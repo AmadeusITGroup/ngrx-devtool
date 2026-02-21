@@ -14,11 +14,8 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RunLocally {
-  public runAppCommands = `git clone https://github.com/amadeusitgroup/ngrx-devtool
-cd ngrx-devtool
-npm install
-npm run build
-node dist/index.js`;
+  public runAppCommands = `npm install ngrx-devtool
+npx ngrx-devtool`;
 
   copyCode() {
     navigator.clipboard.writeText(this.runAppCommands);

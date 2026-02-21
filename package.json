@@ -1,6 +1,7 @@
 {
   "name": "ngrx-devtool",
-  "version": "0.0.1",
+  "version": "0.1.2",
+  "license": "MIT",
   "scripts": {
     "ng": "ng",
     "prepare": "husky",
@@ -33,8 +34,8 @@
     "@angular/ssr": "^21.1.4",
     "@ngrx/effects": "^21.0.1",
     "@ngrx/store": "^21.0.1",
+    "chalk": "^4.1.2",
     "express": "^4.22.1",
-    "http-server": "^14.1.1",
     "ngrx-store": "^0.0.2",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
