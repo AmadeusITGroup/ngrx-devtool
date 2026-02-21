@@ -41,6 +41,31 @@ ng serve ngrx-devtool-demo
 npm run build
 ```
 
+### Testing Locally with an Angular App
+
+To test your changes in a real Angular project, use `npm link`:
+
+```bash
+# Build the library
+npm run build
+
+# Link it globally
+cd dist/ngrx-devtool
+npm link
+
+# In your Angular project directory
+npm link ngrx-devtool
+```
+
+Then start the DevTool server:
+
+```bash
+# From the ngrx-devtool directory
+node dist/index.js
+```
+
+> **Note:** If you get module resolution errors after linking, add `"preserveSymlinks": true` in both `tsconfig.json` (`compilerOptions`) and `angular.json` (build `options`) of your Angular project. After running `npm install`, you may need to re-run `npm link ngrx-devtool`.
+
 ### Running Tests
 
 ```bash

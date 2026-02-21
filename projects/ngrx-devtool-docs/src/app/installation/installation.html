@@ -1,17 +1,25 @@
 <h1>Installation</h1>
-<p>Since the package is not yet published to npm, use the development setup.</p>
+<p>Install the package from npm:</p>
 
-<h2>Step 1: Clone and build</h2>
+<h2>Step 1: Install</h2>
+<div class="code-block">
+  <pre><code>npm install ngrx-devtool</code></pre>
+</div>
+
+<div class="info-box">
+  <strong>Note:</strong> If your project uses a private npm registry and you get an E401 error:
+  <pre><code>npm install ngrx-devtool --registry=https://registry.npmjs.org/</code></pre>
+</div>
+
+<h2>Development Setup (npm link)</h2>
+<p>For contributors or local development, use <code>npm link</code> instead:</p>
 <div class="code-block">
   <pre><code>git clone https://github.com/amadeusitgroup/ngrx-devtool
 cd ngrx-devtool
 npm install
-npm run build</code></pre>
-</div>
+npm run build
 
-<h2>Step 2: Link the library to your project</h2>
-<div class="code-block">
-  <pre><code>cd dist/ngrx-devtool
+cd dist/ngrx-devtool
 npm link
 
 # In your Angular project directory
@@ -19,6 +27,6 @@ npm link ngrx-devtool</code></pre>
 </div>
 
 <div class="info-box">
-  <strong>Note:</strong> If you encounter module resolution issues, see the
+  <strong>Note:</strong> If you encounter module resolution issues with npm link, see the
   <a routerLink="/common-issues">npm Link Issues</a> section in Troubleshooting.
 </div>
