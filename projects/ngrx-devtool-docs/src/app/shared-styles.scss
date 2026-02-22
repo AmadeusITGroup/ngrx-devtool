@@ -1,8 +1,0 @@
-// Shared styles for page components
-
-// Base mixin for content pages (not home)
-@mixin page-container {
-  display: block;
-  max-width: var(--content-max-width);
-  width: 100%;
-}

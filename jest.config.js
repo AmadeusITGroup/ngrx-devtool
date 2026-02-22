@@ -1,7 +1,8 @@
 module.exports = {
   preset: 'jest-preset-angular',
   setupFilesAfterEnv: ['<rootDir>/setup-jest.ts'],
-  testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/dist/', '<rootDir>/projects/ngrx-devtool-demo/', '<rootDir>/projects/ngrx-devtool-docs/'],
+  testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/dist/', '<rootDir>/projects/ngrx-devtool-demo/', '<rootDir>/docs/'],
+
   modulePathIgnorePatterns: ['<rootDir>/dist/'],
   moduleNameMapper: {
     '^@app/(.*)$': '<rootDir>/projects/ngrx-devtool-ui/src/app/$1',
