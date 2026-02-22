@@ -135,7 +135,7 @@ test(store): add unit tests for meta reducer
 | `projects/ngrx-devtool/` | Core library package |
 | `projects/ngrx-devtool-ui/` | Standalone visualization UI |
 | `projects/ngrx-devtool-demo/` | Example implementation |
-| `projects/ngrx-devtool-docs/` | Documentation site |
+| `docs/` | Docusaurus documentation site |
 
 ---
 

@@ -1,2 +1,2 @@
 package-lock.json merge=ours
-projects/ngrx-devtool-docs/package-lock.json merge=ours
+docs/package-lock.json merge=ours
