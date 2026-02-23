@@ -29,6 +29,11 @@ yarn-error.log
 !.vscode/extensions.json
 .history/*
 
+# Docusaurus build output
+docs/build/
+docs/.docusaurus/
+docs/node_modules/
+
 # Miscellaneous
 **/.angular/
 .sass-cache/
