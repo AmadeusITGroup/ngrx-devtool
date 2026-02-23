@@ -1,39 +1,78 @@
-.hero {
-  padding: 5rem 0 4rem;
+/* ----------  Hero – centered  ---------- */
+.heroFullPage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--ifm-background-color, #000D2E);
   text-align: center;
-  background: var(--ifm-hero-background-color);
+  padding: 5rem 1rem 3rem;
 }
 
-.badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  background: var(--ifm-color-primary-lightest);
-  color: var(--ifm-color-primary-darker);
-  margin-bottom: 1.5rem;
+.heroContent {
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
 }
 
+/* ----------  Title  ---------- */
 .heroTitle {
-  font-size: 3.5rem;
-  font-weight: 800;
-  line-height: 1.1;
-  margin-bottom: 1rem;
+  font-size: 4.5rem;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--ifm-color-primary);
+  margin: 0;
+  letter-spacing: -0.02em;
 }
 
-.heroAccent {
+/* ----------  Subtitle  ---------- */
+.heroSubtitle {
+  font-size: 1.25rem;
+  color: var(--ifm-font-color-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ----------  Install command box  ---------- */
+.installBox {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+  padding: 0.75rem 1.25rem;
+  max-width: 100%;
+}
+
+.installCode {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  font-size: 0.95rem;
+  color: var(--ifm-color-primary);
+  background: none;
+  border: none;
+  white-space: nowrap;
+  user-select: all;
+}
+
+.copyButton {
+  background: none;
+  border: none;
+  color: var(--ifm-color-emphasis-500);
+  cursor: pointer;
+  font-size: 1.15rem;
+  padding: 0.25rem;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.copyButton:hover {
   color: var(--ifm-color-primary);
 }
 
-.heroSubtitle {
-  font-size: 1.25rem;
-  color: var(--ifm-color-secondary-darkest);
-  margin-bottom: 2rem;
-}
-
+/* ----------  CTA buttons  ---------- */
 .ctaGroup {
   display: flex;
   gap: 1rem;
@@ -41,6 +80,60 @@
   flex-wrap: wrap;
 }
 
+.ctaPrimary,
+.ctaSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.15s, transform 0.15s;
+  cursor: pointer;
+}
+
+.ctaPrimary {
+  background: var(--ifm-color-primary);
+  color: #ffffff;
+  border: 2px solid var(--ifm-color-primary);
+}
+
+.ctaPrimary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.ctaSecondary {
+  background: var(--ifm-background-color);
+  color: var(--ifm-font-color-base);
+  border: 2px solid var(--ifm-color-emphasis-300);
+}
+
+.ctaSecondary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  color: var(--ifm-font-color-base);
+  text-decoration: none;
+}
+
+/* ----------  Badges  ---------- */
+.badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.badges img {
+  height: 22px;
+}
+
+/* ----------  Demo section  ---------- */
 .demo {
   padding: 4rem 0;
   text-align: center;
@@ -51,7 +144,6 @@
   border-radius: 8px;
   overflow: hidden;
   display: inline-block;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
   max-width: 100%;
 }
 
@@ -60,34 +152,18 @@
   display: block;
 }
 
-.features {
-  padding: 4rem 0;
-  background: var(--ifm-background-surface-color);
-}
+/* ----------  Responsive  ---------- */
+@media (max-width: 640px) {
+  .heroTitle {
+    font-size: 3rem;
+  }
 
-.featuresGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1rem;
-}
+  .heroSubtitle {
+    font-size: 1.05rem;
+  }
 
-.featureCard {
-  padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid var(--ifm-color-emphasis-200);
-  background: var(--ifm-card-background-color);
-}
-
-.featureCard h3 {
-  font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-.featureCard p {
-  font-size: 0.9rem;
-  color: var(--ifm-color-secondary-darkest);
-  margin: 0;
+  .installCode {
+    font-size: 0.8rem;
+  }
 }
 
