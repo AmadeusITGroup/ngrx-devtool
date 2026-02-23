@@ -11,8 +11,8 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://ngrx-devtool.dev',
-  baseUrl: '/',
+  url: 'https://amadeusitgroup.github.io',
+  baseUrl: '/ngrx-devtool/',
 
   organizationName: 'amadeusitgroup',
   projectName: 'ngrx-devtool',
