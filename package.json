@@ -1,5 +1,5 @@
 {
-  "name": "ngrx-devtool",
+  "name": "@amadeus-it-group/ngrx-devtool",
   "version": "0.1.2",
   "license": "MIT",
   "scripts": {

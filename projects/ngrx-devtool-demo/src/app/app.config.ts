@@ -1,6 +1,6 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { loggerMetaReducer, provideNgrxDevTool } from 'ngrx-devtool';
+import { loggerMetaReducer, provideNgrxDevTool } from '@amadeus-it-group/ngrx-devtool';
 import { routes } from './app.routes';
 import { booksReducer } from './state/book.reducer';
 import { provideStore } from '@ngrx/store';

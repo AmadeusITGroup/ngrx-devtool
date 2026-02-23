@@ -30,7 +30,7 @@ function CopyButton({text}: {text: string}) {
 
 export default function Home(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
-  const installCmd = 'npm install ngrx-devtool';
+  const installCmd = 'npm install @amadeus-it-group/ngrx-devtool';
 
   return (
     <Layout

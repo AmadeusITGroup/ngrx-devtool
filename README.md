@@ -45,12 +45,12 @@ This tool provides real-time monitoring and visualization of NgRx actions, state
 ### Step 1: Install
 
 ```bash
-npm install ngrx-devtool
+npm install @amadeus-it-group/ngrx-devtool
 ```
 
 > If your project uses a private npm registry and you get an E401 error:
 > ```bash
-> npm install ngrx-devtool --registry=https://registry.npmjs.org/
+> npm install @amadeus-it-group/ngrx-devtool --registry=https://registry.npmjs.org/
 > ```
 
 ### Step 2: Configure your app
@@ -59,7 +59,7 @@ npm install ngrx-devtool
 
 ```typescript
 // app.config.ts
-import { provideNgrxDevTool, createDevToolMetaReducer } from 'ngrx-devtool';
+import { provideNgrxDevTool, createDevToolMetaReducer } from '@amadeus-it-group/ngrx-devtool';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -80,7 +80,7 @@ export const appConfig: ApplicationConfig = {
 
 ```typescript
 // store.module.ts
-import { createDevToolMetaReducer } from 'ngrx-devtool';
+import { createDevToolMetaReducer } from '@amadeus-it-group/ngrx-devtool';
 
 @NgModule({
   imports: [
@@ -94,7 +94,7 @@ import { createDevToolMetaReducer } from 'ngrx-devtool';
 export class RootStoreModule {}
 
 // app.config.ts
-import { provideNgrxDevTool } from 'ngrx-devtool';
+import { provideNgrxDevTool } from '@amadeus-it-group/ngrx-devtool';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -147,7 +147,7 @@ cd dist/ngrx-devtool
 npm link
 
 # Then in YOUR project directory
-npm link ngrx-devtool
+npm link @amadeus-it-group/ngrx-devtool
 ```
 
 **Step 2:** Configure symlink preservation:
@@ -174,7 +174,7 @@ angular.json (in build options):
 }
 ```
 
-Note: After running `npm install`, you may need to re-run `npm link ngrx-devtool`.
+Note: After running `npm install`, you may need to re-run `npm link @amadeus-it-group/ngrx-devtool`.
 
 ### Build Errors with @types/jest and @types/jasmine
 
@@ -237,7 +237,7 @@ cd dist/ngrx-devtool
 npm link
 
 # In your Angular project directory
-npm link ngrx-devtool
+npm link @amadeus-it-group/ngrx-devtool
 ```
 
 Note: If you encounter module resolution issues after `npm link`, see the npm Link Issues section in Troubleshooting.
