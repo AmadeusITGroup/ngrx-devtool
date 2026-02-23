@@ -12,7 +12,7 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "paths": {
-      "ngrx-devtool": [
+      "@amadeus-it-group/ngrx-devtool": [
         "./dist/ngrx-devtool"
       ]
     },

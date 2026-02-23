@@ -11,7 +11,7 @@ Configure NgRx DevTool in your Angular application.
 
 ```typescript
 // app.config.ts
-import { provideNgrxDevTool, createDevToolMetaReducer } from 'ngrx-devtool';
+import { provideNgrxDevTool, createDevToolMetaReducer } from '@amadeus-it-group/ngrx-devtool';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -34,7 +34,7 @@ Common in large enterprise apps.
 
 ```typescript
 // store.module.ts
-import { createDevToolMetaReducer } from 'ngrx-devtool';
+import { createDevToolMetaReducer } from '@amadeus-it-group/ngrx-devtool';
 
 @NgModule({
   imports: [

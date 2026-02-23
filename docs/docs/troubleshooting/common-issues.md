@@ -22,7 +22,7 @@ cd dist/ngrx-devtool
 npm link
 
 # Then in YOUR project directory
-npm link ngrx-devtool
+npm link @amadeus-it-group/ngrx-devtool
 ```
 
 **Step 2:** Configure symlink preservation.
@@ -51,7 +51,7 @@ In `angular.json` (build options):
 }
 ```
 
-After running `npm install`, you may need to re-run `npm link ngrx-devtool`.
+After running `npm install`, you may need to re-run `npm link @amadeus-it-group/ngrx-devtool`.
 
 ---
 

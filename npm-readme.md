@@ -5,19 +5,19 @@ A development tool for visualizing and debugging NgRx state management in Angula
 ## Install
 
 ```bash
-npm install ngrx-devtool
+npm install @amadeus-it-group/ngrx-devtool
 ```
 
 > If your project uses a private npm registry and you get an E401 error:
 > ```bash
-> npm install ngrx-devtool --registry=https://registry.npmjs.org/
+> npm install @amadeus-it-group/ngrx-devtool --registry=https://registry.npmjs.org/
 > ```
 
 ## Setup
 
 ```typescript
 // app.config.ts
-import { provideNgrxDevTool, createDevToolMetaReducer } from 'ngrx-devtool';
+import { provideNgrxDevTool, createDevToolMetaReducer } from '@amadeus-it-group/ngrx-devtool';
 
 export const appConfig: ApplicationConfig = {
   providers: [

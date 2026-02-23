@@ -89,7 +89,7 @@ const config: Config = {
             },
             {
               label: 'npm',
-              href: 'https://www.npmjs.com/package/ngrx-devtool',
+              href: 'https://www.npmjs.com/package/%40amadeus-it-group%2Fngrx-devtool',
             },
           ],
         },

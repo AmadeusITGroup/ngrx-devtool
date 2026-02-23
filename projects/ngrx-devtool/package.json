@@ -1,5 +1,5 @@
 {
-  "name": "ngrx-devtool",
+  "name": "@amadeus-it-group/ngrx-devtool",
   "version": "0.1.0",
   "peerDependencies": {
     "@angular/common": "^19.0.0 || ^20.0.0 || ^21.0.0",

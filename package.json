@@ -1,5 +1,5 @@
 {
-  "name": "ngrx-devtool",
+  "name": "@amadeus-it-group/ngrx-devtool",
   "version": "0.1.2",
   "license": "MIT",
   "scripts": {
@@ -67,5 +67,8 @@
     "ng-packagr": "^21.1.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "8.46.4"
+  },
+  "overrides": {
+    "minimatch": "^10.2.1"
   }
 }

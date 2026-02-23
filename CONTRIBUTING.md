@@ -54,7 +54,7 @@ cd dist/ngrx-devtool
 npm link
 
 # In your Angular project directory
-npm link ngrx-devtool
+npm link @amadeus-it-group/ngrx-devtool
 ```
 
 Then start the DevTool server:
@@ -64,7 +64,7 @@ Then start the DevTool server:
 node dist/index.js
 ```
 
-> **Note:** If you get module resolution errors after linking, add `"preserveSymlinks": true` in both `tsconfig.json` (`compilerOptions`) and `angular.json` (build `options`) of your Angular project. After running `npm install`, you may need to re-run `npm link ngrx-devtool`.
+> **Note:** If you get module resolution errors after linking, add `"preserveSymlinks": true` in both `tsconfig.json` (`compilerOptions`) and `angular.json` (build `options`) of your Angular project. After running `npm install`, you may need to re-run `npm link @amadeus-it-group/ngrx-devtool`.
 
 ### Running Tests
 

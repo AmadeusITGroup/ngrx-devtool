@@ -8,14 +8,14 @@ title: Installation
 ## Step 1: Install the package
 
 ```bash
-npm install ngrx-devtool
+npm install @amadeus-it-group/ngrx-devtool
 ```
 
 :::note
 If your project uses a private npm registry and you get an E401 error:
 
 ```bash
-npm install ngrx-devtool --registry=https://registry.npmjs.org/
+npm install @amadeus-it-group/ngrx-devtool --registry=https://registry.npmjs.org/
 ```
 :::
 
@@ -33,7 +33,7 @@ cd dist/ngrx-devtool
 npm link
 
 # In your Angular project directory
-npm link ngrx-devtool
+npm link @amadeus-it-group/ngrx-devtool
 ```
 
 :::note
