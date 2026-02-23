@@ -17,6 +17,12 @@
   --ifm-navbar-link-color: #ffffff;
   --ifm-navbar-link-hover-color: #5ac4ff;
 
+  --ifm-footer-background-color: #000D2E;
+  --ifm-footer-color: #94a3b8;
+  --ifm-footer-link-color: #cbd5e1;
+  --ifm-footer-link-hover-color: #5ac4ff;
+  --ifm-footer-title-color: #ffffff;
+
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 }
 
@@ -29,11 +35,26 @@
   --ifm-color-primary-lighter: #ddd6fe;
   --ifm-color-primary-lightest: #ede9fe;
 
+  --ifm-background-color: #0a0e27;
+  --ifm-background-surface-color: #0f1335;
+
   --ifm-navbar-background-color: #000D2E;
   --ifm-navbar-link-color: #ffffff;
   --ifm-navbar-link-hover-color: #5ac4ff;
 
+  --ifm-footer-background-color: #000D2E;
+  --ifm-footer-color: #94a3b8;
+  --ifm-footer-link-color: #cbd5e1;
+  --ifm-footer-link-hover-color: #5ac4ff;
+  --ifm-footer-title-color: #ffffff;
+
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* ----------  Navbar  ---------- */
+.navbar {
+  box-shadow: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .navbar__title {
@@ -44,5 +65,26 @@
 
 .navbar__link {
   color: #ffffff;
+}
+
+/* ----------  Footer  ---------- */
+.footer--dark {
+  background: #000D2E;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ----------  Color mode toggle (visible on dark navbar)  ---------- */
+[data-theme='light'] .navbar .clean-btn {
+  color: #ffffff;
+}
+
+[data-theme='light'] .navbar .toggleButton_node_modules-\@docusaurus-theme-classic-lib-theme-ColorModeToggle-styles-module {
+  color: #ffffff;
+}
+
+/* Generic selector for the toggle icon on dark navbar in light mode */
+:root .navbar svg {
+  color: #ffffff;
+  fill: #ffffff;
 }
 
