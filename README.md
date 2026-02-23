@@ -13,7 +13,7 @@
 
 <p align="center">
   A development tool for visualizing and debugging NgRx state management in Angular applications.<br>
-  Real-time action monitoring, effect tracking, state visualization, diff viewer, and performance metrics — no browser extensions needed.
+  Real-time action monitoring, effect tracking, state visualization, diff viewer, and performance metrics no browser extensions needed.
 </p>
 
 <p align="center">
