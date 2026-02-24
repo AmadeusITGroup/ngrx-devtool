@@ -1,0 +1,41 @@
+name: Publish to npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version bump type or "doconly" to skip publish'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - doconly
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: npm
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm install -g npm@latest
+      - run: npm ci
+      - run: |
+          git config --global user.name github-actions
+          git config --global user.email github-actions@github.com
+      - run: npm version ${{ inputs.version }}
+        if: inputs.version != 'doconly'
+      - run: npm run build
+        if: inputs.version != 'doconly'
+      - run: npm publish ./dist --provenance --access=public
+        if: inputs.version != 'doconly'
+      - run: git push origin master --tags
+        if: inputs.version != 'doconly'
