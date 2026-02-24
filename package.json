@@ -2,6 +2,10 @@
   "name": "@amadeus-it-group/ngrx-devtool",
   "version": "0.1.2",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AmadeusITGroup/ngrx-devtool"
+  },
   "scripts": {
     "ng": "ng",
     "prepare": "husky",
