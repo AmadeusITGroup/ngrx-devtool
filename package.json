@@ -46,6 +46,9 @@
     "ws": "^8.18.2",
     "zone.js": "~0.16.1"
   },
+  "overrides": {
+    "rollup": ">=4.59.0"
+  },
   "devDependencies": {
     "@angular-devkit/build-angular": "^21.1.4",
     "@angular-devkit/core": "^21.1.4",
