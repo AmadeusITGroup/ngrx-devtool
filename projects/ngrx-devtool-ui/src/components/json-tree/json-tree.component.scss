@@ -1,5 +1,25 @@
 @use '../../styles/theme' as *;
 
+:host {
+    display: block;
+    position: relative;
+    overflow: hidden;
+}
+
+.tree-toggle-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    color: #{$color-on-surface-variant};
+    opacity: 0.6;
+
+    &:hover {
+        opacity: 1;
+        color: #{$color-primary};
+    }
+}
+
 json-viewer {
     --background-color: #{$color-background};
     --property-color: #{$color-primary};

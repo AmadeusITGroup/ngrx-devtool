@@ -11,7 +11,8 @@ Explore your application state with a tree-based JSON viewer.
 
 The state viewer provides an interactive tree representation of your entire NgRx store state. You can:
 
-- Expand and collapse nested objects
+- Expand and collapse nested objects individually
+- Expand or collapse all nodes at once with the toggle button
 - Search through the state tree
 - Copy values to clipboard
 - View raw JSON

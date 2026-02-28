@@ -1,1 +1,7 @@
-<json-viewer [data]="jsonData"></json-viewer>
+<button mat-icon-button
+        class="tree-toggle-btn"
+        [matTooltip]="expanded ? 'Collapse All' : 'Expand All'"
+        (click)="toggle()">
+  <mat-icon>{{ expanded ? 'unfold_less' : 'unfold_more' }}</mat-icon>
+</button>
+<json-viewer #jsonViewer [data]="jsonData"></json-viewer>
