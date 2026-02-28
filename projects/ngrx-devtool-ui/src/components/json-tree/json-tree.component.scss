@@ -8,11 +8,12 @@
 
 .tree-toggle-btn {
     position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 1;
+    top: $spacing-xs;
+    right: $spacing-xs;
+    z-index: $z-dropdown;
     color: #{$color-on-surface-variant};
     opacity: 0.6;
+    transition: opacity $transition-fast, color $transition-fast;
 
     &:hover {
         opacity: 1;

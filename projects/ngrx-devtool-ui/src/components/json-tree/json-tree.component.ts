@@ -24,6 +24,26 @@ export class JsonTreeComponent {
 
   expanded = false;
 
+  private readonly ITEM_THRESHOLD = 5;
+
+  get showToggle(): boolean {
+    return this.countItems(this.jsonData) > this.ITEM_THRESHOLD;
+  }
+
+  private countItems(data: unknown, depth = 0): number {
+    if (data === null || data === undefined || typeof data !== 'object') {
+      return 0;
+    }
+    const entries = Array.isArray(data) ? data : Object.values(data);
+    let count = entries.length;
+    for (const value of entries) {
+      if (typeof value === 'object' && value !== null) {
+        count += this.countItems(value, depth + 1);
+      }
+    }
+    return count;
+  }
+
   toggle(): void {
     const viewer = this.jsonViewerRef?.nativeElement;
     if (!viewer) return;
