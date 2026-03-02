@@ -3,7 +3,7 @@ import { Actions } from '@ngrx/effects';
 import { Action } from '@ngrx/store';
 import { filter, Subject, takeUntil, tap } from 'rxjs';
 
-import { DevToolMessage, EffectEvent, TrackedAction } from './core.models';
+import { DEFAULT_WS_URL, DevToolMessage, EffectEvent, TrackedAction } from './core.models';
 import { EffectTrackerService } from './effect-tracker.service';
 import { WebSocketService, WebSocketMessage } from './websocket.service';
 
@@ -16,7 +16,7 @@ export class ActionsInterceptorService implements OnDestroy {
   private readonly destroy$ = new Subject<void>();
   private initialized = false;
 
-  initialize(wsUrl = 'ws://localhost:4000'): void {
+  initialize(wsUrl = DEFAULT_WS_URL): void {
     if (this.initialized) {
       return;
     }

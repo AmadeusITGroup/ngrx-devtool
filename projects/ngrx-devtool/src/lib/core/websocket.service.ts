@@ -1,10 +1,13 @@
 import { inject, Injectable, OnDestroy, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { DEFAULT_WS_URL } from './core.models';
 
 export interface WebSocketMessage {
   readonly type: string;
 }
+
+const MAX_BUFFER_SIZE = 200;
 
 @Injectable({ providedIn: 'root' })
 export class WebSocketService implements OnDestroy {
@@ -31,7 +34,7 @@ export class WebSocketService implements OnDestroy {
     return this.incomingMessages$.asObservable();
   }
 
-  initialize(wsUrl = 'ws://localhost:4000'): void {
+  initialize(wsUrl = DEFAULT_WS_URL): void {
     if (this.initialized) {
       // If already initialized with same URL, skip
       if (this.wsUrl === wsUrl) {
@@ -47,19 +50,17 @@ export class WebSocketService implements OnDestroy {
   }
 
   send<T extends WebSocketMessage>(message: T): void {
-    const payload = JSON.stringify(message);
-
-    if (this.isConnected && this.socket?.readyState === WebSocket.OPEN) {
-      this.socket.send(payload);
-    } else if (this.isBrowser) {
-      this.messageBuffer.push(payload);
-    }
+    this.bufferOrSend(JSON.stringify(message));
   }
 
   sendRaw(payload: string): void {
+    this.bufferOrSend(payload);
+  }
+
+  private bufferOrSend(payload: string): void {
     if (this.isConnected && this.socket?.readyState === WebSocket.OPEN) {
       this.socket.send(payload);
-    } else if (this.isBrowser) {
+    } else if (this.isBrowser && this.messageBuffer.length < MAX_BUFFER_SIZE) {
       this.messageBuffer.push(payload);
     }
   }
@@ -73,6 +74,7 @@ export class WebSocketService implements OnDestroy {
   private close(): void {
     this.socket?.close();
     this.socket = null;
+    this.messageBuffer = [];
     this.connectionState$.next(false);
     this.initialized = false;
     this.wsUrl = null;
@@ -109,9 +111,11 @@ export class WebSocketService implements OnDestroy {
   }
 
   private flushBuffer(): void {
-    while (this.messageBuffer.length > 0 && this.isConnected) {
-      const message = this.messageBuffer.shift();
-      if (message && this.socket?.readyState === WebSocket.OPEN) {
+    const buffered = this.messageBuffer;
+    this.messageBuffer = [];
+
+    for (const message of buffered) {
+      if (this.isConnected && this.socket?.readyState === WebSocket.OPEN) {
         this.socket.send(message);
       }
     }

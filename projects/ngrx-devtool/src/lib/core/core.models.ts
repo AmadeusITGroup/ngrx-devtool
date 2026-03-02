@@ -1,5 +1,7 @@
 import { Action } from '@ngrx/store';
 
+export const DEFAULT_WS_URL = 'ws://localhost:4000';
+
 export type EffectLifecycle = 'triggered' | 'emitted' | 'executed' | 'error';
 
 export interface EffectEvent {

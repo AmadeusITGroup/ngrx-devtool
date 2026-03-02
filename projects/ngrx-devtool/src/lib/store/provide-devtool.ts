@@ -2,6 +2,7 @@ import { APP_INITIALIZER, Provider } from '@angular/core';
 import { EffectSources } from '@ngrx/effects';
 import { ActionsInterceptorService } from '../core/actions-interceptor.service';
 import { DevToolsEffectSources } from '../core/devtools-effect-sources';
+import { DEFAULT_WS_URL } from '../core/core.models';
 
 export interface DevToolConfig {
   readonly wsUrl?: string;
@@ -13,7 +14,7 @@ export function provideNgrxDevTool(config: DevToolConfig = {}): Provider[] {
     {
       provide: APP_INITIALIZER,
       useFactory: (interceptor: ActionsInterceptorService) => () => {
-        interceptor.initialize(config.wsUrl ?? 'ws://localhost:4000');
+        interceptor.initialize(config.wsUrl ?? DEFAULT_WS_URL);
       },
       deps: [ActionsInterceptorService],
       multi: true,

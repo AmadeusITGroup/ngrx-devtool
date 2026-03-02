@@ -2,6 +2,7 @@ import { ActionReducer, Action } from '@ngrx/store';
 import { inject } from '@angular/core';
 import { PerformanceTrackerService } from '../performance/performance-tracker.service';
 import { WebSocketService } from '../core/websocket.service';
+import { DEFAULT_WS_URL } from '../core/core.models';
 
 export interface RenderPerformanceData {
   readonly renderTime: number;
@@ -22,13 +23,13 @@ export interface DevToolMetaReducerConfig {
 }
 
 export function createDevToolMetaReducer(
-  wsUrlOrConfig: string | DevToolMetaReducerConfig = 'ws://localhost:4000'
+  wsUrlOrConfig: string | DevToolMetaReducerConfig = DEFAULT_WS_URL
 ) {
   const config: DevToolMetaReducerConfig = typeof wsUrlOrConfig === 'string'
     ? { wsUrl: wsUrlOrConfig }
     : wsUrlOrConfig;
 
-  const wsUrl = config.wsUrl ?? 'ws://localhost:4000';
+  const wsUrl = config.wsUrl ?? DEFAULT_WS_URL;
   const enablePerf = config.enablePerformanceTracking ?? true;
 
   return function devToolMetaReducer<State>(
@@ -85,5 +86,5 @@ export function createDevToolMetaReducer(
 export function loggerMetaReducer<State>(
   reducer: ActionReducer<State>
 ): ActionReducer<State> {
-  return createDevToolMetaReducer('ws://localhost:4000')(reducer);
+  return createDevToolMetaReducer(DEFAULT_WS_URL)(reducer);
 }
