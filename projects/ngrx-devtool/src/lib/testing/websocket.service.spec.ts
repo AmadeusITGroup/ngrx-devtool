@@ -151,6 +151,19 @@ describe('WebSocketService', () => {
       expect(messages[0].type).toBe('MSG_1');
       expect(messages[1].type).toBe('MSG_2');
     });
+
+    it('should drop messages once the buffer reaches max size (200)', () => {
+      service.initialize();
+      // Don't open the socket — all messages go to buffer
+
+      for (let i = 0; i < 250; i++) {
+        service.send({ type: `MSG_${i}` } as WebSocketMessage);
+      }
+
+      // Open and flush — should only have the first 200
+      getLastWs().simulateOpen();
+      expect(getLastWs().sentMessages).toHaveLength(200);
+    });
   });
 
   describe('sendRaw()', () => {
