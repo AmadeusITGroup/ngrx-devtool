@@ -11,6 +11,14 @@ const TIMELINE_MAX_SIZE = 1000;
 const TIMELINE_TRIM_SIZE = 500;
 const EFFECT_TIMELINE_MAX_SIZE = 500;
 const CORRELATION_TIMEOUT_MS = 30000;
+
+interface PendingCorrelation {
+  readonly correlationId: string;
+  readonly actionType: string;
+  readonly timestamp: number;
+  readonly timeoutId: ReturnType<typeof setTimeout>;
+}
+
 @Injectable({ providedIn: 'root' })
 export class EffectTrackerService implements OnDestroy {
   private readonly effectSources = inject(EffectSources, { optional: true });
@@ -19,7 +27,7 @@ export class EffectTrackerService implements OnDestroy {
   private actionTimeline: TrackedAction[] = [];
   private effectTimeline: TrackedEffect[] = [];
   private readonly effectActionPatterns = new Set<string>();
-  private readonly pendingCorrelations = new Map<string, { action: Action; timestamp: number }>();
+  private pendingCorrelations: PendingCorrelation[] = [];
   private correlationCounter = 0;
   private lastTriggerAction: Action | null = null;
 
@@ -96,8 +104,13 @@ export class EffectTrackerService implements OnDestroy {
       this.lastTriggerAction = action;
     }
 
+    // Resolve trigger action type to match the correct correlation.
+    const triggerActionType = isEffect
+      ? this.findTriggerActionType(action.type)
+      : undefined;
+
     const correlationId = isEffect
-      ? this.findCorrelation()
+      ? this.consumeCorrelation(triggerActionType)
       : this.createCorrelation(action);
 
     const effectName = this.findEffectNameForAction(action.type);
@@ -126,26 +139,60 @@ export class EffectTrackerService implements OnDestroy {
 
   clearTimeline(): void {
     this.actionTimeline = [];
-    this.pendingCorrelations.clear();
+    this.clearPendingCorrelations();
   }
 
   private createCorrelation(action: Action): string {
     const correlationId = `corr_${++this.correlationCounter}_${Date.now()}`;
-    this.pendingCorrelations.set(correlationId, {
-      action,
-      timestamp: Date.now(),
-    });
 
-    setTimeout(() => {
-      this.pendingCorrelations.delete(correlationId);
+    const timeoutId = setTimeout(() => {
+      this.pendingCorrelations = this.pendingCorrelations.filter(
+        c => c.correlationId !== correlationId
+      );
     }, CORRELATION_TIMEOUT_MS);
+
+    this.pendingCorrelations.push({
+      correlationId,
+      actionType: action.type,
+      timestamp: Date.now(),
+      timeoutId,
+    });
 
     return correlationId;
   }
 
-  private findCorrelation(): string | undefined {
-    const entries = Array.from(this.pendingCorrelations.entries());
-    return entries.length > 0 ? entries[entries.length - 1][0] : undefined;
+  // Find and consume the best-matching pending correlation (by trigger type, then FIFO fallback).
+  private consumeCorrelation(triggerActionType?: string): string | undefined {
+    let idx = -1;
+
+    // Prefer matching by trigger action type (oldest match first)
+    if (triggerActionType) {
+      idx = this.pendingCorrelations.findIndex(c => c.actionType === triggerActionType);
+    }
+
+    // Fallback: oldest pending correlation (FIFO)
+    if (idx === -1 && this.pendingCorrelations.length > 0) {
+      idx = 0;
+    }
+
+    if (idx === -1) {
+      return undefined;
+    }
+
+    const [entry] = this.pendingCorrelations.splice(idx, 1);
+    clearTimeout(entry.timeoutId);
+    return entry.correlationId;
+  }
+
+  // Resolve which user action type triggered a given effect-result action type.
+  private findTriggerActionType(effectActionType: string): string | undefined {
+    for (let i = this.effectTimeline.length - 1; i >= Math.max(0, this.effectTimeline.length - 10); i--) {
+      const effect = this.effectTimeline[i];
+      if (effect.resultAction === effectActionType && effect.triggerAction) {
+        return effect.triggerAction;
+      }
+    }
+    return undefined;
   }
 
   private findEffectNameForAction(actionType: string): string | undefined {
@@ -159,9 +206,17 @@ export class EffectTrackerService implements OnDestroy {
     return undefined;
   }
 
+  private clearPendingCorrelations(): void {
+    for (const entry of this.pendingCorrelations) {
+      clearTimeout(entry.timeoutId);
+    }
+    this.pendingCorrelations = [];
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
     this.effectEvents$.complete();
+    this.clearPendingCorrelations();
   }
 }
