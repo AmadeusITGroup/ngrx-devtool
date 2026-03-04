@@ -7,5 +7,6 @@ export const initialState: readonly Book[] = [];
 
 export const booksReducer = createReducer(
   initialState,
-  on(BooksApiActions.retrievedBookList, (_state, { books }) => books)
+  on(BooksApiActions.retrievedBookList, (_state, { books }) => books),
+  on(BooksApiActions.searchResults, (_state, { books }) => books)
 );

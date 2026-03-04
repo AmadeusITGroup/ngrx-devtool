@@ -6,7 +6,8 @@ export const BooksActions = createActionGroup({
   events: {
     'Add Book': props<{ bookId: string }>(),
     'Remove Book': props<{ bookId: string }>(),
-    'Load Books': emptyProps(), 
+    'Load Books': emptyProps(),
+    'Search Books': props<{ query: string }>(),
   },
 });
 
@@ -14,5 +15,6 @@ export const BooksApiActions = createActionGroup({
   source: 'Books API',
   events: {
     'Retrieved Book List': props<{ books: readonly Book[] }>(),
+    'Search Results': props<{ books: readonly Book[] }>(),
   },
 });
