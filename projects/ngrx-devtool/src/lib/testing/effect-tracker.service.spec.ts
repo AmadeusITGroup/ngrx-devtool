@@ -104,6 +104,43 @@ describe('EffectTrackerService', () => {
       expect(tracked2.correlationId).toBeDefined();
       expect(userTracked.correlationId).not.toBe(tracked2.correlationId);
     }));
+
+    it('should consume correlations in FIFO order so each effect result gets a unique correlation', fakeAsync(() => {
+      // Register '[Test] Load Items Success' as an effect action type via a real store dispatch
+      store.dispatch(testActions.loadItems());
+      tick(100);
+
+      trackerService.clearTimeline();
+
+      const user1 = trackerService.trackAction(testActions.loadItems());
+      const user2 = trackerService.trackAction(testActions.addItem({ item: 'x' }));
+
+      const effect1 = trackerService.trackAction(testActions.loadItemsSuccess({ items: ['a'] }));
+      const effect2 = trackerService.trackAction(testActions.loadItemsSuccess({ items: ['b'] }));
+
+      expect(effect1.correlationId).not.toBe(effect2.correlationId);
+
+      expect(effect1.correlationId).toBe(user1.correlationId);
+      expect(effect2.correlationId).toBe(user2.correlationId);
+    }));
+
+    it('should return undefined correlation when no pending correlations remain', fakeAsync(() => {
+      // Register '[Test] Load Items Success' as an effect action type
+      store.dispatch(testActions.loadItems());
+      tick(100);
+
+      trackerService.clearTimeline();
+
+      // Dispatch one user action
+      trackerService.trackAction(testActions.loadItems());
+
+      // First effect result consumes the only correlation
+      trackerService.trackAction(testActions.loadItemsSuccess({ items: [] }));
+
+      // Second effect result has nothing left should be undefined, not a stale reuse
+      const orphan = trackerService.trackAction(testActions.loadItemsSuccess({ items: [] }));
+      expect(orphan.correlationId).toBeUndefined();
+    }));
   });
 
   describe('Effect Events Forwarding', () => {

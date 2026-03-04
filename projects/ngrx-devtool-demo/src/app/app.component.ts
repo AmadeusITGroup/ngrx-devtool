@@ -6,12 +6,13 @@ import { Book } from './book-list/book.model';
 import { Observable } from 'rxjs';
 import { BookListComponent } from './book-list/book-list.component';
 import { BookCollectionComponent } from './book-collection/book-collection.component';
+import { CorrelationDebugComponent } from './correlation-debug/correlation-debug.component';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  imports: [BookListComponent, BookCollectionComponent, AsyncPipe]
+  imports: [BookListComponent, BookCollectionComponent, CorrelationDebugComponent, AsyncPipe]
 })
 export class AppComponent implements OnInit {
   books$!: Observable<readonly Book[]>;
