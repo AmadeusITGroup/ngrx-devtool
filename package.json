@@ -17,7 +17,7 @@
     "lint:fix": "ng lint --fix"
   },
   "exports": {
-    ".": "./dist/ngrx-devtool/fesm2022/ngrx-devtool.mjs"
+    ".": "./dist/ngrx-devtool/fesm2022/amadeus-it-group-ngrx-devtool.mjs"
   },
   "bin": {
     "ngrx-devtool": "./dist/index.js"

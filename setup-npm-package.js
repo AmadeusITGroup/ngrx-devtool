@@ -23,7 +23,25 @@ for (const dep of runtimeDeps) {
 }
 sourceObj.dependencies = cleanedDeps;
 
-if (sourceObj.exports && sourceObj.exports["."] && sourceObj.exports["."].startsWith("./dist")) {
+// Use ng-packagr's generated exports (has correct filenames) instead of the root hardcoded ones
+const ngPkgPath = path.join(__dirname, "dist", "ngrx-devtool", "package.json");
+if (fs.existsSync(ngPkgPath)) {
+  const ngPkg = JSON.parse(fs.readFileSync(ngPkgPath, "utf-8"));
+  if (ngPkg.exports && ngPkg.exports["."]  ) {
+    const ngExports = ngPkg.exports["."];
+    // Prefix paths with ./ngrx-devtool/ since they're relative to the sub-package
+    if (typeof ngExports === "object") {
+      sourceObj.exports = {
+        ".": {
+          types: "./ngrx-devtool/" + ngExports.types.replace("./", ""),
+          default: "./ngrx-devtool/" + ngExports.default.replace("./", ""),
+        },
+      };
+    } else {
+      sourceObj.exports = { ".": "./ngrx-devtool/" + ngExports.replace("./", "") };
+    }
+  }
+} else if (sourceObj.exports && sourceObj.exports["."] && sourceObj.exports["."].startsWith("./dist")) {
   sourceObj.exports["."] = "./" + sourceObj.exports["."].slice(7);
 }
 
