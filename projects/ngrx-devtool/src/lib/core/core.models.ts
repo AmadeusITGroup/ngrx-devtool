@@ -77,4 +77,6 @@ export interface DevToolEffectEventPayload {
   readonly duration?: number;
   readonly executionId?: string;
   readonly dispatch?: boolean;
+  readonly errorMessage?: string;
+  readonly errorStack?: string;
 }

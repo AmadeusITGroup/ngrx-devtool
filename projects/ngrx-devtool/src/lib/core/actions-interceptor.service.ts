@@ -81,6 +81,11 @@ export class ActionsInterceptorService implements OnDestroy {
     this.effectTracker.effectEvents$.pipe(
       takeUntil(this.destroy$),
       tap((event: EffectEvent) => {
+        const errorMessage = event.error instanceof Error
+          ? event.error.message
+          : event.error != null ? String(event.error) : undefined;
+        const errorStack = event.error instanceof Error ? event.error.stack : undefined;
+
         const message: DevToolMessage = {
           type: 'EFFECT_EVENT',
           action: event.action?.type,
@@ -91,6 +96,8 @@ export class ActionsInterceptorService implements OnDestroy {
             duration: event.duration,
             executionId: event.executionId,
             dispatch: event.dispatch,
+            errorMessage,
+            errorStack,
           },
           timestamp: new Date().toISOString(),
         };

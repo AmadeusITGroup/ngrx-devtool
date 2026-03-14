@@ -1,11 +1,11 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { PLATFORM_ID } from '@angular/core';
 import { provideStore } from '@ngrx/store';
 import { provideEffects, EffectSources } from '@ngrx/effects';
 
 import { ActionsInterceptorService, DevToolMessage } from '../core/actions-interceptor.service';
 import { EffectTrackerService } from '../core/effect-tracker.service';
-import { DevToolsEffectSources } from '../core/devtools-effect-sources';
+import { DevToolsEffectSources, EffectEvent } from '../core/devtools-effect-sources';
 import { WebSocketService } from '../core/websocket.service';
 import { TestEffects, testActions, testReducer } from './test-effects';
 import { MockWebSocket, WebSocketConstants } from './mock-websocket';
@@ -170,6 +170,94 @@ describe('ActionsInterceptorService', () => {
       expect(message!.timestamp).toBeDefined();
       expect(new Date(message!.timestamp).getTime()).toBeGreaterThan(0);
     });
+  });
+
+  describe('Effect Event Forwarding', () => {
+    function getEffectSources(): DevToolsEffectSources {
+      return TestBed.inject(EffectSources) as DevToolsEffectSources;
+    }
+
+    function emitEffectEvent(event: EffectEvent): void {
+      getEffectSources().effectEvents$.next(event);
+    }
+
+    it('should include errorMessage and errorStack in EFFECT_EVENT when lifecycle is error', fakeAsync(() => {
+      interceptorService.initialize();
+      const ws = getCreatedWebSocket();
+      ws.simulateOpen();
+      ws.clearMessages();
+
+      const error = new Error('Something went wrong');
+
+      emitEffectEvent({
+        effectName: 'TestEffects.failingEffect$',
+        sourceName: 'TestEffects',
+        propertyName: 'failingEffect$',
+        lifecycle: 'error',
+        error,
+        timestamp: Date.now(),
+        executionId: 'test-exec-error-1',
+      });
+      tick(0);
+
+      const messages = ws.getSentMessagesAsObjects<DevToolMessage>();
+      const effectMsg = messages.find((m) => m.type === 'EFFECT_EVENT');
+
+      expect(effectMsg).toBeDefined();
+      expect(effectMsg!.effectEvent?.errorMessage).toBe('Something went wrong');
+      expect(effectMsg!.effectEvent?.errorStack).toContain('Error: Something went wrong');
+    }));
+
+    it('should include errorMessage for non-Error thrown values', fakeAsync(() => {
+      interceptorService.initialize();
+      const ws = getCreatedWebSocket();
+      ws.simulateOpen();
+      ws.clearMessages();
+
+      emitEffectEvent({
+        effectName: 'TestEffects.failingEffect$',
+        sourceName: 'TestEffects',
+        propertyName: 'failingEffect$',
+        lifecycle: 'error',
+        error: 'plain string error',
+        timestamp: Date.now(),
+        executionId: 'test-exec-error-2',
+      });
+      tick(0);
+
+      const messages = ws.getSentMessagesAsObjects<DevToolMessage>();
+      const effectMsg = messages.find((m) => m.type === 'EFFECT_EVENT');
+
+      expect(effectMsg).toBeDefined();
+      expect(effectMsg!.effectEvent?.errorMessage).toBe('plain string error');
+      expect(effectMsg!.effectEvent?.errorStack).toBeUndefined();
+    }));
+
+    it('should not include errorMessage or errorStack for non-error lifecycle', fakeAsync(() => {
+      interceptorService.initialize();
+      const ws = getCreatedWebSocket();
+      ws.simulateOpen();
+      ws.clearMessages();
+
+      emitEffectEvent({
+        effectName: 'TestEffects.loadItems$',
+        sourceName: 'TestEffects',
+        propertyName: 'loadItems$',
+        lifecycle: 'emitted',
+        action: testActions.loadItemsSuccess({ items: [] }),
+        timestamp: Date.now(),
+        executionId: 'test-exec-emitted-1',
+        dispatch: true,
+      });
+      tick(0);
+
+      const messages = ws.getSentMessagesAsObjects<DevToolMessage>();
+      const effectMsg = messages.find((m) => m.type === 'EFFECT_EVENT');
+
+      expect(effectMsg).toBeDefined();
+      expect(effectMsg!.effectEvent?.errorMessage).toBeUndefined();
+      expect(effectMsg!.effectEvent?.errorStack).toBeUndefined();
+    }));
   });
 
   describe('Platform Detection', () => {
