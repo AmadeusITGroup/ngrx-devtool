@@ -80,6 +80,18 @@
               <span class="detail-label">Time:</span>
               <span class="detail-value">{{ execution.endTime | date:'medium' }}</span>
             </div>
+            @if (execution.status === 'error' && execution.errorMessage) {
+              <div class="detail-row error-message-row">
+                <span class="detail-label">Error:</span>
+                <span class="detail-value error-message-text">{{ execution.errorMessage }}</span>
+              </div>
+              @if (execution.errorStack) {
+                <details class="stack-trace">
+                  <summary>Stack Trace</summary>
+                  <pre class="stack-trace-content">{{ execution.errorStack }}</pre>
+                </details>
+              }
+            }
           </div>
         </mat-expansion-panel>
       }

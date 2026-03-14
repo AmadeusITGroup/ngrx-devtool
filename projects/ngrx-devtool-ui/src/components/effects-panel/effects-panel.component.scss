@@ -210,6 +210,43 @@ mat-panel-title {
   }
 }
 
+// Error details
+.error-message-row {
+  align-items: flex-start;
+
+  .error-message-text {
+    color: $effect-error;
+    font-weight: 500;
+    word-break: break-word;
+  }
+}
+
+.stack-trace {
+  margin-top: $spacing-md;
+
+  summary {
+    cursor: pointer;
+    color: $color-on-surface-variant;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: $spacing-xs 0;
+    user-select: none;
+  }
+
+  .stack-trace-content {
+    margin-top: $spacing-sm;
+    padding: $spacing-md;
+    background: $color-surface-container;
+    border-radius: $corner-extra-small;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: $color-on-surface-variant;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}
+
 // Lifecycle events
 .lifecycle-events {
   padding: $spacing-lg;
