@@ -8,6 +8,8 @@ export interface EffectEventMessage {
     readonly duration?: number;
     readonly executionId?: string;
     readonly dispatch?: boolean;
+    readonly errorMessage?: string;
+    readonly errorStack?: string;
   };
   readonly timestamp: string;
 }
@@ -24,4 +26,6 @@ export interface EffectExecution {
   readonly emittedAction?: string;
   readonly executionId?: string;
   readonly dispatch?: boolean;
+  readonly errorMessage?: string;
+  readonly errorStack?: string;
 }

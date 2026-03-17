@@ -71,7 +71,11 @@ export class EffectsPanelComponent {
       const lifecycleProps = {
         emitted: { status: 'completed' as const, emittedAction: event.action, dispatch: true },
         executed: { status: 'executed' as const, dispatch: false },
-        error: { status: 'error' as const },
+        error: {
+          status: 'error' as const,
+          errorMessage: event.effectEvent.errorMessage,
+          errorStack: event.effectEvent.errorStack,
+        },
       };
 
       completedExecutions.push({
