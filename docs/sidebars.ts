@@ -24,6 +24,7 @@ const sidebars: SidebarsConfig = {
         'features/performance',
         'features/state-visualization',
         'features/diff-viewer',
+        'features/debug-with-ai',
       ],
     },
     {

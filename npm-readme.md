@@ -1,6 +1,6 @@
 # NgRx DevTool
 
-A development tool for visualizing and debugging NgRx state management in Angular applications. Real-time action monitoring, effect tracking, state visualization, diff viewer, and performance metrics — no browser extensions needed.
+A development tool for visualizing and debugging NgRx state management in Angular applications. Real-time action monitoring, effect tracking, state visualization, diff viewer, and performance metrics. No browser extensions needed.
 
 ## Install
 

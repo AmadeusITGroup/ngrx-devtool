@@ -44,8 +44,8 @@ import { BooksActions } from '../state/book.actions';
                     {{ entry.source }}
                   </span>
                 </td>
-                <td class="mono">{{ entry.correlationId ?? '—' }}</td>
-                <td>{{ entry.effectName ?? '—' }}</td>
+                <td class="mono">{{ entry.correlationId ?? '-' }}</td>
+                <td>{{ entry.effectName ?? '-' }}</td>
               </tr>
             }
           </tbody>
@@ -65,7 +65,7 @@ export class CorrelationDebugComponent {
   timeline: readonly TrackedAction[] = [];
 
   dispatchBothConcurrently(): void {
-    // Fire two user actions back-to-back — each triggers a separate async effect.
+    // Fire two user actions back-to-back; each triggers a separate async effect.
     this.store.dispatch(BooksActions.loadBooks());
     this.store.dispatch(BooksActions.searchBooks({ query: 'neuroscience' }));
 

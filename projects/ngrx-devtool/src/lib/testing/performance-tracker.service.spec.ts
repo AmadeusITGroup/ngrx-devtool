@@ -166,7 +166,6 @@ describe('PerformanceTrackerService', () => {
     });
 
     it('should calculate performance score that decreases with slow render times', () => {
-      // Default threshold is 16ms
       injectEntries([
         { actionType: 'slow', timestamp: 1000, renderTime: 50 },
         { actionType: 'slow', timestamp: 2000, renderTime: 60 },
@@ -208,12 +207,10 @@ describe('PerformanceTrackerService', () => {
         { actionType: 'A', timestamp: now, renderTime: 5 },
         { actionType: 'B', timestamp: now, renderTime: 5 },
       ]);
-      // Set firstActionTime 10 seconds ago
       injectFirstActionTime(now - 10000);
 
       const aggregated = service.getAggregatedStats();
 
-      // 2 actions over ~10 seconds
       expect(aggregated.actionsPerSecond).toBeCloseTo(0.2, 1);
     });
   });
@@ -342,16 +339,11 @@ describe('PerformanceTrackerService', () => {
       }));
       injectEntries(entries);
 
-      // Trigger trim by calling measureRenderTime — the trim happens inside afterNextRender
-      // Instead, manually verify the trim logic by checking at boundary
       expect(service.getEntries()).toHaveLength(1001);
 
-      // Add one more via direct push to trigger trim check
       const internalEntries = (service as unknown as { entries: RenderPerformanceEntry[] }).entries;
       internalEntries.push({ actionType: 'overflow', timestamp: 9999, renderTime: 1 });
 
-      // Entries exceed 1000 but trim only happens inside afterNextRender
-      // The trim logic slices to last 500 when count > 1000
       expect(internalEntries.length).toBe(1002);
     });
   });
