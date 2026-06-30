@@ -48,6 +48,11 @@
 
   <span class="toolbar-spacer"></span>
 
+  <button mat-button class="ai-debug-btn" matTooltip="Assemble an AI debugging prompt from this session" (click)="openAiDebug()">
+    <mat-icon>auto_awesome</mat-icon>
+    Debug with AI
+  </button>
+
   <button mat-icon-button matTooltip="Export Session" (click)="exportSession()">
     <mat-icon>save</mat-icon>
   </button>
