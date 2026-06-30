@@ -5,7 +5,6 @@ import { RenderTimingMessage } from './session.service';
 
 const OLLAMA_BASE = 'http://localhost:11434';
 const FRAME_BUDGET_MS = 16;
-const MAX_JSON_CHARS = 4000;
 
 export type DebugFocus = 'general' | 'errors' | 'performance' | 'actions';
 
@@ -242,6 +241,7 @@ export class AiDebugService {
           const chunk = json?.message?.content;
           if (typeof chunk === 'string' && chunk) onToken(chunk);
         } catch {
+          continue;
         }
       }
     }
