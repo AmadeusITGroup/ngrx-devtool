@@ -3,6 +3,7 @@ import { WebSocket, WebSocketServer } from 'ws';
 import * as path from 'path';
 import * as express from 'express';
 import { createServer } from 'http';
+import { createStore, captureMessage, registerMcpEndpoint } from './mcp-server';
 const chalk = require('chalk');
 
 const PORT_WS = 4000;
@@ -10,6 +11,8 @@ const PORT_UI = '3000';
 const wss = new WebSocketServer({ port: PORT_WS });
 
 let clients = [];
+
+const store = createStore();
 
 const logo = `
                                     ***@  +**
@@ -63,6 +66,7 @@ console.log(chalk.dim('─'.repeat(60)));
 wss.on('connection', (socket) => {
   clients.push(socket);
   socket.on('message', (message) => {
+    captureMessage(store, message.toString());
     clients.forEach((client) => {
       if (client !== socket && client.readyState === WebSocket.OPEN) {
         client.send(message);
@@ -71,6 +75,7 @@ wss.on('connection', (socket) => {
   });
 });
 const app = express();
+registerMcpEndpoint(app, express, store);
 app.use(express.static(path.resolve(__dirname, 'ngrx-devtool-ui/browser')));
 app.get('*', (_req, res) => {
   res.sendFile(path.resolve(__dirname, 'ngrx-devtool-ui/browser/index.html'));
@@ -94,6 +99,11 @@ process.on('SIGINT', () => {
 console.log('');
 console.log(chalk.green(`  ✓ WebSocket`), chalk.dim(`ws://localhost:${PORT_WS}`));
 console.log(chalk.green(`  ✓ UI Server`), chalk.dim(`http://localhost:${PORT_UI}`));
+console.log(chalk.green(`  ✓ AI / MCP `), chalk.dim(`http://localhost:${PORT_UI}/mcp`));
+console.log('');
+console.log(chalk.dim('  Connect Copilot / Claude / Cursor by adding to .vscode/mcp.json:'));
+console.log(chalk.dim('    { "servers": { "ngrx-devtool": { "type": "http",'));
+console.log(chalk.dim(`      "url": "http://localhost:${PORT_UI}/mcp" } } }`));
 console.log('');
 console.log(chalk.dim('─'.repeat(60)));
 console.log(chalk.dim('  Press'), chalk.white('Ctrl+C'), chalk.dim('to stop all servers'));

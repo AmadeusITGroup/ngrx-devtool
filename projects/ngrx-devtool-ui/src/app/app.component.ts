@@ -13,6 +13,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { AiDebugDialogComponent } from '../components/ai-debug-dialog/ai-debug-dialog.component';
+import { DebugContext } from '../services/ai-debug.service';
 import { JsonTreeComponent } from '../components/json-tree/json-tree.component';
 import { DatePipe } from '@angular/common';
 import { DiffViewerComponent } from '../components/diff-viewer/diff-viewer.component';
@@ -112,6 +115,17 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly _webSocketService = inject(WebsocketService);
   private readonly _sessionService = inject(SessionService);
   private readonly _snackBar = inject(MatSnackBar);
+  private readonly _dialog = inject(MatDialog);
+
+  openAiDebug(): void {
+    const data: DebugContext = {
+      messages: this.messagesWithPrevState(),
+      effectEvents: this.effectEvents(),
+      renderTimings: this.renderTimings(),
+      appName: this.importedSessionName(),
+    };
+    this._dialog.open(AiDebugDialogComponent, { data, autoFocus: false, maxHeight: '90vh' });
+  }
 
   ngOnInit(): void {
     this._webSocketService.connect('ws://localhost:4000');

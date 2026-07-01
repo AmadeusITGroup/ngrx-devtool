@@ -88,11 +88,11 @@ npm run lint:fix      # Auto-fix lint errors
 ### Branch Naming
 
 Use descriptive branch names:
-- `feat/description` — for new features
-- `fix/description` — for bug fixes
-- `docs/description` — for documentation changes
-- `refactor/description` — for code refactoring
-- `test/description` — for adding or updating tests
+- `feat/description` - for new features
+- `fix/description` - for bug fixes
+- `docs/description` - for documentation changes
+- `refactor/description` - for code refactoring
+- `test/description` - for adding or updating tests
 
 ### Commit Messages
 
@@ -117,14 +117,14 @@ test(store): add unit tests for meta reducer
 3. Ensure all tests pass: `npm test`
 4. Ensure linting passes: `npm run lint`
 5. Push your branch and open a pull request against `master`
-6. CI will automatically run lint and tests — both must pass before merging
+6. CI will automatically run lint and tests. Both must pass before merging
 
 ### Code Quality Requirements
 
 - All new code must include unit tests
 - Existing tests must continue to pass
 - Code must pass linting without errors
-- Keep pull requests focused — one feature or fix per PR
+- Keep pull requests focused: one feature or fix per PR
 
 ---
 

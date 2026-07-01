@@ -107,7 +107,6 @@ describe('WebSocketService', () => {
       service.initialize();
       getLastWs().simulateOpen();
 
-      // Give async a tick
       await Promise.resolve();
       const value = await firstValueFrom(service.connected$);
       expect(value).toBe(true);
@@ -129,7 +128,6 @@ describe('WebSocketService', () => {
 
     it('should buffer messages when not connected', () => {
       service.initialize();
-      // Don't open the socket
 
       service.send({ type: 'BUFFERED' } as WebSocketMessage);
 
@@ -154,13 +152,11 @@ describe('WebSocketService', () => {
 
     it('should drop messages once the buffer reaches max size (200)', () => {
       service.initialize();
-      // Don't open the socket — all messages go to buffer
 
       for (let i = 0; i < 250; i++) {
         service.send({ type: `MSG_${i}` } as WebSocketMessage);
       }
 
-      // Open and flush — should only have the first 200
       getLastWs().simulateOpen();
       expect(getLastWs().sentMessages).toHaveLength(200);
     });
@@ -196,7 +192,6 @@ describe('WebSocketService', () => {
 
       const messagePromise = firstValueFrom(
         service.messages$.pipe(
-          // skip null initial value — take the next real message
           take(2),
           toArray()
         )
@@ -219,7 +214,6 @@ describe('WebSocketService', () => {
         if (m !== null) receivedMessage = m;
       });
 
-      // Simulate a non-JSON message
       getLastWs().onmessage?.(new MessageEvent('message', { data: 'not-json{{{' }));
 
       expect(receivedMessage).toBeNull();
@@ -275,7 +269,6 @@ describe('WebSocketService', () => {
       serverService.initialize();
       serverService.send({ type: 'TEST' } as WebSocketMessage);
 
-      // No WebSocket created, no buffer used
       expect(serverService.isConnected).toBe(false);
     });
   });

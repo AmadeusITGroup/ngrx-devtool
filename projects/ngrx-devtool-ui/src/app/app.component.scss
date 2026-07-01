@@ -171,6 +171,32 @@ mat-toolbar {
   flex: 1 1 auto;
 }
 
+.ai-debug-btn {
+  --mdc-text-button-label-text-color: #{$color-on-primary-container};
+  --mat-text-button-state-layer-color: #{$color-on-primary-container};
+  --mat-text-button-ripple-color: rgba(255, 255, 255, 0.12);
+  --mat-text-button-hover-state-layer-opacity: 0.1;
+  --mat-text-button-focus-state-layer-opacity: 0.12;
+  --mat-text-button-pressed-state-layer-opacity: 0.16;
+
+  height: 36px;
+  margin-right: $spacing-sm;
+  padding: 0 $spacing-md;
+  border-radius: $corner-small;
+  font: $typography-label-large;
+  font-family: $font-sans;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: $color-on-primary-container;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: $spacing-xs;
+    font-size: 18px;
+  }
+}
+
 // Effect tracking styles
 .effect-action {
   @include colored-border-left($color-warning);

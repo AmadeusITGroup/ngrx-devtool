@@ -13,7 +13,7 @@
 
 <p align="center">
   A development tool for visualizing and debugging NgRx state management in Angular applications.<br>
-  Real-time action monitoring, effect tracking, state visualization, diff viewer, and performance metrics no browser extensions needed.
+  Real-time action monitoring, effect tracking, state visualization, diff viewer, and performance metrics. No browser extensions needed.
 </p>
 
 <p align="center">
@@ -66,8 +66,6 @@ npx ngrx-devtool
 ### 4. Open the UI
 
 Open **http://localhost:3000** and start your Angular app.
-
----
 
 For full documentation, configuration options, troubleshooting, and more, visit the **[documentation site](https://amadeusitgroup.github.io/ngrx-devtool/)**.
 
