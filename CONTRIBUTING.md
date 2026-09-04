@@ -8,7 +8,7 @@ Thank you for your interest in contributing! This guide will help you get starte
 
 ### Prerequisites
 
-- Node.js 18.x or 20.x
+- Node.js 22.x or 24.x
 - npm
 - Angular CLI
 
