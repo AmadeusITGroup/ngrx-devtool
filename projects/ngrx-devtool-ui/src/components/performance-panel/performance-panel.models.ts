@@ -1,5 +1,7 @@
 export interface RenderPerformance {
   renderTime: number;
+  reducerTime?: number;
+  stateSize?: number;
 }
 
 export interface PerformanceData {
@@ -34,12 +36,8 @@ export interface StateChangeMessage {
 export interface RenderEntry {
   actionType: string;
   renderTime: number;
-}
-
-export interface RenderStats {
-  avgRenderTime: number;
-  maxRenderTime: number;
-  totalActions: number;
+  reducerTime?: number;
+  stateSize?: number;
 }
 
 export const STATUS_COLORS = {
@@ -48,39 +46,10 @@ export const STATUS_COLORS = {
   critical: '#f44336',
 } as const;
 
-export const OPTIMIZATION_TIPS = [
-  { threshold: 32, text: 'Use OnPush change detection strategy', docUrl: 'https://angular.dev/best-practices/skipping-subtrees#using-onpush' },
-  { threshold: 50, text: 'Add trackBy to *ngFor loops', docUrl: 'https://angular.dev/api/common/NgFor#description' },
-  { threshold: 100, text: 'Use virtual scrolling for large lists', docUrl: 'https://material.angular.io/cdk/scrolling/overview#virtual-scrolling' },
-  { threshold: 100, text: 'Defer heavy components with @defer', docUrl: 'https://angular.dev/guide/defer' },
-  { threshold: 150, text: 'Use signals for fine-grained reactivity', docUrl: 'https://angular.dev/guide/signals' },
-];
-
 export const METRIC_TOOLTIPS = {
-  avgRenderTime: `Average Render Time
+  reducerTime: `Reducer Time
 
-Formula: Sum of all render times ÷ Total actions
-
-How it's measured:
-• Timer starts when action is dispatched
-• Timer ends when afterNextRender() fires
-• afterNextRender() executes after Angular completes change detection and DOM updates
-
-This represents the average time Angular takes to re-render components after each state change.`,
-
-  maxRenderTime: `Maximum Render Time
-
-Formula: Max(all render times)
-
-The slowest render recorded across all tracked actions. High values indicate specific actions that cause expensive re-renders.
-
-Target: < 16ms for 60fps, < 32ms acceptable`,
-
-  totalActions: `Total Actions Tracked
-
-The number of NgRx actions that triggered a state change and were measured for render performance.
-
-Only STATE_CHANGE messages with renderPerformance data are counted.`,
+Time spent executing the reducer for this action. It excludes Angular change detection and DOM rendering.`,
 
   renderTime: `Render Time
 
@@ -92,6 +61,10 @@ How it's measured:
 5. afterNextRender() fires → Timer ends
 
 This captures the full render cycle from action to painted pixels.`,
+
+  stateSize: `State Size
+
+The UTF-8 byte size of the serialized state immediately after this action.`,
 
   status: `Performance Status
 
