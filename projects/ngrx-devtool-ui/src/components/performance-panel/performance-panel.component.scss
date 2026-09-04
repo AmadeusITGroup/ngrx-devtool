@@ -2,148 +2,85 @@
 
 .performance-panel {
   @include panel-container;
+  padding: $spacing-xl $spacing-3xl $spacing-3xl;
+}
 
-  mat-card {
-    box-shadow: $elevation-1;
-    transition: box-shadow $transition-slow;
-    background: $color-surface;
+.action-performance {
+  min-width: 0;
+  padding: $spacing-xl 0;
+  border-top: $border-width-thin solid $color-outline-variant;
+  border-bottom: $border-width-thin solid $color-outline-variant;
+}
 
-    &:hover {
-      box-shadow: $elevation-2;
-    }
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-lg;
+  min-height: 48px;
+  margin-bottom: $spacing-md;
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+
+  > mat-icon {
+    flex: 0 0 auto;
+    width: $icon-size-md;
+    height: $icon-size-md;
+    margin: 1px $spacing-md 0 0;
+    color: $color-primary;
+    font-size: $icon-size-md;
   }
 
-  mat-card-header {
-    margin-bottom: $spacing-lg;
-
-    mat-icon[mat-card-avatar] {
-      font-size: $icon-size-2xl;
-      width: $icon-size-2xl;
-      height: $icon-size-2xl;
-    }
+  h2 {
+    margin: 0;
+    font: $typography-label-medium;
+    font-weight: 700;
+    text-transform: uppercase;
   }
 
-  mat-card-title {
-    font: $typography-title-medium;
-  }
-
-  mat-card-subtitle {
-    font: $typography-body-medium;
+  p {
+    margin: $spacing-xs 0 0;
     color: $color-on-surface-variant;
-    margin-top: $spacing-xs;
+    font: $typography-body-small;
   }
 }
 
-// Suggestions Card
-.suggestions-card {
-  @include colored-border-left($color-warning);
-  background: $color-warning-container;
-
-  .warning-icon {
-    color: $color-warning;
-  }
-
-  .tips-list {
-    padding-top: 0;
-
-    .tip-item {
-      .tip-icon {
-        color: $color-warning;
-      }
-
-      .doc-link {
-        mat-icon {
-          font-size: $icon-size-sm;
-          width: $icon-size-sm;
-          height: $icon-size-sm;
-          margin-right: $spacing-xs;
-        }
-      }
-    }
-  }
-
-  mat-divider {
-    margin: $spacing-lg 0;
-  }
-
-  .action-buttons {
-    display: flex;
-    gap: $spacing-md;
-    flex-wrap: wrap;
-    padding-top: $spacing-lg;
-
-    button {
-      mat-icon {
-        margin-right: $spacing-sm;
-      }
-    }
-  }
+.result-count {
+  flex: 0 0 auto;
+  color: $color-on-surface-variant;
+  font: $typography-body-small;
 }
 
-// Stats Grid
-.stats-grid {
-  @include stats-grid;
+.table-wrap {
+  max-height: min(65vh, 720px);
+  overflow: auto;
 }
 
-.stat-card {
-  @include stat-card-base;
-  border-left: $border-width-thick solid $color-primary;
-
-  --mat-card-content-padding: #{$spacing-lg};
-
-  mat-card-content {
-    padding: $spacing-lg;
-  }
-
-  .stat-label {
-    @include label-text;
-    margin-bottom: $spacing-sm;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: $spacing-xs;
-
-    .info-icon {
-      @include info-icon;
-    }
-  }
-
-  &:hover .info-icon {
-    opacity: 1;
-  }
-
-  .stat-value {
-    font-family: $font-mono;
-    font-weight: 600;
-    font-size: 1.25rem;
-    line-height: 1;
-    margin-bottom: $spacing-xs;
-  }
-
-  .stat-value-text {
-    font-weight: 600;
-    margin-bottom: $spacing-xs;
-    @include text-truncate;
-  }
-
-  .stat-subtitle {
-    color: $color-on-surface-variant;
-    margin-top: $spacing-xs;
-  }
-}
-
-// Tables
-.renders-table,
-.components-table {
+.actions-table {
   @include data-table;
+  min-width: 760px;
+
+  .mat-mdc-header-row {
+    height: 52px;
+    background: $color-surface;
+  }
+
+  .mat-mdc-row {
+    height: 60px;
+  }
 
   th {
-    cursor: help;
+    border-bottom-color: $color-outline;
+    white-space: nowrap;
 
     .header-info-icon {
       @include info-icon;
-      vertical-align: middle;
       margin-left: $spacing-xs;
+      vertical-align: middle;
     }
 
     &:hover .header-info-icon {
@@ -152,334 +89,126 @@
   }
 
   td {
-    font-weight: 600;
+    border-bottom-color: $color-outline-variant;
+    font-weight: 500;
+  }
+
+  .mat-column-action {
+    width: 38%;
+  }
+
+  .mat-column-reducerTime,
+  .mat-column-renderTime,
+  .mat-column-stateSize {
+    width: 16%;
+  }
+
+  .mat-column-status {
+    width: 14%;
+  }
+
+  .metric-value,
+  .mat-column-renderTime {
+    font-family: $font-mono;
+    white-space: nowrap;
   }
 
   .highlighted-row {
-    animation: highlightFade 3s ease-out forwards;
-    border-left: $border-width-thick solid $color-tertiary;
-
-    &:hover {
-      background: color-mix(in srgb, #{$color-tertiary} 10%, transparent) !important;
-    }
+    animation: highlight-fade 3s ease-out forwards;
+    box-shadow: inset $border-width-thick 0 0 $color-tertiary;
   }
 }
 
-@keyframes highlightFade {
-  0% {
-    background: color-mix(in srgb, #{$color-tertiary} 40%, transparent);
-    transform: scale(1.02);
-  }
-  15% {
-    background: color-mix(in srgb, #{$color-tertiary} 35%, transparent);
-  }
-  30% {
-    background: color-mix(in srgb, #{$color-tertiary} 25%, transparent);
-    transform: scale(1);
-  }
-  100% {
-    background: transparent;
-    border-left-color: transparent;
-  }
-}
+.status-label {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-sm;
+  font-family: $font-sans;
+  font-weight: 500;
+  white-space: nowrap;
 
-// Status Chip (using mat-chip)
-.status-chip {
-  font-weight: 700 !important;
-  letter-spacing: $letter-spacing-normal;
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    flex: 0 0 auto;
+    border-radius: $corner-full;
+  }
 
   &.status-good {
-    @include status-chip($color-success);
+    color: $color-success-dark;
+
+    .status-dot {
+      background: $color-success;
+    }
   }
 
   &.status-warning {
-    @include status-chip($color-warning);
+    color: $color-warning-dark;
+
+    .status-dot {
+      background: $color-warning;
+    }
   }
 
   &.status-critical {
-    @include status-chip($color-error);
-  }
-}
+    color: $color-error-dark;
 
-// Info Card
-.info-card {
-  background: $color-info-container;
-}
-
-// Threshold Info
-.threshold-info {
-  display: flex;
-  gap: $spacing-md;
-  align-items: flex-start;
-
-  mat-icon {
-    color: $color-primary;
-    font-size: $icon-size-md;
-    width: $icon-size-md;
-    height: $icon-size-md;
-  }
-
-  .status-legend {
-    display: flex;
-    gap: $spacing-lg;
-    margin-top: $spacing-sm;
-    flex-wrap: wrap;
-
-    .legend-item {
-      display: inline-flex;
-      align-items: center;
-      gap: $spacing-xs;
-      font: $typography-body-small;
-      color: $color-on-surface;
-
-      .legend-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: $corner-full;
-        display: inline-block;
-        flex-shrink: 0;
-      }
-
-      &.status-good .legend-dot {
-        background: $color-success;
-      }
-
-      &.status-warning .legend-dot {
-        background: $color-warning;
-      }
-
-      &.status-critical .legend-dot {
-        background: $color-error;
-      }
+    .status-dot {
+      background: $color-error;
     }
   }
 }
 
-// Card-specific styles
-.overview-card mat-icon[mat-card-avatar],
-.table-card mat-icon[mat-card-avatar] {
-  color: $color-primary;
-}
-
-.suggestions-card mat-icon[mat-card-avatar] {
-  color: $color-warning;
-}
-
-.performance-badge {
-  display: inline-block;
-  padding: $spacing-xs $spacing-md;
-  border-radius: $corner-full;
-  font: $typography-label-small;
-  font-weight: 700;
-  letter-spacing: $letter-spacing-normal;
-
-  &[data-score='EXCELLENT'] {
-    background: $color-success;
-    color: white;
-  }
-  &[data-score='GOOD'] {
-    background: $color-good;
-    color: white;
-  }
-  &[data-score='FAIR'] {
-    background: $color-fair;
-    color: $color-on-surface;
-  }
-  &[data-score='POOR'] {
-    background: $color-warning;
-    color: white;
-  }
-  &[data-score='CRITICAL'] {
-    background: $color-error;
-    color: white;
-  }
-}
-
-// Metrics Table
-.metrics-table {
-  width: 100%;
-
-  .value-cell,
-  .threshold-cell {
-    font-family: $font-mono;
-    font: $typography-body-small;
-  }
-}
-
-// Impact Card
-.impact-card mat-icon[mat-card-avatar] {
-  color: $color-warning;
-}
-
-.action-name {
-  margin-left: $spacing-sm;
-  font-family: $font-mono;
-  font: $typography-body-small;
-}
-
-.component-count {
-  margin-left: $spacing-sm;
-  font: $typography-label-small;
-  color: $color-on-surface-variant;
-}
-
-.impact-details {
-  padding: $spacing-lg 0;
-}
-
-.factors-section,
-.recommendations-section {
-  margin-bottom: $spacing-lg;
-
-  h4 {
-    font: $typography-label-small;
-    font-weight: 600;
-    margin: 0 0 $spacing-sm 0;
-    text-transform: uppercase;
-    color: $color-on-surface-variant;
-    letter-spacing: $letter-spacing-normal;
-  }
-
-  mat-list {
-    padding-top: 0;
-  }
-}
-
-.factor-details {
-  font-family: $font-mono;
-  font: $typography-label-small;
-  color: $color-on-surface-variant;
-}
-
-.impact-score {
-  color: $color-warning;
-  font-weight: 600;
-  font-family: $font-mono;
-}
-
-// Warnings Card
-.warnings-card {
-  @include colored-border-left($color-error);
-
-  mat-icon[mat-card-avatar] {
-    color: $color-error;
-  }
-
-  mat-chip-set {
-    margin-top: $spacing-sm;
-  }
-}
-
-// Severity chips (for mat-chip components)
-.severity-high {
-  @include status-chip($color-error);
-}
-
-.severity-medium {
-  @include status-chip($color-warning);
-}
-
-.severity-low {
-  @include status-chip($color-fair, $color-on-surface);
-}
-
-.warning-counts {
+.empty-state {
   display: flex;
-  gap: $spacing-sm;
-  margin-top: $spacing-sm;
-}
-
-.warning-type {
-  margin-left: $spacing-sm;
-  font-weight: 500;
-  text-transform: capitalize;
-}
-
-.warning-content {
-  padding: $spacing-sm 0;
-
-  p {
-    margin: 0 0 $spacing-md 0;
-    line-height: 1.6;
-  }
-}
-
-.suggestion-box {
-  display: flex;
-  align-items: flex-start;
-  gap: $spacing-sm;
-  padding: $spacing-md;
-  background: $color-success-container;
-  border-radius: $corner-extra-small;
-  border-left: $border-width-medium solid $color-success;
-
-  mat-icon {
-    color: $color-success;
-    font-size: $icon-size-md;
-    width: $icon-size-md;
-    height: $icon-size-md;
-  }
-
-  span {
-    flex: 1;
-    font: $typography-body-small;
-    line-height: 1.5;
-  }
-}
-
-// Slowest Actions Card
-.slowest-card mat-icon[mat-card-avatar] {
-  color: $color-primary;
-}
-
-.rank-badge {
-  width: $icon-size-xl;
-  height: $icon-size-xl;
-  border-radius: $corner-full;
-  background: $color-primary;
-  color: $color-on-primary;
-  display: flex;
+  min-height: 240px;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font: $typography-body-medium;
-  box-shadow: $elevation-1;
+  color: $color-on-surface-variant;
+  text-align: center;
+
+  mat-icon {
+    width: $icon-size-xl;
+    height: $icon-size-xl;
+    margin-bottom: $spacing-md;
+    font-size: $icon-size-xl;
+    opacity: 0.45;
+  }
+
+  p {
+    margin: 0;
+    font: $typography-body-medium;
+  }
 }
 
-.execution-time {
-  font-family: $font-mono;
-  font-weight: 600;
-  font: $typography-body-medium;
-  color: $color-warning;
+@keyframes highlight-fade {
+  0% {
+    background: color-mix(in srgb, #{$color-tertiary} 30%, transparent);
+  }
+
+  100% {
+    background: transparent;
+  }
 }
 
-// No Data Card
-.no-data-card {
-  mat-card-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: $spacing-5xl !important;
-    text-align: center;
+@media (max-width: 720px) {
+  .performance-panel {
+    width: auto;
+    margin-top: 0;
+    padding: $spacing-md;
+  }
 
-    mat-icon {
-      font-size: $icon-size-3xl;
-      width: $icon-size-3xl;
-      height: $icon-size-3xl;
-      opacity: 0.3;
-      margin-bottom: $spacing-lg;
-    }
+  .section-header {
+    align-items: flex-start;
+  }
 
-    h3 {
-      margin: 0 0 $spacing-sm 0;
-      font: $typography-title-medium;
-    }
+  .section-heading p {
+    display: none;
+  }
 
-    p {
-      margin: 0;
-      font: $typography-body-medium;
-      color: $color-on-surface-variant;
-    }
+  .actions-table th,
+  .actions-table td {
+    padding: $spacing-sm;
   }
 }

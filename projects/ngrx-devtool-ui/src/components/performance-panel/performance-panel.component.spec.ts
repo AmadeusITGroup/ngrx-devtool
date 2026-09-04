@@ -10,17 +10,17 @@ describe('PerformancePanelComponent', () => {
     {
       type: 'STATE_CHANGE',
       action: { type: '[Books] Load Success' },
-      renderPerformance: { renderTime: 10 },
+      renderPerformance: { renderTime: 10, reducerTime: 2, stateSize: 1024 },
     },
     {
       type: 'STATE_CHANGE',
       action: { type: '[Books] Add Book' },
-      renderPerformance: { renderTime: 25 },
+      renderPerformance: { renderTime: 25, reducerTime: 4, stateSize: 2048 },
     },
     {
       type: 'STATE_CHANGE',
       action: { type: '[Books] Remove Book' },
-      renderPerformance: { renderTime: 50 },
+      renderPerformance: { renderTime: 50, reducerTime: 6, stateSize: 4096 },
     },
     {
       type: 'OTHER_TYPE',
@@ -77,46 +77,21 @@ describe('PerformancePanelComponent', () => {
     });
   });
 
-  describe('renderStats', () => {
-    it('should return zero stats when no entries', () => {
-      const stats = component.renderStats();
-
-      expect(stats).toEqual({
-        avgRenderTime: 0,
-        maxRenderTime: 0,
-        totalActions: 0,
-      });
-    });
-
-    it('should calculate correct stats from messages', () => {
-      component.messages = mockMessages;
-      component.ngOnChanges({
-        messages: new SimpleChange(null, mockMessages, true),
-      });
-
-      const stats = component.renderStats();
-
-      expect(stats.totalActions).toBe(3);
-      expect(stats.maxRenderTime).toBe(50);
-      expect(stats.avgRenderTime).toBeCloseTo(28.33, 1);
-    });
-  });
-
-  describe('slowestRenders', () => {
+  describe('actionEntries', () => {
     it('should return entries sorted by render time descending', () => {
       component.messages = mockMessages;
       component.ngOnChanges({
         messages: new SimpleChange(null, mockMessages, true),
       });
 
-      const slowest = component.slowestRenders();
+      const slowest = component.actionEntries();
 
       expect(slowest[0].renderTime).toBe(50);
       expect(slowest[1].renderTime).toBe(25);
       expect(slowest[2].renderTime).toBe(10);
     });
 
-    it('should limit to 10 entries', () => {
+    it('should include every measured action', () => {
       const manyMessages = Array.from({ length: 15 }, (_, i) => ({
         type: 'STATE_CHANGE',
         action: { type: `[Action ${i}]` },
@@ -128,15 +103,23 @@ describe('PerformancePanelComponent', () => {
         messages: new SimpleChange(null, manyMessages, true),
       });
 
-      expect(component.slowestRenders().length).toBe(10);
+      expect(component.actionEntries()).toHaveLength(15);
     });
   });
 
   describe('formatMs', () => {
     it('should format milliseconds with 2 decimal places', () => {
-      expect(component.formatMs(10)).toBe('10.00ms');
-      expect(component.formatMs(10.123)).toBe('10.12ms');
-      expect(component.formatMs(0.5)).toBe('0.50ms');
+      expect(component.formatMs(10)).toBe('10.00 ms');
+      expect(component.formatMs(10.123)).toBe('10.12 ms');
+      expect(component.formatMs(0.5)).toBe('0.50 ms');
+    });
+  });
+
+  describe('formatBytes', () => {
+    it('should format state size with suitable units', () => {
+      expect(component.formatBytes(0)).toBe('0 B');
+      expect(component.formatBytes(500)).toBe('500 B');
+      expect(component.formatBytes(2048)).toBe('2.00 KB');
     });
   });
 
@@ -165,89 +148,6 @@ describe('PerformancePanelComponent', () => {
     });
   });
 
-  describe('hasPerformanceIssues', () => {
-    it('should return false when no entries', () => {
-      expect(component.hasPerformanceIssues()).toBe(false);
-    });
-
-    it('should return false when max render time is within budget', () => {
-      component.messages = [
-        {
-          type: 'STATE_CHANGE',
-          action: { type: '[Test]' },
-          renderPerformance: { renderTime: 10 },
-        },
-      ];
-      component.ngOnChanges({
-        messages: new SimpleChange(null, component.messages, true),
-      });
-
-      expect(component.hasPerformanceIssues()).toBe(false);
-    });
-
-    it('should return true when max render time exceeds budget', () => {
-      component.messages = [
-        {
-          type: 'STATE_CHANGE',
-          action: { type: '[Test]' },
-          renderPerformance: { renderTime: 50 },
-        },
-      ];
-      component.ngOnChanges({
-        messages: new SimpleChange(null, component.messages, true),
-      });
-
-      expect(component.hasPerformanceIssues()).toBe(true);
-    });
-  });
-
-  describe('getOptimizationTips', () => {
-    it('should return "Performance looks good!" when no issues', () => {
-      const tips = component.getOptimizationTips();
-
-      expect(tips).toEqual([{ text: 'Performance looks good!' }]);
-    });
-
-    it('should return OnPush tip when render time > 32ms', () => {
-      component.messages = [
-        {
-          type: 'STATE_CHANGE',
-          action: { type: '[Test]' },
-          renderPerformance: { renderTime: 40 },
-        },
-      ];
-      component.ngOnChanges({
-        messages: new SimpleChange(null, component.messages, true),
-      });
-
-      const tips = component.getOptimizationTips();
-
-      expect(tips.some(tip => tip.text.includes('OnPush'))).toBe(true);
-    });
-
-    it('should return multiple tips for very slow renders', () => {
-      component.messages = [
-        {
-          type: 'STATE_CHANGE',
-          action: { type: '[Test]' },
-          renderPerformance: { renderTime: 200 },
-        },
-      ];
-      component.ngOnChanges({
-        messages: new SimpleChange(null, component.messages, true),
-      });
-
-      const tips = component.getOptimizationTips();
-
-      expect(tips.length).toBeGreaterThan(1);
-      expect(tips.some(tip => tip.text.includes('OnPush'))).toBe(true);
-      expect(tips.some(tip => tip.text.includes('trackBy'))).toBe(true);
-      expect(tips.some(tip => tip.text.includes('virtual scrolling'))).toBe(true);
-      expect(tips.some(tip => tip.text.includes('@defer'))).toBe(true);
-      expect(tips.some(tip => tip.text.includes('signals'))).toBe(true);
-    });
-  });
-
   describe('isSelectedAction', () => {
     it('should return true when action matches selectedActionType', () => {
       component.selectedActionType = '[Books] Load Success';
@@ -265,21 +165,6 @@ describe('PerformancePanelComponent', () => {
       component.selectedActionType = null;
 
       expect(component.isSelectedAction('[Books] Load Success')).toBe(false);
-    });
-  });
-
-  describe('openAngularProfiler', () => {
-    it('should open Angular DevTools documentation', () => {
-      const windowOpenSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
-
-      component.openAngularProfiler();
-
-      expect(windowOpenSpy).toHaveBeenCalledWith(
-        'https://angular.dev/tools/devtools',
-        '_blank'
-      );
-
-      windowOpenSpy.mockRestore();
     });
   });
 
@@ -307,7 +192,42 @@ describe('PerformancePanelComponent', () => {
         messages: new SimpleChange(null, mixedMessages, true),
       });
 
-      expect(component.renderStats().totalActions).toBe(1);
+      expect(component.actionEntries()).toHaveLength(1);
+    });
+  });
+
+  describe('template', () => {
+    it('should show only per-action measurements', () => {
+      component.messages = mockMessages;
+      component.ngOnChanges({
+        messages: new SimpleChange(null, mockMessages, true),
+      });
+      fixture.detectChanges();
+
+      const text = fixture.nativeElement.textContent;
+
+      expect(text).toContain('Action Performance');
+      expect(text).toContain('Reducer Time');
+      expect(text).toContain('Render Time');
+      expect(text).toContain('State Size');
+      expect(fixture.nativeElement.querySelector('.mat-column-status').textContent).toContain('Status');
+      expect(text).not.toContain('Avg');
+      expect(text).not.toContain('Store and Render Performance');
+      expect(fixture.nativeElement.querySelectorAll('.mat-mdc-row')).toHaveLength(3);
+    });
+
+    it('should show unavailable optional measurements as N/A', () => {
+      component.messages = [{
+        type: 'STATE_CHANGE',
+        action: { type: '[Legacy] Action' },
+        renderPerformance: { renderTime: 10 },
+      }];
+      component.ngOnChanges({
+        messages: new SimpleChange(null, component.messages, true),
+      });
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.textContent.match(/N\/A/g)).toHaveLength(2);
     });
   });
 });

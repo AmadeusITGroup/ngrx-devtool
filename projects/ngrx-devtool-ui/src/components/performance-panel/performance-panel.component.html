@@ -1,65 +1,35 @@
 <div class="performance-panel">
-  <!-- Render Performance Overview -->
-  <mat-card class="overview-card">
-    <mat-card-header>
-      <mat-icon mat-card-avatar>speed</mat-icon>
-      <mat-card-title>Component Render Time</mat-card-title>
-      <mat-card-subtitle>Measured using afterNextRender</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <div class="stats-grid">
-        <mat-card appearance="outlined" class="stat-card" [matTooltip]="tooltips.avgRenderTime" matTooltipClass="metric-tooltip">
-          <mat-card-content>
-            <div class="stat-label">
-              Avg Render Time
-              <mat-icon class="info-icon">info_outline</mat-icon>
-            </div>
-            <div class="stat-value mat-headline-4" [style.color]="getStatusColor(getRenderStatus(renderStats().avgRenderTime))">
-              {{ formatMs(renderStats().avgRenderTime) }}
-            </div>
-            <div class="stat-subtitle mat-body-small">Per Action</div>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card appearance="outlined" class="stat-card" [matTooltip]="tooltips.maxRenderTime" matTooltipClass="metric-tooltip">
-          <mat-card-content>
-            <div class="stat-label">
-              Max Render Time
-              <mat-icon class="info-icon">info_outline</mat-icon>
-            </div>
-            <div class="stat-value mat-headline-4" [style.color]="getStatusColor(getRenderStatus(renderStats().maxRenderTime))">
-              {{ formatMs(renderStats().maxRenderTime) }}
-            </div>
-            <div class="stat-subtitle mat-body-small">Worst Case</div>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card appearance="outlined" class="stat-card" [matTooltip]="tooltips.totalActions" matTooltipClass="metric-tooltip">
-          <mat-card-content>
-            <div class="stat-label">
-              Total Actions
-              <mat-icon class="info-icon">info_outline</mat-icon>
-            </div>
-            <div class="stat-value mat-headline-4">{{ renderStats().totalActions }}</div>
-            <div class="stat-subtitle mat-body-small">Tracked</div>
-          </mat-card-content>
-        </mat-card>
+  <section class="action-performance" aria-labelledby="action-performance-title">
+    <header class="section-header">
+      <div class="section-heading">
+        <mat-icon aria-hidden="true">speed</mat-icon>
+        <div>
+          <h2 id="action-performance-title">Action Performance</h2>
+          <p>Every measured dispatch, sorted by render time</p>
+        </div>
       </div>
-    </mat-card-content>
-  </mat-card>
+      <span class="result-count">
+        {{ actionEntries().length }} {{ actionEntries().length === 1 ? 'action' : 'actions' }}
+      </span>
+    </header>
 
-  <!-- Slowest Renders Table -->
-  <mat-card class="table-card">
-    <mat-card-header>
-      <mat-icon mat-card-avatar>hourglass_empty</mat-icon>
-      <mat-card-title>Slowest Renders</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <table mat-table [dataSource]="slowestRenders()" class="renders-table">
+    @if (actionEntries().length) {
+      <div class="table-wrap">
+        <table mat-table [dataSource]="actionEntries()" class="actions-table">
         <ng-container matColumnDef="action">
           <th mat-header-cell *matHeaderCellDef>Action</th>
           <td mat-cell *matCellDef="let element" [attr.data-action-type]="element.actionType">
             {{ element.actionType }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="reducerTime">
+          <th mat-header-cell *matHeaderCellDef>
+            Reducer Time
+            <mat-icon class="header-info-icon" [matTooltip]="tooltips.reducerTime" matTooltipClass="metric-tooltip" matTooltipPosition="above">info_outline</mat-icon>
+          </th>
+          <td mat-cell *matCellDef="let element" class="metric-value">
+            {{ element.reducerTime === undefined ? 'N/A' : formatMs(element.reducerTime) }}
           </td>
         </ng-container>
 
@@ -75,74 +45,40 @@
           </td>
         </ng-container>
 
+        <ng-container matColumnDef="stateSize">
+          <th mat-header-cell *matHeaderCellDef>
+            State Size
+            <mat-icon class="header-info-icon" [matTooltip]="tooltips.stateSize" matTooltipClass="metric-tooltip" matTooltipPosition="above">info_outline</mat-icon>
+          </th>
+          <td mat-cell *matCellDef="let element" class="metric-value">
+            {{ element.stateSize === undefined ? 'N/A' : formatBytes(element.stateSize) }}
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="status">
           <th mat-header-cell *matHeaderCellDef>
             Status
             <mat-icon class="header-info-icon" [matTooltip]="tooltips.status" matTooltipClass="metric-tooltip" matTooltipPosition="above">info_outline</mat-icon>
           </th>
           <td mat-cell *matCellDef="let element">
-            <mat-chip [class]="'status-chip status-' + getRenderStatus(element.renderTime)">
-              {{ getRenderStatus(element.renderTime).toUpperCase() }}
-            </mat-chip>
+            <span [class]="'status-label status-' + getRenderStatus(element.renderTime)">
+              <span class="status-dot"></span>
+              {{ getRenderStatus(element.renderTime) | titlecase }}
+            </span>
           </td>
         </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="['action', 'renderTime', 'status']"></tr>
+        <tr mat-header-row *matHeaderRowDef="['action', 'reducerTime', 'renderTime', 'stateSize', 'status']; sticky: true"></tr>
         <tr mat-row
-            *matRowDef="let row; columns: ['action', 'renderTime', 'status'];"
+            *matRowDef="let row; columns: ['action', 'reducerTime', 'renderTime', 'stateSize', 'status'];"
             [class.highlighted-row]="isSelectedAction(row.actionType)"></tr>
-      </table>
-    </mat-card-content>
-  </mat-card>
-
-  <!-- Optimization Suggestions -->
-  @if (hasPerformanceIssues()) {
-  <mat-card class="suggestions-card">
-    <mat-card-header>
-      <mat-icon mat-card-avatar class="warning-icon">lightbulb</mat-icon>
-      <mat-card-title>Optimization Suggestions</mat-card-title>
-      <mat-card-subtitle>Tips to improve render performance</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <mat-list class="tips-list">
-        @for (tip of getOptimizationTips(); track tip.text) {
-          <mat-list-item class="tip-item">
-            <mat-icon matListItemIcon class="tip-icon">arrow_right</mat-icon>
-            <span matListItemTitle>{{ tip.text }}</span>
-            @if (tip.docUrl) {
-              <a mat-stroked-button [href]="tip.docUrl" target="_blank" matListItemMeta class="doc-link">
-                <mat-icon>open_in_new</mat-icon>
-                Fix Guide
-              </a>
-            }
-          </mat-list-item>
-        }
-      </mat-list>
-      <mat-divider></mat-divider>
-      <div class="action-buttons">
-        <button mat-raised-button color="primary" (click)="openAngularProfiler()">
-          <mat-icon>developer_mode</mat-icon>
-          Open Angular DevTools
-        </button>
+        </table>
       </div>
-    </mat-card-content>
-  </mat-card>
-  }
-
-  <!-- Threshold Info -->
-  <mat-card class="info-card">
-    <mat-card-content>
-      <div class="threshold-info">
-        <mat-icon>info</mat-icon>
-        <div>
-          <strong>Performance Target:</strong> &lt; 16ms render time (60 FPS)
-          <div class="status-legend">
-            <span class="legend-item status-good"><span class="legend-dot"></span>Good (≤ 16ms)</span>
-            <span class="legend-item status-warning"><span class="legend-dot"></span>Warning (16-32ms)</span>
-            <span class="legend-item status-critical"><span class="legend-dot"></span>Critical (&gt; 32ms)</span>
-          </div>
-        </div>
+    } @else {
+      <div class="empty-state">
+        <mat-icon aria-hidden="true">query_stats</mat-icon>
+        <p>No action performance has been measured yet.</p>
       </div>
-    </mat-card-content>
-  </mat-card>
+    }
+  </section>
 </div>
