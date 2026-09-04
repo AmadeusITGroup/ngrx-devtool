@@ -6,6 +6,8 @@ export interface RenderPerformanceEntry {
   readonly actionType: string;
   readonly timestamp: number;
   readonly renderTime: number;
+  readonly reducerTime?: number;
+  readonly stateSize?: number;
 }
 
 export interface RenderPerformanceStats {
@@ -56,23 +58,28 @@ export class PerformanceTrackerService {
   measureRenderTime<State>(
     actionType: string,
     reducer: () => State,
-    callback: (renderTime: number) => void
+    callback: (renderTime: number, reducerTime: number, stateSize: number) => void
   ): State {
-    const startTime = performance.now();
+    const renderStartTime = performance.now();
+    const reducerStartTime = performance.now();
     const nextState = reducer();
+    const reducerTime = parseFloat((performance.now() - reducerStartTime).toFixed(2));
+    const stateSize = this.getSerializedSize(nextState);
 
     if (!this.isBrowser) {
-      callback(0);
+      callback(0, reducerTime, stateSize);
       return nextState;
     }
 
     afterNextRender(() => {
-      const renderTime = parseFloat((performance.now() - startTime).toFixed(2));
+      const renderTime = parseFloat((performance.now() - renderStartTime).toFixed(2));
 
       const entry: RenderPerformanceEntry = {
         actionType,
         timestamp: Date.now(),
         renderTime,
+        reducerTime,
+        stateSize,
       };
 
       this.entries.push(entry);
@@ -85,7 +92,7 @@ export class PerformanceTrackerService {
         this.entries = this.entries.slice(-ENTRIES_TRIM_SIZE);
       }
 
-      callback(renderTime);
+      callback(renderTime, reducerTime, stateSize);
     }, { injector: this.injector });
 
     return nextState;
@@ -124,18 +131,30 @@ export class PerformanceTrackerService {
   getAggregatedStats(): AggregatedPerformanceStats {
     const stats = this.getStats();
     const actionTypeStats = this.getActionTypeStats();
+    const reducerTimes = this.entries.map(entry => entry.reducerTime ?? entry.renderTime);
+    const avgReducerTime = reducerTimes.length
+      ? reducerTimes.reduce((total, time) => total + time, 0) / reducerTimes.length
+      : 0;
+    const maxReducerTime = reducerTimes.length ? Math.max(...reducerTimes) : 0;
+    const slowestReducer = this.entries.reduce<RenderPerformanceEntry | null>(
+      (slowest, entry) => !slowest || (entry.reducerTime ?? entry.renderTime) > (slowest.reducerTime ?? slowest.renderTime)
+        ? entry
+        : slowest,
+      null
+    );
+    const currentStateSize = this.entries.at(-1)?.stateSize ?? 0;
     const elapsedTime = this.firstActionTime
       ? (Date.now() - this.firstActionTime) / 1000
       : 1;
 
     return {
       totalActions: stats.totalActions,
-      avgReducerTime: stats.avgRenderTime,
-      maxReducerTime: stats.maxRenderTime,
-      slowestAction: stats.slowestAction,
-      currentStateSize: 0,
+      avgReducerTime,
+      maxReducerTime,
+      slowestAction: slowestReducer?.actionType ?? null,
+      currentStateSize,
       actionsPerSecond: stats.totalActions / Math.max(elapsedTime, 1),
-      performanceScore: this.calculatePerformanceScore(stats),
+      performanceScore: this.calculatePerformanceScore(avgReducerTime, maxReducerTime),
       actionTypeStats,
     };
   }
@@ -187,19 +206,20 @@ export class PerformanceTrackerService {
     const statsMap = new Map<string, ActionTypeStats>();
 
     for (const entry of this.entries) {
+      const reducerTime = entry.reducerTime ?? entry.renderTime;
       const existing = statsMap.get(entry.actionType);
       if (existing) {
         existing.count++;
-        existing.totalTime += entry.renderTime;
+        existing.totalTime += reducerTime;
         existing.avgTime = existing.totalTime / existing.count;
-        existing.maxTime = Math.max(existing.maxTime, entry.renderTime);
+        existing.maxTime = Math.max(existing.maxTime, reducerTime);
         existing.lastExecuted = entry.timestamp;
       } else {
         statsMap.set(entry.actionType, {
           count: 1,
-          totalTime: entry.renderTime,
-          avgTime: entry.renderTime,
-          maxTime: entry.renderTime,
+          totalTime: reducerTime,
+          avgTime: reducerTime,
+          maxTime: reducerTime,
           lastExecuted: entry.timestamp,
         });
       }
@@ -208,18 +228,27 @@ export class PerformanceTrackerService {
     return statsMap;
   }
 
-  private calculatePerformanceScore(stats: RenderPerformanceStats): number {
+  private calculatePerformanceScore(avgReducerTime: number, maxReducerTime: number): number {
     let score = 100;
 
-    if (stats.avgRenderTime > this.thresholds.maxReducerTime) {
-      score -= Math.min(30, (stats.avgRenderTime - this.thresholds.maxReducerTime) * 2);
+    if (avgReducerTime > this.thresholds.maxReducerTime) {
+      score -= Math.min(30, (avgReducerTime - this.thresholds.maxReducerTime) * 2);
     }
 
-    if (stats.maxRenderTime > this.thresholds.maxReducerTime * 2) {
-      score -= Math.min(20, (stats.maxRenderTime - this.thresholds.maxReducerTime * 2) / 2);
+    if (maxReducerTime > this.thresholds.maxReducerTime * 2) {
+      score -= Math.min(20, (maxReducerTime - this.thresholds.maxReducerTime * 2) / 2);
     }
 
     return Math.max(0, Math.round(score));
+  }
+
+  private getSerializedSize(value: unknown): number {
+    try {
+      const serialized = JSON.stringify(value);
+      return serialized === undefined ? 0 : new TextEncoder().encode(serialized).byteLength;
+    } catch {
+      return 0;
+    }
   }
 
   private maxSeverity(

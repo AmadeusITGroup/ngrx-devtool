@@ -6,6 +6,8 @@ import { DEFAULT_WS_URL } from '../core/core.models';
 
 export interface RenderPerformanceData {
   readonly renderTime: number;
+  readonly reducerTime: number;
+  readonly stateSize: number;
 }
 
 export interface StateChangeMessage {
@@ -51,14 +53,14 @@ export function createDevToolMetaReducer(
         nextState = performanceTracker.measureRenderTime(
           action.type,
           () => reducer(state, action),
-          (renderTime) => {
+          (renderTime, reducerTime, stateSize) => {
             const message: StateChangeMessage = {
               type: 'STATE_CHANGE',
               action,
               prevState,
               nextState,
               timestamp,
-              renderPerformance: { renderTime }
+              renderPerformance: { renderTime, reducerTime, stateSize }
             };
 
             webSocketService.send(message);

@@ -205,13 +205,35 @@ describe('PerformanceAnalyzerService', () => {
   describe('generateRecommendations()', () => {
     it('should recommend optimization when avg reducer time exceeds threshold', () => {
       injectEntries([
-        { actionType: 'A', timestamp: Date.now(), renderTime: 30 },
-        { actionType: 'A', timestamp: Date.now(), renderTime: 40 },
+        { actionType: 'A', timestamp: Date.now(), renderTime: 5, reducerTime: 30 },
+        { actionType: 'A', timestamp: Date.now(), renderTime: 6, reducerTime: 40 },
       ]);
 
       const report = analyzer.generateReport();
 
       expect(report.recommendations.some(r => r.category === 'reducer')).toBe(true);
+    });
+
+    it('should recommend state normalization when the measured state is large', () => {
+      injectEntries([
+        {
+          actionType: 'loadData',
+          timestamp: Date.now(),
+          renderTime: 5,
+          reducerTime: 2,
+          stateSize: 3 * 1024 * 1024,
+        },
+      ]);
+
+      const report = analyzer.generateReport();
+
+      expect(report.stats.currentStateSize).toBe(3 * 1024 * 1024);
+      expect(report.recommendations).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          category: 'state',
+          title: 'Consider State Normalization',
+        }),
+      ]));
     });
 
     it('should recommend optimizing slowest action when max time is extreme', () => {
