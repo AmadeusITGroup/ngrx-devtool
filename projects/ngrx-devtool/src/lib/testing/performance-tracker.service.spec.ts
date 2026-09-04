@@ -142,6 +142,20 @@ describe('PerformanceTrackerService', () => {
   });
 
   describe('getAggregatedStats()', () => {
+    it('should aggregate reducer time separately and expose the latest state size', () => {
+      injectEntries([
+        { actionType: 'first', timestamp: 1000, renderTime: 40, reducerTime: 4, stateSize: 120 },
+        { actionType: 'second', timestamp: 2000, renderTime: 10, reducerTime: 8, stateSize: 240 },
+      ]);
+
+      const aggregated = service.getAggregatedStats();
+
+      expect(aggregated.avgReducerTime).toBe(6);
+      expect(aggregated.maxReducerTime).toBe(8);
+      expect(aggregated.slowestAction).toBe('second');
+      expect(aggregated.currentStateSize).toBe(240);
+    });
+
     it('should compute action type stats grouped by action type', () => {
       injectEntries([
         { actionType: 'loadItems', timestamp: 1000, renderTime: 10 },
@@ -320,7 +334,7 @@ describe('PerformanceTrackerService', () => {
       const callback = jest.fn();
       serverService.measureRenderTime('test', () => ({ state: true }), callback);
 
-      expect(callback).toHaveBeenCalledWith(0);
+      expect(callback).toHaveBeenCalledWith(0, expect.any(Number), 14);
     });
 
     it('should not push entries on server platform', () => {

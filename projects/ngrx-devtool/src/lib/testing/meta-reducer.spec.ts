@@ -170,6 +170,30 @@ describe('createDevToolMetaReducer()', () => {
 
       expect(result).toEqual({ count: 4 });
     });
+
+    it('should forward separate reducer, render, and state-size measurements', () => {
+      const measureSpy = jest.spyOn(performanceTracker, 'measureRenderTime')
+        .mockImplementation((actionType, reducer, callback) => {
+          const nextState = reducer();
+          callback(12, 3, 11);
+          return nextState;
+        });
+      const wrappedReducer = TestBed.runInInjectionContext(() =>
+        createDevToolMetaReducer()(testReducer)
+      );
+      const ws = createdWebSockets[createdWebSockets.length - 1];
+      ws.simulateOpen();
+
+      wrappedReducer(initialState, { type: '[Counter] Increment' });
+
+      const message = JSON.parse(ws.sentMessages[0]) as StateChangeMessage;
+      expect(measureSpy).toHaveBeenCalled();
+      expect(message.renderPerformance).toEqual({
+        renderTime: 12,
+        reducerTime: 3,
+        stateSize: 11,
+      });
+    });
   });
 
   describe('sequential actions', () => {
