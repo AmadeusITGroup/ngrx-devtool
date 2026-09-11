@@ -26,7 +26,7 @@
   "dependencies": {
     "@alenaksu/json-viewer": "^2.1.2",
     "@angular/cdk": "^21.1.5",
-    "@angular/common": "^21.1.5",
+    "@angular/common": "^21.2.20",
     "@angular/compiler": "^21.1.5",
     "@angular/core": "^21.1.5",
     "@angular/forms": "^21.1.5",
